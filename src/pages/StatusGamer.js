@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardJog from './Componentes/Cardjog';
 import CardDespesas from './Componentes/CardDespesas';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 // icons
 import { FaPlus } from "react-icons/fa6";
@@ -17,9 +16,7 @@ export default function StatusGame() {
     selectedItem: '', 
     isClosed: false 
   }]);
-  const [bolinhas, setBolinhas] = useState(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false); 
-  const [showDespesas, setShowDespesas] = useState(false);
   const [despesas, setDespesas] = useState([{ 
     nome: '', 
     numero: '1', 
@@ -27,61 +24,13 @@ export default function StatusGame() {
     selectedItem: '', 
     isClosed: false 
   }]);
-  const navigate = useNavigate();
-
-  
-   let valorTotalVendasAvulsas = 0;
-
-   
-   const calcularValorTotalVendasAvulsas = () => {
-     valorTotalVendasAvulsas = 0; 
- 
-     
-     jogadores.forEach(jogador => {
-       if (!jogador.isClosed) { 
-         jogador.items.forEach(item => {
-           if (item.tipo === 'venda avulsa') { 
-             valorTotalVendasAvulsas += item.valor;
-           }
-         });
-       }
-     });
-   };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      calcularValorTotalVendasAvulsas(); 
-    }, 5000);
-
-    return () => clearInterval(interval); // Limpa o intervalo ao desmontar o componente
-  }, [jogadores]);
-
-  const fetchBolinhas = () => {
-    axios.get('http://localhost:5000/estoque/bolinhas')
-      .then(response => {
-        setBolinhas(response.data.quantidade); // Define a quantidade de bolinhas
-      })
-      .catch(error => {
-        console.error('Erro ao buscar bolinhas:', error);
-      });
-  };
-
-  useEffect(() => {
-    fetchBolinhas();
-
-    const storedData = localStorage.getItem('dataJogo');
+  const storedData = localStorage.getItem('dataJogo');
     const storedHora = localStorage.getItem('horaJogo');
   
     if (storedData) {
       setJogo({ data: storedData, hora: storedHora });
     }
-    const interval = setInterval(() => {
-      fetchBolinhas(); 
-    }, 5000); // Intervalo de 5 segundos
-
-    return () => clearInterval(interval); 
-  }, []);
-
+  const navigate = useNavigate();  
   const handleAddJogador = () => {
     const newNumero = (jogadores.length + 1).toString();
     setJogadores([...jogadores, { 
