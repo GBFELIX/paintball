@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -36,31 +36,7 @@ export default function ResumoGame() {
         return mapaFormas[forma.toLowerCase()] || forma.toLowerCase();
     };
 
-    useEffect(() => {
-        carregarDadosJogo();
-    }, []);
-
-    const carregarDadosJogo = () => {
-        const storedData = localStorage.getItem('dataJogo');
-        const storedHora = localStorage.getItem('horaJogo');
-        const storedTotalAvulso = localStorage.getItem('totalAvulso');  
-        const pagamentosArmazenados = JSON.parse(localStorage.getItem('pagamentos')) || [];
-        
-        if (storedTotalAvulso) {
-            setTotalAvulso(parseFloat(storedTotalAvulso));
-        }
-
-        if (storedData) {
-            setJogo({ data: storedData, hora: storedHora });
-        }
-
-        setPagamentos(pagamentosArmazenados);
-
-        const totais = calcularTotais(pagamentosArmazenados);
-        setFormasPagamento(totais);
-    };
-
-    const calcularTotais = (pagamentos) => {
+    const calcularTotais = useCallback((pagamentos) => {
         return pagamentos.reduce((acc, pagamento) => {
             const forma = normalizarFormaPagamento(pagamento.formaPagamento);
             const valor = parseFloat(pagamento.valorTotal);
@@ -78,7 +54,31 @@ export default function ResumoGame() {
             avulso: 0,
             pix: 0,
         });
-    };
+    }, []);
+
+    const carregarDadosJogo = useCallback(() => {
+        const storedData = localStorage.getItem('dataJogo');
+        const storedHora = localStorage.getItem('horaJogo');
+        const storedTotalAvulso = localStorage.getItem('totalAvulso');  
+        const pagamentosArmazenados = JSON.parse(localStorage.getItem('pagamentos')) || [];
+        
+        if (storedTotalAvulso) {
+            setTotalAvulso(parseFloat(storedTotalAvulso));
+        }
+
+        if (storedData) {
+            setJogo({ data: storedData, hora: storedHora });
+        }
+
+        setPagamentos(pagamentosArmazenados);
+
+        const totais = calcularTotais(pagamentosArmazenados);
+        setFormasPagamento(totais);
+    }, [calcularTotais]);
+
+    useEffect(() => {
+        carregarDadosJogo();
+    }, [carregarDadosJogo]);
 
     const fecharPartida = async () => {
         try {
