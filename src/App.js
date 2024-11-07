@@ -21,6 +21,7 @@ import CardDespesas from './pages/Componentes/CardDespesas.js';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import { supabase } from './utils/supabase'
+const { createClient } = require('@supabase/supabase-js');
 
 function Login() {
   const [email, setEmail] = useState('');
