@@ -1,21 +1,35 @@
-
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
+import 'react-toastify/dist/ReactToastify.css';
+
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
 export default function CardJogador({ jogadores, setJogadores }) {
   const [estoque, setEstoque] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [jogadorIndexForPayment, setJogadorIndexForPayment] = useState(null);
-  
-  
 
+  // Carregar estoque inicial
   useEffect(() => {
-    axios.get('http://localhost:5000/estoque')
-      .then(response => setEstoque(response.data))
-      .catch(error => console.error('Erro ao buscar estoque:', error));
+    const fetchEstoque = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('estoque')
+          .select('*');
+        
+        if (error) throw error;
+        setEstoque(data);
+      } catch (error) {
+        console.error('Erro ao buscar estoque:', error);
+      }
+    };
+
+    fetchEstoque();
   }, []);
 
   const handleAddJogador = () => {
@@ -93,63 +107,81 @@ export default function CardJogador({ jogadores, setJogadores }) {
     setSelectedPayment(paymentMethod);
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     const jogador = jogadores[jogadorIndexForPayment];
     const itemsToUpdate = jogador.items;
-  
     const valorTotalJogador = jogador.items.reduce((sum, item) => sum + item.valor, 0);
 
-    
-  
     const itemCountMap = itemsToUpdate.reduce((acc, item) => {
       acc[item.nome] = (acc[item.nome] || 0) + 1;
       return acc;
     }, {});
-  
+
     let podeFechar = true;
-  
-    const promises = Object.keys(itemCountMap).map(nome => {
-      const quantidadeParaSubtrair = itemCountMap[nome];
-      return axios.get(`http://localhost:5000/estoque/${nome}`)
-        .then(response => {
-          const quantidadeAtual = response.data.quantidade;
-          if (quantidadeAtual < quantidadeParaSubtrair) {
-            console.warn(`Quantidade insuficiente no estoque para o item ${nome}`);
-            podeFechar = false;
-          } else {
-            const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
-            return axios.put(`http://localhost:5000/estoque/${nome}`, { quantidade: novaQuantidade })
-              .then(() => console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`))
-              .catch(error => console.error('Erro ao atualizar estoque:', error));
-          }
-        })
-        .catch(error => console.error('Erro ao obter quantidade atual do estoque:', error));
-    });
-  
-    Promise.all(promises).then(() => {
-      if (!podeFechar) {
-        console.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.');
-      } else {
+
+    try {
+      // Verificar e atualizar estoque
+      for (const nome of Object.keys(itemCountMap)) {
+        const quantidadeParaSubtrair = itemCountMap[nome];
+        
+        // Buscar quantidade atual
+        const { data: itemEstoque, error: getError } = await supabase
+          .from('estoque')
+          .select('quantidade')
+          .eq('nome', nome)
+          .single();
+        
+        if (getError) throw getError;
+
+        const quantidadeAtual = itemEstoque.quantidade;
+        
+        if (quantidadeAtual < quantidadeParaSubtrair) {
+          toast.error(`Quantidade insuficiente no estoque para o item ${nome}`);
+          podeFechar = false;
+          break;
+        }
+
+        // Atualizar quantidade
+        const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
+        const { error: updateError } = await supabase
+          .from('estoque')
+          .update({ quantidade: novaQuantidade })
+          .eq('nome', nome);
+        
+        if (updateError) throw updateError;
+      }
+
+      if (podeFechar) {
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
+        const jogoId = localStorage.getItem('jogoId');
+        
+        // Formatar data e hora corretamente
+        const dataHoraFormatada = new Date(`${dataJogo}T${horaJogo}`).toISOString();
 
-        const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
+        // Inserir pedido com estrutura atualizada
+        const { error: pedidoError } = await supabase
+          .from('pedidos')
+          .insert([{
+            nome_jogador: jogador.nome,
+            items: jogador.items, // será armazenado como JSONB
+            forma_pagamento: selectedPayment,
+            valor_total: valorTotalJogador,
+            data_hora: dataHoraFormatada,
+            tipo_pedido: 'jogador',
+            jogo_id: jogoId
+          }]);
 
-        axios.post('http://localhost:5000/pedidos', {
-          nomeJogador: jogador.nome,
-          items: jogador.items,
-          formaPagamento: selectedPayment,
-          valorTotal: valorTotalJogador,
-          dataJogo: dataHoraJogo, 
-        })
-        .then(() => console.log('Pedido e pagamento cadastrados com sucesso!'))
-        .catch(error => console.error('Erro ao cadastrar pedido:', error));
-  
+        if (pedidoError) {
+          console.error('Erro detalhado:', pedidoError);
+          throw pedidoError;
+        }
+
         const updatedJogadores = [...jogadores];
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
         setJogadores(updatedJogadores);
         setShowPaymentModal(false);
-  
+
         // Armazenar os dados no localStorage
         const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
         pagamentosAnteriores.push({
@@ -157,8 +189,13 @@ export default function CardJogador({ jogadores, setJogadores }) {
           formaPagamento: selectedPayment
         });
         localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+
+        toast.success('Pedido cadastrado com sucesso!');
       }
-    });
+    } catch (error) {
+      console.error('Erro detalhado ao processar pagamento:', error);
+      toast.error(`Erro ao processar pagamento: ${error.message}`);
+    }
   };
 
   return (

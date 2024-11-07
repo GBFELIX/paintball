@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import { FaPlus } from "react-icons/fa6";
-import { FaTrashAlt } from "react-icons/fa";
-import { FaEdit } from "react-icons/fa";
+import { createClient } from '@supabase/supabase-js';
+import { FaPlus, FaTrashAlt, FaEdit } from "react-icons/fa";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import { useNavigate } from 'react-router-dom';
 
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
+
 export default function CadEquipe() {
-  const [nomeEquipe, setNomeEquipe] = useState(''); // Nome da equipe
+  const [nomeEquipe, setNomeEquipe] = useState('');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -51,55 +55,75 @@ export default function CadEquipe() {
 
   const handleSubmit = async () => {
     if (!nomeEquipe) {
-      alert('Preencha o nome da equipe antes de finalizar o cadastro.');
+      toast.error('Preencha o nome da equipe antes de finalizar o cadastro.');
       return;
     }
 
     if (jogadores.length === 0) {
-      alert('Adicione pelo menos um jogador antes de finalizar o cadastro.');
+      toast.error('Adicione pelo menos um jogador antes de finalizar o cadastro.');
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/cadastrar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nome_equipe: nomeEquipe, jogadores }),
+      // Primeiro, inserir a equipe
+      const { data: equipe, error: equipeError } = await supabase
+        .from('equipes')
+        .insert([
+          { 
+            nome: nomeEquipe,
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
+
+      if (equipeError) throw equipeError;
+
+      // Depois, inserir os jogadores vinculados à equipe
+      const jogadoresComEquipe = jogadores.map(jogador => ({
+        ...jogador,
+        equipe_id: equipe.id,
+        created_at: new Date().toISOString()
+      }));
+
+      const { error: jogadoresError } = await supabase
+        .from('jogadores')
+        .insert(jogadoresComEquipe);
+
+      if (jogadoresError) throw jogadoresError;
+
+      toast.success('Cadastro da equipe realizado com sucesso', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
       });
 
-      if (response.ok) {
-        toast('Cadastro da equipe realizado com sucesso', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setJogadores([]);
-        setNomeEquipe(''); 
-        setTimeout(() => {
-          navigate("/estoque");
-        }, 5000);
-      } else {
-        const errorData = await response.json(); // Captura a resposta de erro
-        toast.error(`Erro ao realizar cadastro: ${errorData.message || 'Erro desconhecido'}`, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      }
+      // Limpar formulário
+      setJogadores([]);
+      setNomeEquipe(''); 
+
+      // Redirecionar após 5 segundos
+      setTimeout(() => {
+        navigate("/estoque");
+      }, 5000);
+
     } catch (error) {
-      console.error('Erro ao enviar os dados:', error);
+      console.error('Erro detalhado:', error);
+      toast.error(`Erro ao realizar cadastro: ${error.message || 'Erro desconhecido'}`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     }
   };
 

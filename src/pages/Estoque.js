@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 import NavBar from '../pages/Componentes/Navbar';
 import { useNavigate } from 'react-router-dom';
-import { FaPlus } from "react-icons/fa6";
-import { FaRegEdit } from "react-icons/fa";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaPlus, FaRegEdit, FaTrashAlt } from "react-icons/fa";
+
+// Inicialização do cliente Supabase
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
 export default function Estoque() {
   const navigate = useNavigate();
@@ -13,118 +17,222 @@ export default function Estoque() {
   const [editMode, setEditMode] = useState({});
   const [descontos, setDescontos] = useState([]);
 
+  // Verificação de autenticação e carregamento inicial dos dados
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('auth');
     if (!isAuthenticated) {
       navigate("/");  
+      return;
     }
-  }, [navigate]);
-  
-  const fetchEstoque = () => {
-    axios.get('http://localhost:5000/estoque')
-      .then(response => {
-        setEstoque(response.data);
-      })
-      .catch(error => {
-        console.error('Erro ao buscar estoque:', error);
-      });
-  };
-  const fetchDescontos = () => {
-    axios.get('http://localhost:5000/descontos') // Endpoint para buscar descontos
-      .then(response => setDescontos(response.data))
-      .catch(error => console.error('Erro ao buscar descontos:', error));
-  };
-  const removeDesconto = (id) => {
-    console.log(`Tentando excluir desconto com ID: ${id}`); // Log para depuração
-    axios.delete(`http://localhost:5000/descontos/${id}`)
-      .then(response => {
-        console.log(response.data.message);
-        fetchDescontos(); // Atualiza a lista de descontos
-      })
-      .catch(error => {
-        console.error('Erro ao excluir desconto:', error);
-      });
-  };
-  
-  useEffect(() => {
-    fetchEstoque();
-    fetchDescontos();
-  }, []);
 
-  const addDesconto = () => {
+    // Função para carregar dados iniciais
+    const loadInitialData = async () => {
+      try {
+        // Buscar estoque
+        const { data: estoqueData, error: estoqueError } = await supabase
+          .from('estoque')
+          .select('*');
+        
+        if (estoqueError) throw estoqueError;
+        setEstoque(estoqueData);
+
+        // Buscar descontos
+        const { data: descontosData, error: descontosError } = await supabase
+          .from('descontos')
+          .select('*');
+        
+        if (descontosError) throw descontosError;
+        setDescontos(descontosData);
+
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error.message);
+      }
+    };
+
+    loadInitialData();
+  }, [navigate]);
+
+  // Remover desconto
+  const removeDesconto = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('descontos')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de descontos após remover
+      const { data: descontosData, error: descontosError } = await supabase
+        .from('descontos')
+        .select('*');
+      
+      if (descontosError) throw descontosError;
+      setDescontos(descontosData);
+    } catch (error) {
+      console.error('Erro ao excluir desconto:', error);
+    }
+  };
+
+  // Adicionar desconto
+  const addDesconto = async () => {
     const nomeDesconto = document.getElementById('NomeDesconto').value;
     const valorDesconto = document.getElementById('ValorDesconto').value;
     
-    axios.post('http://localhost:5000/descontos', { nome: nomeDesconto, valor: valorDesconto })
-      .then(response => {
-        fetchDescontos();
-        document.getElementById('NomeDesconto').value = '';
-        document.getElementById('ValorDesconto').value = '';
-      })
-      .catch(error => console.error('Erro ao adicionar desconto:', error));
+    try {
+      const { error } = await supabase
+        .from('descontos')
+        .insert([{ 
+          nome: nomeDesconto, 
+          valor: valorDesconto 
+        }]);
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de descontos após adicionar
+      const { data: descontosData, error: descontosError } = await supabase
+        .from('descontos')
+        .select('*');
+      
+      if (descontosError) throw descontosError;
+      setDescontos(descontosData);
+
+      document.getElementById('NomeDesconto').value = '';
+      document.getElementById('ValorDesconto').value = '';
+    } catch (error) {
+      console.error('Erro ao adicionar desconto:', error);
+    }
   };
 
-  const addEstoque = () => {
+  // Adicionar item ao estoque
+  const addEstoque = async () => {
     const nomeProduto = document.getElementById('NomeProduto').value;
     const valorProduto = document.getElementById('valorProduto').value;
     const qtdProduto = document.getElementById('QtdProduto').value;
     
-    axios.post('http://localhost:5000/estoque', { item: nomeProduto, valor: valorProduto, quantidade: qtdProduto })
-      .then(response => {
-        fetchEstoque();
-        document.getElementById('NomeProduto').value = '';
-        document.getElementById('valorProduto').value = '';
-        document.getElementById('QtdProduto').value = '';
-      })
-      .catch(error => {
-        console.error('Erro ao adicionar item ao estoque:', error);
-      });
-  };
-  const updateDesconto = (id, novoValor) => {
-    axios.put(`http://localhost:5000/descontos/${id}`, { valor: novoValor })
-      .then(() => {
-        fetchDescontos();
-        setInputs(prev => ({ ...prev, [id]: { ...prev[id], valor: '' } }));
-      })
-      .catch(error => {
-        console.error('Erro ao atualizar valor do desconto:', error);
-      });
-  };
-  
+    try {
+      const { error } = await supabase
+        .from('estoque')
+        .insert([{ 
+          nome: nomeProduto, 
+          valor: valorProduto, 
+          quantidade: qtdProduto 
+        }]);
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de estoque após adicionar
+      const { data: estoqueData, error: estoqueError } = await supabase
+        .from('estoque')
+        .select('*');
+      
+      if (estoqueError) throw estoqueError;
+      setEstoque(estoqueData);
 
-  const removeEstoque = () => {
+      document.getElementById('NomeProduto').value = '';
+      document.getElementById('valorProduto').value = '';
+      document.getElementById('QtdProduto').value = '';
+    } catch (error) {
+      console.error('Erro ao adicionar item ao estoque:', error);
+    }
+  };
+
+  // Atualizar desconto
+  const updateDesconto = async (id, novoValor) => {
+    try {
+      const { error } = await supabase
+        .from('descontos')
+        .update({ valor: novoValor })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de descontos após atualizar
+      const { data: descontosData, error: descontosError } = await supabase
+        .from('descontos')
+        .select('*');
+      
+      if (descontosError) throw descontosError;
+      setDescontos(descontosData);
+
+      setInputs(prev => ({ ...prev, [id]: { ...prev[id], valor: '' } }));
+    } catch (error) {
+      console.error('Erro ao atualizar valor do desconto:', error);
+    }
+  };
+
+  // Remover item do estoque
+  const removeEstoque = async () => {
     const nomeProduto = document.getElementById('NomeProduto').value;
 
-    axios.delete(`http://localhost:5000/estoque/${nomeProduto}`)
-      .then(response => {
-        fetchEstoque();
-        document.getElementById('NomeProduto').value = '';
-      })
-      .catch(error => {
-        console.error('Erro ao remover item do estoque:', error);
-      });
+    try {
+      const { error } = await supabase
+        .from('estoque')
+        .delete()
+        .eq('nome', nomeProduto);
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de estoque após remover
+      const { data: estoqueData, error: estoqueError } = await supabase
+        .from('estoque')
+        .select('*');
+      
+      if (estoqueError) throw estoqueError;
+      setEstoque(estoqueData);
+
+      document.getElementById('NomeProduto').value = '';
+    } catch (error) {
+      console.error('Erro ao remover item do estoque:', error);
+    }
   };
 
-  const updateQuantidade = (nome, novaQuantidade) => {
-    axios.put(`http://localhost:5000/estoque/${nome}`, { quantidade: novaQuantidade })
-      .then(response => {
-        fetchEstoque();
-        setInputs(prev => ({ ...prev, [nome]: { ...prev[nome], quantidade: '' } }));
-      })
-      .catch(error => {
-        console.error('Erro ao atualizar quantidade do item:', error);
-      });
+  // Atualizar quantidade
+  const updateQuantidade = async (nome, novaQuantidade) => {
+    try {
+      const { error } = await supabase
+        .from('estoque')
+        .update({ quantidade: novaQuantidade })
+        .eq('nome', nome);
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de estoque após atualizar quantidade
+      const { data: estoqueData, error: estoqueError } = await supabase
+        .from('estoque')
+        .select('*');
+      
+      if (estoqueError) throw estoqueError;
+      setEstoque(estoqueData);
+
+      setInputs(prev => ({ ...prev, [nome]: { ...prev[nome], quantidade: '' } }));
+    } catch (error) {
+      console.error('Erro ao atualizar quantidade do item:', error);
+    }
   };
 
-  const updateValor = (nome, novoValor) => {
-    axios.put(`http://localhost:5000/estoque/${nome}`, { valor: novoValor })
-      .then(response => {
-        fetchEstoque();
-        setInputs(prev => ({ ...prev, [nome]: { ...prev[nome], valor: '' } }));
-      })
-      .catch(error => {
-        console.error('Erro ao atualizar valor do item:', error);
-      });
+  // Atualizar valor
+  const updateValor = async (nome, novoValor) => {
+    try {
+      const { error } = await supabase
+        .from('estoque')
+        .update({ valor: novoValor })
+        .eq('nome', nome);
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de estoque após atualizar valor
+      const { data: estoqueData, error: estoqueError } = await supabase
+        .from('estoque')
+        .select('*');
+      
+      if (estoqueError) throw estoqueError;
+      setEstoque(estoqueData);
+
+      setInputs(prev => ({ ...prev, [nome]: { ...prev[nome], valor: '' } }));
+    } catch (error) {
+      console.error('Erro ao atualizar valor do item:', error);
+    }
   };
 
   const handleInputChange = (nome, tipo, valor) => {

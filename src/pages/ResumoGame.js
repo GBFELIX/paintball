@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
 export default function ResumoGame() {
     const navigate = useNavigate();
@@ -16,16 +23,13 @@ export default function ResumoGame() {
     const [totalAvulso, setTotalAvulso] = useState(0);
 
     const normalizarFormaPagamento = (forma) => {
-        // Verifica se 'forma' é uma string antes de aplicar 'toLowerCase()'
-        if (typeof forma !== 'string') {
-            return '';
-        }
+        if (typeof forma !== 'string') return '';
     
         const mapaFormas = {
             credito: 'credito',
             debito: 'debito',
             dinheiro: 'dinheiro',
-            dinehrio: 'dinheiro', // Corrige erro de digitação
+            dinehrio: 'dinheiro',
             pix: 'pix',
             avulso: 'avulso',
         };
@@ -33,9 +37,14 @@ export default function ResumoGame() {
     };
 
     useEffect(() => {
+        carregarDadosJogo();
+    }, []);
+
+    const carregarDadosJogo = () => {
         const storedData = localStorage.getItem('dataJogo');
         const storedHora = localStorage.getItem('horaJogo');
         const storedTotalAvulso = localStorage.getItem('totalAvulso');  
+        const pagamentosArmazenados = JSON.parse(localStorage.getItem('pagamentos')) || [];
         
         if (storedTotalAvulso) {
             setTotalAvulso(parseFloat(storedTotalAvulso));
@@ -45,11 +54,15 @@ export default function ResumoGame() {
             setJogo({ data: storedData, hora: storedHora });
         }
 
-        const pagamentosArmazenados = JSON.parse(localStorage.getItem('pagamentos')) || [];
         setPagamentos(pagamentosArmazenados);
 
-        const totais = pagamentosArmazenados.reduce((acc, pagamento) => {
-            const forma = normalizarFormaPagamento(pagamento.formaPagamento); // Normaliza a forma de pagamento
+        const totais = calcularTotais(pagamentosArmazenados);
+        setFormasPagamento(totais);
+    };
+
+    const calcularTotais = (pagamentos) => {
+        return pagamentos.reduce((acc, pagamento) => {
+            const forma = normalizarFormaPagamento(pagamento.formaPagamento);
             const valor = parseFloat(pagamento.valorTotal);
 
             if (forma in acc) {
@@ -65,9 +78,45 @@ export default function ResumoGame() {
             avulso: 0,
             pix: 0,
         });
+    };
 
-        setFormasPagamento(totais);
-    }, []);
+    const fecharPartida = async () => {
+        try {
+            const totalArrecadado = Object.values(formasPagamento).reduce((acc, val) => acc + val, 0) + totalAvulso;
+            
+            const { error } = await supabase
+                .from('financeiro')
+                .insert({
+                    data_jogo: jogo.data,
+                    total_jogadores: pagamentos.length,
+                    credito: formasPagamento.credito,
+                    debito: formasPagamento.debito,
+                    dinheiro: formasPagamento.dinheiro,
+                    pix: formasPagamento.pix,
+                    avulso: totalAvulso,
+                    total_arrecadado: totalArrecadado,
+                    created_at: new Date().toISOString()
+                });
+
+            if (error) throw error;
+
+            toast.success('Partida fechada com sucesso!');
+
+            // Limpar localStorage
+            localStorage.removeItem('pagamentos');
+            localStorage.removeItem('totalAvulso');
+            localStorage.removeItem('dataJogo');
+            localStorage.removeItem('horaJogo');
+            
+            setTimeout(() => {
+                navigate('/estoque');
+            }, 2000);
+
+        } catch (error) {
+            console.error('Erro ao fechar partida:', error);
+            toast.error('Erro ao fechar partida');
+        }
+    };
 
     const imprimirResumo = () => {
         const conteudo = document.getElementById('resumo-partida').innerHTML;
@@ -88,32 +137,6 @@ export default function ResumoGame() {
         janelaImpressao.focus();
         janelaImpressao.print();
         janelaImpressao.close();
-    };
-
-    const fecharPartida = () => {
-        const totalArrecadado = Object.values(formasPagamento).reduce((acc, val) => acc + val, 0) + totalAvulso;
-        const dataFinanceira = {
-            dataJogo: jogo.data,
-            totalJogadores: pagamentos.length,
-            formasPagamento,
-            totalAvulso,
-            totalArrecadado
-        };
-
-        axios.post('http://localhost:5000/financeiro', dataFinanceira)
-        .then(() => {
-            console.log('Dados financeiros enviados com sucesso');
-        })
-        .catch(error => {
-            console.error('Erro ao enviar dados financeiros:', error);
-        });
-
-        localStorage.removeItem('pagamentos');
-        localStorage.removeItem('totalAvulso');
-        localStorage.removeItem('dataJogo');
-        localStorage.removeItem('horaJogo');
-        
-        navigate('/estoque');
     };
 
     return (

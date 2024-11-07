@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createClient } from '@supabase/supabase-js';
 import NavBar from './Componentes/Navbar';
 import logo from '../images/logo_la.png';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
+import 'react-toastify/dist/ReactToastify.css';
+
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
 function AddJogo() {
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
-  const navigate = useNavigate(); // Hook para redirecionar
+  const navigate = useNavigate();
 
   // Função para obter a data e hora atual no formato correto
   useEffect(() => {
     const now = new Date();
-
-    // Formatando a data no formato YYYY-MM-DD
     const dataAtual = now.toISOString().split('T')[0];
-
-    // Formatando a hora no formato HH:MM
     const horaAtual = now.toTimeString().split(':').slice(0, 2).join(':');
 
     setData(dataAtual);
@@ -26,55 +28,39 @@ function AddJogo() {
 
   const handleAdicionar = async () => {
     try {
-      const response = await fetch('http://localhost:5000/addjogo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ data, hora })
-      });
-  
-      const result = await response.json();
-  
-      if (result.success) {
-        // Armazena a data e a hora no localStorage
-        localStorage.setItem('dataJogo', data);
-        localStorage.setItem('horaJogo', hora);
-        toast('Jogo adicionado com sucesso!', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        navigate('/statusgame'); // Redireciona para StatusGame
-      } else {
-        toast.error('Erro ao adicionar jogo.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+      // Formatar a data e hora para o formato PostgreSQL
+      const dataFormatada = new Date(data);
+      const dataHoraCompleta = `${dataFormatada.toISOString().split('T')[0]}T${hora}:00`;
+
+      // Inserir novo jogo na tabela jogos
+      const { data: jogoData, error } = await supabase
+        .from('jogos')
+        .insert([
+          { 
+            data_jogo: data,
+            hora_jogo: `${hora}:00`,  // Adiciona segundos para formato completo
+            status: 'ativo',
+            data_hora_completa: dataHoraCompleta  // Campo adicional com data e hora juntos
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro detalhado:', error);
+        throw error;
       }
+
+      // Armazena a data e a hora no localStorage
+      localStorage.setItem('dataJogo', data);
+      localStorage.setItem('horaJogo', hora);
+      localStorage.setItem('jogoId', jogoData.id);
+
+      toast.success('Jogo adicionado com sucesso!');
+      navigate('/statusgame');
     } catch (error) {
-      console.error('Erro na solicitação:', error);
-      toast.error('Erro ao adicionar jogo.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      console.error('Erro ao adicionar jogo:', error);
+      toast.error(`Erro ao adicionar jogo: ${error.message}`);
     }
   };
 

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
 export default function PreAgendado() {
   const [equipes, setEquipes] = useState([]); 
@@ -8,17 +15,63 @@ export default function PreAgendado() {
   const [showModal, setShowModal] = useState(false);
   
   useEffect(() => {
-    const fetchEquipes = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/equipes'); 
-        setEquipes(response.data);
-      } catch (error) {
-        console.error('Erro ao buscar dados da equipe:', error);
-      }
-    };
-
     fetchEquipes();
   }, []);
+
+  const fetchEquipes = async () => {
+    try {
+      const { data: equipesData, error } = await supabase
+        .from('equipes')
+        .select(`
+          id,
+          nome,
+          jogadores (
+            id,
+            nome,
+            contato
+          )
+        `)
+        .eq('status', 'pre_agendado');
+
+      if (error) throw error;
+
+      const equipesFormatadas = equipesData.map(equipe => ({
+        equipe_id: equipe.id,
+        nomeEquipe: equipe.nome,
+        nomeJogador: equipe.jogadores[0]?.nome || 'Não informado',
+        contato: equipe.jogadores[0]?.contato || 'Não informado'
+      }));
+
+      setEquipes(equipesFormatadas);
+    } catch (error) {
+      console.error('Erro ao buscar dados da equipe:', error);
+      toast.error('Erro ao carregar equipes');
+    }
+  };
+
+  const handleMostrarEquipe = async (equipe) => {
+    try {
+      const { data: jogadoresData, error } = await supabase
+        .from('jogadores')
+        .select('nome, contato')
+        .eq('equipe_id', equipe.equipe_id);
+
+      if (error) throw error;
+
+      const jogadoresFormatados = jogadoresData.map(jogador => ({
+        nomeJogador: jogador.nome,
+        contato: jogador.contato
+      }));
+
+      setJogadores(jogadoresFormatados);
+      setSelectedEquipe(equipe);
+      setShowModal(true);
+    } catch (error) {
+      console.error('Erro ao buscar jogadores da equipe:', error);
+      toast.error('Erro ao carregar jogadores da equipe');
+    }
+  };
+
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       event.preventDefault();
@@ -31,21 +84,12 @@ export default function PreAgendado() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
-  const handleMostrarEquipe = async (equipe) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/equipes/${equipe.equipe_id}/jogadores`);
-      setJogadores(response.data);
-      setSelectedEquipe(equipe);
-      setShowModal(true);
-    } catch (error) {
-      console.error('Erro ao buscar jogadores da equipe:', error);
-    }
-  };
 
   return (
     <section className="bg-black text-white p-4 w-full h-screen flex flex-col items-center">
+      <ToastContainer />
       <div className="gap-2 flex flex-col lg:flex-row justify-center items-center w-auto">
-        <h1 className="text-white text-3xl text-center m-5">Jogos Pre-Agendado</h1> 
+        <h1 className="text-white text-3xl text-center m-5">Jogos Pre-Agendados</h1> 
       </div>
       <table className="w-full flex flex-col">
         <thead className="bg-primary text-black">
@@ -69,7 +113,10 @@ export default function PreAgendado() {
                 >
                   Mostrar Equipe
                 </button>
-                <button className="rounded-md bg-green-600 p-2 hover:bg-black duration-300">
+                <button 
+                  className="rounded-md bg-green-600 p-2 hover:bg-black duration-300"
+                  onClick={() => window.location.href = `tel:${equipe.contato}`}
+                >
                   Entrar em contato
                 </button>
               </td>

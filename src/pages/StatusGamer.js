@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardJog from './Componentes/Cardjog';
 import CardDespesas from './Componentes/CardDespesas';
 import { useNavigate } from 'react-router-dom';
-// icons
 import { FaPlus } from "react-icons/fa6";
+import { toast } from 'react-toastify';
+
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
 export default function StatusGame() {
   const [jogo, setJogo] = useState({});
-  const [jogadores, setJogadores] = useState([{ nome: '', numero: '1', items: [], selectedItem: '', isClosed: false }]);
+  const [jogadores, setJogadores] = useState([{ 
+    nome: '', 
+    numero: '1', 
+    items: [], 
+    selectedItem: '', 
+    isClosed: false 
+  }]);
   const [vendasAvulsas, setVendasAvulsas] = useState([{ 
     nome: '', 
     numero: '1', 
@@ -16,7 +28,7 @@ export default function StatusGame() {
     selectedItem: '', 
     isClosed: false 
   }]);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false); 
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [despesas, setDespesas] = useState([{ 
     nome: '', 
     numero: '1', 
@@ -24,13 +36,25 @@ export default function StatusGame() {
     selectedItem: '', 
     isClosed: false 
   }]);
-  const storedData = localStorage.getItem('dataJogo');
+  
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedData = localStorage.getItem('dataJogo');
     const storedHora = localStorage.getItem('horaJogo');
+    const jogoId = localStorage.getItem('jogoId');
   
     if (storedData) {
-      setJogo({ data: storedData, hora: storedHora });
+      setJogo({ 
+        id: jogoId,
+        data: storedData, 
+        hora: storedHora 
+      });
+    } else {
+      navigate('/');
     }
-  const navigate = useNavigate();  
+  }, [navigate]);
+
   const handleAddJogador = () => {
     const newNumero = (jogadores.length + 1).toString();
     setJogadores([...jogadores, { 
@@ -38,8 +62,10 @@ export default function StatusGame() {
       numero: newNumero, 
       items: [], 
       selectedItem: '', 
-      isClosed: false }]);
+      isClosed: false 
+    }]);
   };
+
   const handleAddVendaAvulsa = () => {
     const newNumero = (vendasAvulsas.length + 1).toString();
     setVendasAvulsas([...vendasAvulsas, { 
@@ -61,31 +87,42 @@ export default function StatusGame() {
       isClosed: false 
     }]);
   };
+
   const handleClosePedido = (index) => {
     const updatedJogadores = [...jogadores];
     updatedJogadores[index].isClosed = !updatedJogadores[index].isClosed;
     setJogadores(updatedJogadores);
   };
 
-  // Contar jogadores ativos (cards não fechados)
   const jogadoresAtivos = jogadores.filter(jogador => !jogador.isClosed).length;
-
   const jogadoresInativos = jogadores.filter(jogador => jogador.isClosed).length;
 
   const handleFecharPartida = () => {
     setShowConfirmationModal(true);
   };
 
-  
-  const confirmCloseGame = () => {
-    setShowConfirmationModal(false);
-    navigate('/resumogame');
+  const confirmCloseGame = async () => {
+    try {
+      // Atualizar status do jogo para 'finalizado'
+      const { error } = await supabase
+        .from('jogos')
+        .update({ status: 'finalizado' })
+        .eq('id', jogo.id);
+
+      if (error) throw error;
+
+      setShowConfirmationModal(false);
+      navigate('/resumogame');
+    } catch (error) {
+      console.error('Erro ao finalizar jogo:', error);
+      toast.error('Erro ao finalizar jogo');
+    }
   };
 
   const cancelCloseGame = () => {
     setShowConfirmationModal(false);
   };
-  
+
   return (
     <section className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
     <section className="bg-black text-white w-full h-auto rounded-md p-3 flex flex-col gap-4">

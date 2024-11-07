@@ -1,19 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
 export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     const [estoque, setEstoque] = useState([]);
     const [selectedPayment, setSelectedPayment] = useState('');
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [vendaIndexForPayment, setVendaIndexForPayment] = useState(null);
-    const [setValorTotalGeral] = useState(0);
 
     useEffect(() => {
-        axios.get('http://localhost:5000/estoque')
-            .then(response => setEstoque(response.data))
-            .catch(error => console.error('Erro ao buscar estoque:', error));
+        const fetchEstoque = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('estoque')
+                    .select('*');
+                
+                if (error) throw error;
+                setEstoque(data);
+            } catch (error) {
+                console.error('Erro ao buscar estoque:', error);
+                toast.error('Erro ao carregar estoque');
+            }
+        };
+
+        fetchEstoque();
     }, []);
 
     const handleRemoveVendaAvulsa = (index) => {
@@ -77,12 +93,9 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
         setSelectedPayment(paymentMethod);
     };
 
-    const handleConfirmPayment = () => {
+    const handleConfirmPayment = async () => {
         const venda = vendas[vendaIndexForPayment];
         const itemsToUpdate = venda.items;
-
-        setValorTotalGeral((prevTotal) => prevTotal + valorTotalVenda);
-        // Cálculo do valor total do pedido
         const valorTotalVenda = venda.items.reduce((sum, item) => sum + item.valor, 0);
 
         const itemCountMap = itemsToUpdate.reduce((acc, item) => {
@@ -92,51 +105,63 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
 
         let podeFechar = true;
 
-        const promises = Object.keys(itemCountMap).map(nome => {
-            const quantidadeParaSubtrair = itemCountMap[nome];
-            return axios.get(`http://localhost:5000/estoque/${nome}`)
-                .then(response => {
-                    const quantidadeAtual = response.data.quantidade;
-                    if (quantidadeAtual < quantidadeParaSubtrair) {
-                        toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
-                            position: "top-right",
-                            autoClose: 5000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            progress: undefined,
-                            theme: "light",
-                        });
-                        podeFechar = false;
-                    } else {
-                        const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
-                        return axios.put(`http://localhost:5000/estoque/${nome}`, { quantidade: novaQuantidade })
-                            .then(() => console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`))
-                            .catch(error => console.error('Erro ao atualizar estoque:', error));
-                    }
-                })
-                .catch(error => console.error('Erro ao obter quantidade atual do estoque:', error));
-        });
+        try {
+            // Verificar e atualizar estoque
+            for (const nome of Object.keys(itemCountMap)) {
+                const quantidadeParaSubtrair = itemCountMap[nome];
+                
+                // Buscar quantidade atual
+                const { data: itemEstoque, error: getError } = await supabase
+                    .from('estoque')
+                    .select('quantidade')
+                    .eq('nome', nome)
+                    .single();
+                
+                if (getError) throw getError;
 
-        Promise.all(promises).then(() => {
-            if (!podeFechar) {
-                console.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.');
-            } else {
+                const quantidadeAtual = itemEstoque.quantidade;
+                
+                if (quantidadeAtual < quantidadeParaSubtrair) {
+                    toast.error(`Quantidade insuficiente no estoque para o item ${nome}`);
+                    podeFechar = false;
+                    break;
+                }
+
+                // Atualizar quantidade
+                const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
+                const { error: updateError } = await supabase
+                    .from('estoque')
+                    .update({ quantidade: novaQuantidade })
+                    .eq('nome', nome);
+                
+                if (updateError) throw updateError;
+            }
+
+            if (podeFechar) {
                 const dataJogo = localStorage.getItem('dataJogo');
                 const horaJogo = localStorage.getItem('horaJogo');
+                const jogoId = localStorage.getItem('jogoId');
+                
+                // Formatar data e hora corretamente
+                const dataHoraFormatada = new Date(`${dataJogo}T${horaJogo}`).toISOString();
 
-                const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
-
-                axios.post('http://localhost:5000/pedidos', {
-                        nomeJogador: venda.nome,
+                // Inserir pedido com estrutura atualizada
+                const { error: pedidoError } = await supabase
+                    .from('pedidos')
+                    .insert([{
+                        nome_jogador: venda.nome,
                         items: venda.items,
-                        formaPagamento: selectedPayment,
-                        valorTotal: valorTotalVenda,
-                        dataJogo: dataHoraJogo,
-                    })
-                    .then(() => console.log('Pedido e pagamento cadastrados com sucesso!'))
-                    .catch(error => console.error('Erro ao cadastrar pedido:', error));
+                        forma_pagamento: selectedPayment,
+                        valor_total: valorTotalVenda,
+                        data_hora: dataHoraFormatada,
+                        tipo_pedido: 'venda_avulsa',
+                        jogo_id: jogoId
+                    }]);
+
+                if (pedidoError) {
+                    console.error('Erro detalhado:', pedidoError);
+                    throw pedidoError;
+                }
 
                 const updatedVendas = [...vendas];
                 updatedVendas[vendaIndexForPayment].isClosed = true;
@@ -147,11 +172,16 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                 const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
                 pagamentosAnteriores.push({
                     valorTotal: valorTotalVenda,
-                    formaPagamento: selectedPayment,
+                    formaPagamento: selectedPayment
                 });
                 localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+
+                toast.success('Venda registrada com sucesso!');
             }
-        });
+        } catch (error) {
+            console.error('Erro detalhado ao processar venda:', error);
+            toast.error(`Erro ao processar venda: ${error.message}`);
+        }
     };
 
     return (

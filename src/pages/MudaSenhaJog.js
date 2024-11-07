@@ -1,35 +1,46 @@
 import logo from '../images/logo_la.png';
 import React, { useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
+import 'react-toastify/dist/ReactToastify.css';
+
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
 function ForgotPassword() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(1);
   const navigate = useNavigate();
 
   const handleVerifyUser = async () => {
     try {
-      const response = await fetch('http://localhost:5000/verifyuser', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, email })
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      if (!username || !email) {
+        toast.error('Preencha todos os campos!');
+        return;
       }
 
-      const data = await response.json();
+      // Verificar se existe um jogador com esse nome e email
+      const { data: jogador, error } = await supabase
+        .from('jogadores')
+        .select('*')
+        .eq('nome', username)
+        .eq('email', email)
+        .single();
 
-      if (data.success) {
+      if (error) {
+        console.error('Erro ao verificar jogador:', error);
+        throw error;
+      }
+
+      if (jogador) {
         setStep(2);
+        toast.success('Usuário verificado com sucesso!');
       } else {
         toast.error('Usuário ou email incorretos!', {
           position: "top-right",
@@ -43,79 +54,41 @@ function ForgotPassword() {
         });
       }
     } catch (error) {
-      console.error('Erro na solicitação:', error);
-      toast.error('Erro ao verificar usuário.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      console.error('Erro na verificação:', error);
+      toast.error(`Erro ao verificar usuário: ${error.message}`);
     }
   };
 
   const handleResetPassword = async () => {
-    if (newPassword !== confirmPassword) {
-      toast.error('As senhas não coincidem.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      return;
-    }
-
     try {
-      const response = await fetch('http://localhost:5000/resetpassword', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, email, newPassword })
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      if (newPassword !== confirmPassword) {
+        toast.error('As senhas não coincidem.');
+        return;
       }
 
-      const data = await response.json();
-
-      if (data.success) {
-        toast('Senha alterada com sucesso!', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        navigate("/loginjog");
-      } else {
-        toast.error('Erro ao alterar senha.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+      if (newPassword.length < 6) {
+        toast.error('A senha deve ter pelo menos 6 caracteres.');
+        return;
       }
-    } catch (error) {
-      console.error('Erro na solicitação:', error);
-      toast.error('Erro ao alterar senha.', {
+
+      // Atualizar a senha do jogador
+      const { error: updateError } = await supabase
+        .from('jogadores')
+        .update({ 
+          senha: newPassword,
+          updated_at: new Date().toISOString()
+        })
+        .eq('nome', username)
+        .eq('email', email);
+
+      if (updateError) {
+        console.error('Erro ao atualizar senha:', updateError);
+        throw updateError;
+      }
+
+      toast.success('Senha alterada com sucesso!', {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -123,6 +96,15 @@ function ForgotPassword() {
         progress: undefined,
         theme: "light",
       });
+
+      // Redirecionar após 3 segundos
+      setTimeout(() => {
+        navigate("/loginjog");
+      }, 3000);
+
+    } catch (error) {
+      console.error('Erro na alteração de senha:', error);
+      toast.error(`Erro ao alterar senha: ${error.message}`);
     }
   };
 
