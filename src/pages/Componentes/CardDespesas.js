@@ -3,12 +3,11 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 
-export default function CardDespesas() {
-  const [jogadores, setJogadores] = useState([{ nome: '', numero: '1', items: [], selectedItem: '', isClosed: false }]);
+export default function CardDespesas({ despesas, setDespesas, handleAddDespesa}) {
   const [estoque, setEstoque] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [jogadorIndexForPayment, setJogadorIndexForPayment] = useState(null);
+  const [despesaIndexForPayment, setDespesaIndexForPayment] = useState(null);
   const [valorTotalGeral, setValorTotalGeral] = useState(0);
 
   useEffect(() => {
@@ -19,15 +18,11 @@ export default function CardDespesas() {
   useEffect(() => {
     localStorage.setItem('totalAvulso', valorTotalGeral);
   }, [valorTotalGeral]);
-  const handleAddJogador = () => {
-    const newNumero = (jogadores.length + 0).toString();
-    setJogadores([...jogadores, { nome: '', numero: newNumero, items: [], selectedItem: '', isClosed: false }]);
-  };
 
-  const handleRemoveJogador = (index) => {
-    if (jogadores.length > 1) {
-      const updatedJogadores = jogadores.filter((_, i) => i !== index);
-      setJogadores(updatedJogadores);
+  const handleRemoveDespesa = (index) => {
+    if (despesas.length > 1) {
+      const updatedDespesas = despesas.filter((_, i) => i !== index);
+      setDespesas(updatedDespesas);
     } else {
       toast.error('Deve haver pelo menos um card de despesas na tela.', {
         position: "top-right",
@@ -43,49 +38,49 @@ export default function CardDespesas() {
   };
 
   const handleNomeChange = (index, event) => {
-    const updatedJogadores = [...jogadores];
-    updatedJogadores[index].nome = event.target.value;
-    setJogadores(updatedJogadores);
+    const updatedDespesas = [...despesas];
+    updatedDespesas[index].nome = event.target.value;
+    setDespesas(updatedDespesas);
   };
 
   const handleNumeroChange = (index, event) => {
-    const updatedJogadores = [...jogadores];
-    updatedJogadores[index].numero = event.target.value;
-    setJogadores(updatedJogadores);
+    const updatedDespesas = [...despesas];
+    updatedDespesas[index].numero = event.target.value;
+    setDespesas(updatedDespesas);
   };
 
   const handleItemSelectChange = (index, event) => {
-    const updatedJogadores = [...jogadores];
+    const updatedDespesas = [...despesas];
     const selectedItem = estoque.find(item => item.nome === event.target.value);
-    updatedJogadores[index].selectedItem = selectedItem;
-    setJogadores(updatedJogadores);
+    updatedDespesas[index].selectedItem = selectedItem;
+    setDespesas(updatedDespesas);
   };
 
   const handleAddItem = (index) => {
-    const updatedJogadores = [...jogadores];
-    if (updatedJogadores[index].selectedItem) {
-      const selectedItem = { ...updatedJogadores[index].selectedItem };
+    const updatedDespesas = [...despesas];
+    if (updatedDespesas[index].selectedItem) {
+      const selectedItem = { ...updatedDespesas[index].selectedItem };
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-      updatedJogadores[index].items.push(selectedItem);
-      updatedJogadores[index].selectedItem = '';
-      setJogadores(updatedJogadores);
+      updatedDespesas[index].items.push(selectedItem);
+      updatedDespesas[index].selectedItem = '';
+      setDespesas(updatedDespesas);
     }
   };
 
-  const handleRemoveItem = (jogadorIndex, itemIndex) => {
-    const updatedJogadores = [...jogadores];
-    updatedJogadores[jogadorIndex].items.splice(itemIndex, 1);
-    setJogadores(updatedJogadores);
+  const handleRemoveItem = (despesaIndex, itemIndex) => {
+    const updatedDespesas = [...despesas];
+    updatedDespesas[despesaIndex].items.splice(itemIndex, 1);
+    setDespesas(updatedDespesas);
   };
 
   const handleClosePedido = (index) => {
-    if (jogadores[index].isClosed) {
-      const updatedJogadores = [...jogadores];
-      updatedJogadores[index].isClosed = false;
-      updatedJogadores[index].items = [];
-      setJogadores(updatedJogadores);
+    if (despesas[index].isClosed) {
+      const updatedDespesas = [...despesas];
+      updatedDespesas[index].isClosed = false;
+      updatedDespesas[index].items = [];
+      setDespesas(updatedDespesas);
     } else {
-      setJogadorIndexForPayment(index);
+      setDespesaIndexForPayment(index);
       setShowPaymentModal(true);
     }
   };
@@ -95,12 +90,12 @@ export default function CardDespesas() {
   };
 
   const handleConfirmPayment = () => {
-    const jogador = jogadores[jogadorIndexForPayment];
-    const itemsToUpdate = jogador.items;  
+    const despesa = despesas[despesaIndexForPayment];
+    const itemsToUpdate = despesa.items;  
     
-    setValorTotalGeral((prevTotal) => prevTotal + valorTotalJogador);
+    setValorTotalGeral((prevTotal) => prevTotal + valorTotalDespesa);
     // Cálculo do valor total do pedido
-    const valorTotalJogador = jogador.items.reduce((sum, item) => sum + item.valor, 0);
+    const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + item.valor, 0);
   
     const itemCountMap = itemsToUpdate.reduce((acc, item) => {
       acc[item.nome] = (acc[item.nome] || 0) + 1;
@@ -143,24 +138,24 @@ export default function CardDespesas() {
         const storedData = localStorage.getItem('dataJogo');
 
         axios.post('http://localhost:5000/pedidos', {
-          nomeJogador: jogador.nome,
-          items: jogador.items,
+          nomeDespesa: despesa.nome,
+          items: despesa.items,
           formaPagamento: selectedPayment,
-          valorTotal: valorTotalJogador,
+          valorTotal: valorTotalDespesa,
           dataJogo: storedData,  
         })
         .then(() => console.log('Pedido e pagamento cadastrados com sucesso!'))
         .catch(error => console.error('Erro ao cadastrar pedido:', error));
   
-        const updatedJogadores = [...jogadores];
-        updatedJogadores[jogadorIndexForPayment].isClosed = true;
-        setJogadores(updatedJogadores);
+        const updatedDespesas = [...despesas];
+        updatedDespesas[despesaIndexForPayment].isClosed = true;
+        setDespesas(updatedDespesas);
         setShowPaymentModal(false);
 
         // Armazenar os dados no localStorage
         const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
         pagamentosAnteriores.push({
-        valorTotal: valorTotalJogador,
+        valorTotal: valorTotalDespesa,
         formaPagamento: selectedPayment, 
       });
       localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
@@ -171,10 +166,10 @@ export default function CardDespesas() {
   return (
     <div className="flex flex-wrap gap-4">
       <ToastContainer />
-      {jogadores.map((jogador, index) => {
-        const valorTotalJogador = jogador.items.reduce((sum, item) => sum + item.valor, 0);
+      {despesas.map((despesa, index) => {
+        const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + item.valor, 0);
         return (
-          <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
+          <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${despesa.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
             <header className="bg-secondary w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
               <p className="text-black">Despesas</p>
               <div className="flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
@@ -182,28 +177,28 @@ export default function CardDespesas() {
                   type="text"
                   className="text-center w-10 rounded-sm px-2 py-1"
                   placeholder="N°"
-                  value={jogador.numero}
+                  value={despesa.numero}
                   onChange={(e) => handleNumeroChange(index, e)}
-                  disabled={jogador.isClosed}
+                  disabled={despesa.isClosed}
                 />
                 <input
                   type="text"
                   className="text-center w-44 rounded-sm px-2 py-1"
                   placeholder="Cliente"
-                  value={jogador.nome}
+                  value={despesa.nome}
                   onChange={(e) => handleNomeChange(index, e)}
-                  disabled={jogador.isClosed}
+                  disabled={despesa.isClosed}
                 />
                 <div className="inline-flex">
                   <button
                     className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
-                    onClick={handleAddJogador}
+                    onClick={handleAddDespesa}
                   >
                     +
                   </button>
                   <button
                     className="bg-black hover:bg-primary py-1 px-2 rounded-r text-white"
-                    onClick={() => handleRemoveJogador(index)}
+                    onClick={() => handleRemoveDespesa(index)}
                   >
                     -
                   </button>
@@ -215,9 +210,9 @@ export default function CardDespesas() {
               <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
                 <select
                   className="w-full border border-slate-400 rounded px-2 p-1 text-center"
-                  value={jogador.selectedItem?.nome || ''}
+                  value={despesa.selectedItem?.nome || ''}
                   onChange={(e) => handleItemSelectChange(index, e)}
-                  disabled={jogador.isClosed}
+                  disabled={despesa.isClosed}
                 >
                   <option value="">Selecione o item</option>
                   {estoque.map((item) => (
@@ -230,20 +225,20 @@ export default function CardDespesas() {
                   <button
                     className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
                     onClick={() => handleAddItem(index)}
-                    disabled={jogador.isClosed}
+                    disabled={despesa.isClosed}
                   >
                     +
                   </button>
                 </div>
               </div>
 
-              {jogador.items.map((item, itemIndex) => (
+              {despesa.items.map((item, itemIndex) => (
                 <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
                   <div className="inline-flex">
                     <button
                       className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
                       onClick={() => handleRemoveItem(index, itemIndex)}
-                      disabled={jogador.isClosed}
+                      disabled={despesa.isClosed}
                     >
                       -
                     </button>
@@ -255,7 +250,7 @@ export default function CardDespesas() {
             </div>
 
             <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
-              <h1 className="text-md font-semibold">Total: R${valorTotalJogador.toFixed(2)}</h1>
+              <h1 className="text-md font-semibold">Total: R${valorTotalDespesa.toFixed(2)}</h1>
             </div>
 
             <div className="flex justify-center items-center mt-2">
@@ -263,7 +258,7 @@ export default function CardDespesas() {
                 className="w-[180px] bg-gray-300 hover:bg-secondary text-gray-800 font-bold py-2 px-4 rounded-l"
                 onClick={() => handleClosePedido(index)}
               >
-                {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
+                {despesa.isClosed ? 'Fechado' : 'Fechar Pedido'}
               </button>
             </div>
           </section>

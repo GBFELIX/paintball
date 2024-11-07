@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardJog from './Componentes/Cardjog';
@@ -11,9 +10,23 @@ import { FaPlus } from "react-icons/fa6";
 export default function StatusGame() {
   const [jogo, setJogo] = useState({});
   const [jogadores, setJogadores] = useState([{ nome: '', numero: '1', items: [], selectedItem: '', isClosed: false }]);
-  const [vendas, setVendas] = useState([{ numero: '1' }]);
+  const [vendasAvulsas, setVendasAvulsas] = useState([{ 
+    nome: '', 
+    numero: '1', 
+    items: [], 
+    selectedItem: '', 
+    isClosed: false 
+  }]);
   const [bolinhas, setBolinhas] = useState(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false); 
+  const [showDespesas, setShowDespesas] = useState(false);
+  const [despesas, setDespesas] = useState([{ 
+    nome: '', 
+    numero: '1', 
+    items: [], 
+    selectedItem: '', 
+    isClosed: false 
+  }]);
   const navigate = useNavigate();
 
   
@@ -71,15 +84,33 @@ export default function StatusGame() {
 
   const handleAddJogador = () => {
     const newNumero = (jogadores.length + 1).toString();
-    setJogadores([...jogadores, { nome: '', numero: newNumero, items: [], selectedItem: '', isClosed: false }]);
+    setJogadores([...jogadores, { 
+      nome: '', 
+      numero: newNumero, 
+      items: [], 
+      selectedItem: '', 
+      isClosed: false }]);
   };
   const handleAddVendaAvulsa = () => {
-    const newNumero = (jogadores.length + 1).toString(); // Adicione a lógica de numeração
-    setJogadores([...jogadores, { nome: '', numero: newNumero, items: [], selectedItem: '', isClosed: false }]);
+    const newNumero = (vendasAvulsas.length + 1).toString();
+    setVendasAvulsas([...vendasAvulsas, { 
+      nome: '', 
+      numero: newNumero, 
+      items: [], 
+      selectedItem: '', 
+      isClosed: false 
+    }]);
   };
   
-  const handleAddDespesas = () => {
-    // Lógica para adicionar uma despesa, similar ao handleAddJogador
+  const handleAddDespesa = () => {
+    const newNumero = (despesas.length + 1).toString();
+    setDespesas([...despesas, { 
+      nome: '', 
+      numero: newNumero, 
+      items: [], 
+      selectedItem: '', 
+      isClosed: false 
+    }]);
   };
   const handleClosePedido = (index) => {
     const updatedJogadores = [...jogadores];
@@ -122,16 +153,9 @@ export default function StatusGame() {
           <p className="font-semibold">Jogadores Finalizados</p>
           <p id="playerInativo" className="font-semibold text-3xl">{jogadoresInativos}</p> 
         </div>
-        <div className="flex flex-col items-start">
-        <p id="bolinhasEstoque" className="font-semibold text-3xl">
-          {bolinhas !== null ? `Bolinhas disponíveis: ${bolinhas}` : 'Carregando...'}
-        </p>
-      <div className="flex flex-col items-start">
-    </div>
-        </div>
       </div>
 
-      {/* Componentes VendaAvulsa e CardJog */}
+      {/* Componentes VendaAvulsa, CardJog e CardDespesas */}
       <div className="flex flex-wrap gap-4 text-black">
         <CardJog 
           jogadores={jogadores} 
@@ -139,9 +163,18 @@ export default function StatusGame() {
           handleAddJogador={handleAddJogador} 
           handleClosePedido={handleClosePedido}   
         />
-        <VendaAvulsa />
-        <CardDespesas />
-        
+        <VendaAvulsa 
+          vendas={vendasAvulsas} 
+          setVendas={setVendasAvulsas} 
+          handleAddVendaAvulsa={handleAddVendaAvulsa} 
+          handleClosePedido={handleClosePedido}
+        />
+        <CardDespesas 
+          despesas={despesas}
+          setDespesas={setDespesas}
+          handleAddDespesa={handleAddDespesa}
+          handleClosePedido={handleClosePedido}
+        />
       </div>
     </section>
     <div className="flex justify-end mt-auto">
@@ -158,8 +191,8 @@ export default function StatusGame() {
       >
         <FaPlus size={30} />
       </button>
-      <button // botão para adicionar despesas
-        onClick={handleAddDespesas}
+      <button 
+        onClick={handleAddDespesa}
         className="bg-red-600 hover:bg-white duration-300 m-2 w-20 h-20 rounded-full flex justify-center items-center"
       >
         <FaPlus size={30} />

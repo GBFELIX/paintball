@@ -20,67 +20,49 @@ import PreAgendado from './pages/PreAgendado.js';
 import CardDespesas from './pages/Componentes/CardDespesas.js';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
+import { supabase } from './utils/supabase'
 
 function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Erro de comunicação com o servidor');
-      }
-  
-      const data = await response.json();
-  
-      if (data.success) {
-        localStorage.setItem('auth', 'true');
-        localStorage.setItem('role', data.role); // Armazena o papel do usuário
-  
-        // Redireciona com base no papel do usuário
-        if (data.role === 'admin') {
-          navigate("/estoque");
-        } else if (data.role === 'usuario') {
-          navigate("/cadjog");
-        } else if (data.role === 'operador') {
-          navigate("/addjogo"); // Redireciona para uma página sem acesso ao estoque
-        }
-      } else {
-        toast.error('Houve um erro ao tentar fazer login.', {
-          position: "top-right", 
-          autoClose: 5000, 
-          hideProgressBar: false, 
-          closeOnClick: true, 
-          pauseOnHover: true, 
-          draggable: true, 
-          progress: undefined, 
-          theme: "light", 
+    const handleLogin = async () => {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
         });
+  
+        if (error) {
+          toast.error(error.message || 'Credenciais inválidas');
+        } else if (data) {
+          localStorage.setItem('auth', 'true');
+          const role = data.user.user_metadata?.role || 'admin';
+          localStorage.setItem('role', role);
+  
+          toast.success('Login realizado com sucesso!');
+          setTimeout(() => {
+            switch(role) {
+              case 'admin':
+                navigate('/estoque');
+                break;
+              case 'usuario':
+                navigate('/cadjog');
+                break;
+              case 'operador':
+                navigate('/addjogo');
+                break;
+              default:
+                toast.error('Tipo de usuário não reconhecido');
+            }
+          }, 500);
+        }
+      } catch (error) {
+        console.error('Erro ao fazer login:', error);
+        toast.error('Erro ao conectar com o servidor');
       }
-    } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      toast.error('Houve um erro ao tentar fazer login.', {
-        position: "top-right", 
-        autoClose: 5000, 
-        hideProgressBar: false, 
-        closeOnClick: true, 
-        pauseOnHover: true, 
-        draggable: true, 
-        progress: undefined, 
-        theme: "light", 
-      });
-    }
-  };
-
+    };
 
   return (
     <div className='w-full h-screen flex flex-col items-center justify-center bg-black'>
@@ -89,12 +71,12 @@ function Login() {
         <img src={logo} className="m-4 w-[150px]" title='PaintBall - LA' alt='PaintBall - LA'/>
         <h1 className='text-white text-4xl font-bold m-4'>Administradores</h1>
         <input 
-          id="username" 
-          type='text' 
+          id="email" 
+          type='email' 
           className='border border-white p-1 rounded-sm text-center mt-2 w-[250px]' 
-          placeholder='Digite seu nome' 
-          value={username} 
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder='Digite seu email' 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
         />
         <input 
           id="password" 
@@ -126,7 +108,7 @@ function App() {
         <Route path="/loginjog" element={<PrivateRoute role={['admin', 'usuario', 'operador']}><Loginjog /></PrivateRoute>} />
         <Route path="/Navbar" element={<NavBar />} />
         <Route path="/mudarsenhajog" element={<PrivateRoute role={['admin', 'usuario', 'operador']}><ForgotPassword /></PrivateRoute>} />
-        <Route path="/mudarsenhaadm" element={<PrivateRoute role="admin"><Changepass /></PrivateRoute>} />
+        <Route path="/mudarsenhaadm" element={<Changepass />} />
         <Route path="/estoque" element={<PrivateRoute role="admin"><Estoque /></PrivateRoute>}/>
         <Route path="/addjogo" element={<PrivateRoute role={['admin', 'operador']}><AddJogo /></PrivateRoute>} />
         <Route path="/cardjogador" element={<CardJogador />} />

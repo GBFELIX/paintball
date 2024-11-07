@@ -146,10 +146,6 @@ export default function ResumoGame() {
                             <p id="dinheiro">R${formasPagamento.dinheiro.toFixed(2)}</p>
                         </div>
                         <div className="flex flex-row justify-around items-start">
-                            <p className="text-xl font-semibold">Avulso</p>
-                            <p id="avulso">R${totalAvulso.toFixed(2)}</p> 
-                        </div>
-                        <div className="flex flex-row justify-around items-start">
                             <p className="text-xl font-semibold">Pix</p>
                             <p id="pix">R${formasPagamento.pix.toFixed(2)}</p>
                         </div>
