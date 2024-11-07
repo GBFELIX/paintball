@@ -20,6 +20,7 @@ import PreAgendado from './pages/PreAgendado.js';
 import CardDespesas from './pages/Componentes/CardDespesas.js';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
+// eslint-disable-next-line no-unused-vars
 import { supabase } from './utils/supabase'
 const { createClient } = require('@supabase/supabase-js');
 
