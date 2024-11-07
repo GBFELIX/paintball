@@ -20,20 +20,13 @@ import PreAgendado from './pages/PreAgendado.js';
 import CardDespesas from './pages/Componentes/CardDespesas.js';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
-// eslint-disable-next-line no-unused-vars
-import { supabase } from './utils/supabase'
-const { createClient } = require('@supabase/supabase-js');
+
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const supabaseUrl = 'https://ifshyzgwiukjqupmrwde.supabase.co'
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmc2h5emd3aXVranF1cG1yd2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA4NDY1NDMsImV4cCI6MjA0NjQyMjU0M30.Q8YYezFhpYX-4mNvk7NyVseoH8SPNkyF8mlwUwYoD3w'
-  // eslint-disable-next-line no-unused-vars
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  console.log(supabase);
-  module.exports = { supabase };
+  
     const handleLogin = async () => {
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
