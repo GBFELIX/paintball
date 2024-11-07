@@ -10,8 +10,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+const supabaseUrl = https://ifshyzgwiukjqupmrwde.supabase.co
+const supabaseKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmc2h5emd3aXVranF1cG1yd2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA4NDY1NDMsImV4cCI6MjA0NjQyMjU0M30.Q8YYezFhpYX-4mNvk7NyVseoH8SPNkyF8mlwUwYoD3w
 const supabase = createClient(supabaseUrl, supabaseKey);
 module.exports = { supabase };
 
