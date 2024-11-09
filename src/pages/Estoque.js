@@ -6,12 +6,20 @@ import { FaPlus } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
 
+// Adicionar configuração base do axios
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || '/.netlify/functions',
+  timeout: 5000
+});
+
 export default function Estoque() {
   const navigate = useNavigate();
   const [estoque, setEstoque] = useState([]);
   const [inputs, setInputs] = useState({});
   const [editMode, setEditMode] = useState({});
   const [descontos, setDescontos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('auth');
@@ -20,14 +28,18 @@ export default function Estoque() {
     }
   }, [navigate]);
   
-  const fetchEstoque = () => {
-    axios.get('./.netlify/functions/api-estoque')
-      .then(response => {
-        setEstoque(response.data);
-      })
-      .catch(error => {
-        console.error('Erro ao buscar estoque:', error);
-      });
+  const fetchEstoque = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get('/api-estoque');
+      setEstoque(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar estoque:', error);
+      setError('Erro ao carregar o estoque. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
   const fetchDescontos = () => {
     axios.get('./.netlify/functions/api-descontos') // Endpoint para buscar descontos
@@ -64,21 +76,38 @@ export default function Estoque() {
       .catch(error => console.error('Erro ao adicionar desconto:', error));
   };
 
-  const addEstoque = () => {
+  const addEstoque = async () => {
     const nomeProduto = document.getElementById('NomeProduto').value;
     const valorProduto = document.getElementById('valorProduto').value;
     const qtdProduto = document.getElementById('QtdProduto').value;
     
-    axios.post('./.netlify/functions/api-estoque', { item: nomeProduto, valor: valorProduto, quantidade: qtdProduto })
-      .then(response => {
-        fetchEstoque();
-        document.getElementById('NomeProduto').value = '';
-        document.getElementById('valorProduto').value = '';
-        document.getElementById('QtdProduto').value = '';
-      })
-      .catch(error => {
-        console.error('Erro ao adicionar item ao estoque:', error);
+    if (!nomeProduto || !valorProduto || !qtdProduto) {
+      setError('Preencha todos os campos');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await api.post('/api-estoque', {
+        item: nomeProduto,
+        valor: parseFloat(valorProduto),
+        quantidade: parseInt(qtdProduto)
       });
+      
+      await fetchEstoque();
+      
+      // Limpar campos
+      document.getElementById('NomeProduto').value = '';
+      document.getElementById('valorProduto').value = '';
+      document.getElementById('QtdProduto').value = '';
+    } catch (error) {
+      console.error('Erro ao adicionar item:', error);
+      setError('Erro ao adicionar item. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
   const updateDesconto = (id, novoValor) => {
     axios.put(`./.netlify/functions/api-descontos/${id}`, { valor: novoValor })
@@ -175,6 +204,18 @@ export default function Estoque() {
     <div className="bg-black min-h-screen flex flex-col items-center justify-center">
       <NavBar />
       <section className="w-full max-w-4xl flex flex-col items-center justify-center p-5">
+        {error && (
+          <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+            {error}
+          </div>
+        )}
+        
+        {loading && (
+          <div className="w-full text-center text-white mb-4">
+            Carregando...
+          </div>
+        )}
+
         <h1 className="text-white font-bold text-2xl mt-5 mb-10">Gerenciamento de Estoque</h1>
         
         <div className="w-full h-auto bg-gray-400 rounded-sm flex flex-col p-5 items-center justify-center mb-5">
