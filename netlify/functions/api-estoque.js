@@ -1,40 +1,85 @@
 const mysql = require('mysql2');
 require('dotenv').config();
 
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306
-});
+// Função para criar conexão
+function createConnection() {
+  return mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306
+  }).promise();
+}
 
 exports.handler = async (event, context) => {
-  // Tratamento para diferentes métodos HTTP
-  switch (event.httpMethod) {
-    case 'GET':
-      return handleGet(event);
-    case 'POST':
-      return handlePost(event);
-    case 'PUT':
-      return handlePut(event);
-    case 'DELETE':
-      return handleDelete(event);
-    default:
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ message: 'Método não permitido' })
-      };
+  // Adicionar headers CORS
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
+  };
+
+  // Tratamento para preflight requests
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers,
+      body: ''
+    };
+  }
+
+  // Criar nova conexão para cada requisição
+  const db = createConnection();
+  
+  try {
+    let response;
+    
+    switch (event.httpMethod) {
+      case 'GET':
+        response = await handleGet(event, db);
+        break;
+      case 'POST':
+        response = await handlePost(event, db);
+        break;
+      case 'PUT':
+        response = await handlePut(event, db);
+        break;
+      case 'DELETE':
+        response = await handleDelete(event, db);
+        break;
+      default:
+        response = {
+          statusCode: 405,
+          body: JSON.stringify({ message: 'Método não permitido' })
+        };
+    }
+
+    // Adicionar headers CORS à resposta
+    response.headers = headers;
+    
+    // Fechar conexão
+    await db.end();
+    
+    return response;
+  } catch (error) {
+    // Fechar conexão em caso de erro
+    await db.end();
+    
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: 'Erro interno do servidor' })
+    };
   }
 };
 
-async function handleGet(event) {
+async function handleGet(event, db) {
   try {
-    // Se houver um parâmetro nome na URL
     const nomeItem = event.path.split('/').pop();
     if (nomeItem !== 'estoque') {
       const query = 'SELECT * FROM estoque WHERE nome = ?';
-      const [results] = await db.promise().query(query, [nomeItem]);
+      const [results] = await db.query(query, [nomeItem]);
       
       if (results.length === 0) {
         return {
@@ -49,8 +94,7 @@ async function handleGet(event) {
       };
     }
 
-    // Caso contrário, retorna todo o estoque
-    const [results] = await db.promise().query('SELECT * FROM estoque');
+    const [results] = await db.query('SELECT * FROM estoque');
     return {
       statusCode: 200,
       body: JSON.stringify(results)
@@ -63,11 +107,11 @@ async function handleGet(event) {
   }
 }
 
-async function handlePost(event) {
+async function handlePost(event, db) {
   try {
     const { item, valor, quantidade } = JSON.parse(event.body);
     const query = 'INSERT INTO estoque (nome, valor, quantidade) VALUES (?, ?, ?)';
-    const [result] = await db.promise().query(query, [item, valor, quantidade]);
+    const [result] = await db.query(query, [item, valor, quantidade]);
 
     return {
       statusCode: 201,
@@ -86,7 +130,7 @@ async function handlePost(event) {
   }
 }
 
-async function handlePut(event) {
+async function handlePut(event, db) {
   try {
     const nome = event.path.split('/').pop();
     const { quantidade, valor } = JSON.parse(event.body);
@@ -115,7 +159,7 @@ async function handlePut(event) {
     query += 'WHERE nome = ?';
     values.push(nome);
 
-    await db.promise().query(query, values);
+    await db.query(query, values);
 
     return {
       statusCode: 200,
@@ -132,11 +176,11 @@ async function handlePut(event) {
   }
 }
 
-async function handleDelete(event) {
+async function handleDelete(event, db) {
   try {
     const nome = event.path.split('/').pop();
     const query = 'DELETE FROM estoque WHERE nome = ?';
-    const [result] = await db.promise().query(query, [nome]);
+    const [result] = await db.query(query, [nome]);
 
     return {
       statusCode: 200,
