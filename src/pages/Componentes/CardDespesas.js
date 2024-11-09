@@ -11,7 +11,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   const [valorTotalGeral, setValorTotalGeral] = useState(0);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/estoque')
+    axios.get('/.netlify/functions/api-estoque')
       .then(response => setEstoque(response.data))
       .catch(error => console.error('Erro ao buscar estoque:', error));
   }, []);
@@ -106,7 +106,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   
     const promises = Object.keys(itemCountMap).map(nome => {
       const quantidadeParaSubtrair = itemCountMap[nome];
-      return axios.get(`http://localhost:5000/estoque/${nome}`)
+      return axios.get(`/.netlify/functions/api-estoque/${nome}`)
         .then(response => {
           const quantidadeAtual = response.data.quantidade;
           if (quantidadeAtual < quantidadeParaSubtrair) {
@@ -123,7 +123,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
             podeFechar = false;
           } else {
             const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
-            return axios.put(`http://localhost:5000/estoque/${nome}`, { quantidade: novaQuantidade })
+            return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
               .then(() => console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`))
               .catch(error => console.error('Erro ao atualizar estoque:', error));
           }
@@ -137,7 +137,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
       } else {
         const storedData = localStorage.getItem('dataJogo');
 
-        axios.post('http://localhost:5000/pedidos', {
+        axios.post('/.netlify/functions/api-pedidos', {
           nomeDespesa: despesa.nome,
           items: despesa.items,
           formaPagamento: selectedPayment,

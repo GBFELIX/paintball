@@ -113,7 +113,7 @@ export default function ResumoGame() {
         localStorage.removeItem('dataJogo');
         localStorage.removeItem('horaJogo');
         
-        navigate('/estoque');
+        navigate('/addjogo');
     };
 
     return (
