@@ -32,7 +32,7 @@ export default function Estoque() {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/api-estoque');
+      const response = await api.get('./.netlify/functions/api-estoque');
       setEstoque(response.data);
     } catch (error) {
       console.error('Erro ao buscar estoque:', error);
@@ -90,7 +90,7 @@ export default function Estoque() {
     setError(null);
     
     try {
-      await api.post('/api-estoque', {
+      await api.post('./.netlify/functions/api-estoque', {
         item: nomeProduto,
         valor: parseFloat(valorProduto),
         quantidade: parseInt(qtdProduto)
