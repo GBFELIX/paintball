@@ -10,7 +10,7 @@ function Loginjog() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    const response = await fetch('http://localhost:5000/jogador', {
+    const response = await fetch('./.netlify/functions/api-jogador', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

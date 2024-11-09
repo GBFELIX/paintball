@@ -26,7 +26,7 @@ function AddJogo() {
 
   const handleAdicionar = async () => {
     try {
-      const response = await fetch('http://localhost:5000/addjogo', {
+      const response = await fetch('./.netlify/functions/api-addjogo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -61,7 +61,7 @@ export default function CadEquipe() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/cadastrar', {
+      const response = await fetch('./.netlify/functions/api-cadastrar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -17,7 +17,7 @@ export default function Financeiro() {
   }, []);
 
   const buscarDadosFinanceiros = (data) => {
-    axios.get(`http://localhost:5000/financeiro?data=${data}`)
+    axios.get(`./.netlify/functions/api-financeiro?data=${data}`)
       .then((response) => {
         setFinanceiroData(response.data);
       })

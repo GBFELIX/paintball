@@ -10,7 +10,7 @@ export default function PreAgendado() {
   useEffect(() => {
     const fetchEquipes = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/equipes'); 
+        const response = await axios.get('./.netlify/functions/api-equipes'); 
         setEquipes(response.data);
       } catch (error) {
         console.error('Erro ao buscar dados da equipe:', error);
@@ -33,7 +33,7 @@ export default function PreAgendado() {
   }, []);
   const handleMostrarEquipe = async (equipe) => {
     try {
-      const response = await axios.get(`http://localhost:5000/equipes/${equipe.equipe_id}/jogadores`);
+      const response = await axios.get(`./.netlify/functions/api-equipes/${equipe.equipe_id}/jogadores`);
       setJogadores(response.data);
       setSelectedEquipe(equipe);
       setShowModal(true);

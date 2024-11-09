@@ -14,7 +14,7 @@ function ForgotPassword() {
 
   const handleVerifyUser = async () => {
     try {
-      const response = await fetch('http://localhost:5000/verifyuser', {
+      const response = await fetch('./.netlify/functions/api-verifyuser', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

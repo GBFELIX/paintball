@@ -100,7 +100,7 @@ export default function ResumoGame() {
             totalArrecadado
         };
 
-        axios.post('http://localhost:5000/financeiro', dataFinanceira)
+        axios.post('./.netlify/functions/api-financeiro', dataFinanceira)
         .then(() => {
             console.log('Dados financeiros enviados com sucesso');
         })
