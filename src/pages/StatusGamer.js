@@ -1,26 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import React, { useEffect, useState } from 'react';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardJog from './Componentes/Cardjog';
 import CardDespesas from './Componentes/CardDespesas';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+// icons
 import { FaPlus } from "react-icons/fa6";
-import { toast } from 'react-toastify';
-
-const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_ANON_KEY
-);
 
 export default function StatusGame() {
   const [jogo, setJogo] = useState({});
-  const [jogadores, setJogadores] = useState([{ 
-    nome: '', 
-    numero: '1', 
-    items: [], 
-    selectedItem: '', 
-    isClosed: false 
-  }]);
+  const [jogadores, setJogadores] = useState([{ nome: '', numero: '1', items: [], selectedItem: '', isClosed: false }]);
   const [vendasAvulsas, setVendasAvulsas] = useState([{ 
     nome: '', 
     numero: '1', 
@@ -28,7 +17,9 @@ export default function StatusGame() {
     selectedItem: '', 
     isClosed: false 
   }]);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [bolinhas, setBolinhas] = useState(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false); 
+  const [showDespesas, setShowDespesas] = useState(false);
   const [despesas, setDespesas] = useState([{ 
     nome: '', 
     numero: '1', 
@@ -36,24 +27,60 @@ export default function StatusGame() {
     selectedItem: '', 
     isClosed: false 
   }]);
-  
   const navigate = useNavigate();
 
+  
+   let valorTotalVendasAvulsas = 0;
+
+   
+   const calcularValorTotalVendasAvulsas = () => {
+     valorTotalVendasAvulsas = 0; 
+ 
+     
+     jogadores.forEach(jogador => {
+       if (!jogador.isClosed) { 
+         jogador.items.forEach(item => {
+           if (item.tipo === 'venda avulsa') { 
+             valorTotalVendasAvulsas += item.valor;
+           }
+         });
+       }
+     });
+   };
+
   useEffect(() => {
+    const interval = setInterval(() => {
+      calcularValorTotalVendasAvulsas(); 
+    }, 5000);
+
+    return () => clearInterval(interval); // Limpa o intervalo ao desmontar o componente
+  }, [jogadores]);
+
+  const fetchBolinhas = () => {
+    axios.get('http://localhost:5000/estoque/bolinhas')
+      .then(response => {
+        setBolinhas(response.data.quantidade); // Define a quantidade de bolinhas
+      })
+      .catch(error => {
+        console.error('Erro ao buscar bolinhas:', error);
+      });
+  };
+
+  useEffect(() => {
+    fetchBolinhas();
+
     const storedData = localStorage.getItem('dataJogo');
     const storedHora = localStorage.getItem('horaJogo');
-    const jogoId = localStorage.getItem('jogoId');
   
     if (storedData) {
-      setJogo({ 
-        id: jogoId,
-        data: storedData, 
-        hora: storedHora 
-      });
-    } else {
-      navigate('/');
+      setJogo({ data: storedData, hora: storedHora });
     }
-  }, [navigate]);
+    const interval = setInterval(() => {
+      fetchBolinhas(); 
+    }, 5000); // Intervalo de 5 segundos
+
+    return () => clearInterval(interval); 
+  }, []);
 
   const handleAddJogador = () => {
     const newNumero = (jogadores.length + 1).toString();
@@ -62,10 +89,8 @@ export default function StatusGame() {
       numero: newNumero, 
       items: [], 
       selectedItem: '', 
-      isClosed: false 
-    }]);
+      isClosed: false }]);
   };
-
   const handleAddVendaAvulsa = () => {
     const newNumero = (vendasAvulsas.length + 1).toString();
     setVendasAvulsas([...vendasAvulsas, { 
@@ -87,42 +112,31 @@ export default function StatusGame() {
       isClosed: false 
     }]);
   };
-
   const handleClosePedido = (index) => {
     const updatedJogadores = [...jogadores];
     updatedJogadores[index].isClosed = !updatedJogadores[index].isClosed;
     setJogadores(updatedJogadores);
   };
 
+  // Contar jogadores ativos (cards não fechados)
   const jogadoresAtivos = jogadores.filter(jogador => !jogador.isClosed).length;
+
   const jogadoresInativos = jogadores.filter(jogador => jogador.isClosed).length;
 
   const handleFecharPartida = () => {
     setShowConfirmationModal(true);
   };
 
-  const confirmCloseGame = async () => {
-    try {
-      // Atualizar status do jogo para 'finalizado'
-      const { error } = await supabase
-        .from('jogos')
-        .update({ status: 'finalizado' })
-        .eq('id', jogo.id);
-
-      if (error) throw error;
-
-      setShowConfirmationModal(false);
-      navigate('/resumogame');
-    } catch (error) {
-      console.error('Erro ao finalizar jogo:', error);
-      toast.error('Erro ao finalizar jogo');
-    }
+  
+  const confirmCloseGame = () => {
+    setShowConfirmationModal(false);
+    navigate('/resumogame');
   };
 
   const cancelCloseGame = () => {
     setShowConfirmationModal(false);
   };
-
+  
   return (
     <section className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
     <section className="bg-black text-white w-full h-auto rounded-md p-3 flex flex-col gap-4">

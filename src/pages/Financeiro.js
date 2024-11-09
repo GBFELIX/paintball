@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
-import { createClient } from '@supabase/supabase-js';
+import axios from "axios";
 import Datepicker from "react-tailwindcss-datepicker";
 import NavBar from "./Componentes/Navbar";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_ANON_KEY
-);
 
 export default function Financeiro() {
   const [value, setValue] = useState({
@@ -23,30 +16,14 @@ export default function Financeiro() {
     buscarDadosFinanceiros(today);
   }, []);
 
-  const buscarDadosFinanceiros = async (data) => {
-    try {
-      const { data: financeiro, error } = await supabase
-        .from('vw_financeiro')
-        .select('*')
-        .eq('data_jogo::date', data)
-        .single();
-
-      if (error) throw error;
-
-      setFinanceiroData([{
-        ...financeiro,
-        data_jogo: financeiro.data_jogo,
-        credito: financeiro.credito?.toFixed(2) || '0.00',
-        debito: financeiro.debito?.toFixed(2) || '0.00',
-        dinheiro: financeiro.dinheiro?.toFixed(2) || '0.00',
-        pix: financeiro.pix?.toFixed(2) || '0.00',
-        avulso: financeiro.avulso?.toFixed(2) || '0.00',
-        total_arrecadado: financeiro.total_arrecadado?.toFixed(2) || '0.00'
-      }]);
-    } catch (error) {
-      console.error("Erro ao buscar dados financeiros:", error);
-      toast.error("Erro ao buscar dados financeiros");
-    }
+  const buscarDadosFinanceiros = (data) => {
+    axios.get(`http://localhost:5000/financeiro?data=${data}`)
+      .then((response) => {
+        setFinanceiroData(response.data);
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar dados financeiros:", error);
+      });
   };
 
   const handleDateChange = (newValue) => {
@@ -64,7 +41,6 @@ export default function Financeiro() {
 
   return (
     <section className="bg-black p-4 w-full h-screen flex flex-col items-center overflow-auto"> 
-      <ToastContainer />
       <NavBar />
       <div className="gap-2 flex flex-col lg:flex-row justify-center items-center w-auto">
         <h1 className="text-white text-3xl text-center m-5">Departamento Financeiro</h1>
