@@ -15,7 +15,7 @@ function CadJog() {
 
   const handleCadastro = async () => {
     try {
-      const response = await fetch('http://localhost:5000/cadastro', {
+      const response = await fetch('/.netlify/functions/api-cadastro', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
