@@ -8,7 +8,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     const [selectedPayment, setSelectedPayment] = useState('');
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [vendaIndexForPayment, setVendaIndexForPayment] = useState(null);
-    const [valorTotalGeral, setValorTotalGeral] = useState(0);
+    const [setValorTotalGeral] = useState(0);
 
     useEffect(() => {
         axios.get('http://localhost:5000/estoque')
