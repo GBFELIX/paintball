@@ -28,18 +28,19 @@ export default function Estoque() {
     }
   }, [navigate]);
   
-  const fetchEstoque = async () => {
+  const fetchEstoque = () => {
     setLoading(true);
     setError(null);
-    try {
-      const response = await api.get('/.netlify/functions/api-estoque');
-      setEstoque(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar estoque:', error);
-      setError('Erro ao carregar o estoque. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
+    axios.get('/.netlify/functions/api-estoque')
+      .then(response => {
+        setEstoque(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Erro ao buscar estoque:', error);
+        setError('Erro ao carregar o estoque. Tente novamente.');
+        setLoading(false);
+      });
   };
   const fetchDescontos = () => {
     axios.get('/.netlify/functions/api-descontos') // Endpoint para buscar descontos
