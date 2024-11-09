@@ -6,7 +6,11 @@ import { FaPlus } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
 
-
+// Adicionar configuração base do axios
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || '/.netlify/functions',
+  timeout: 5000
+});
 
 export default function Estoque() {
   const navigate = useNavigate();
