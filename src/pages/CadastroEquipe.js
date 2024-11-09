@@ -23,16 +23,42 @@ export default function CadEquipe() {
         const jogadoresAtualizados = [...jogadores];
         jogadoresAtualizados[editIndex] = novoJogador;
         setJogadores(jogadoresAtualizados);
-        setEditIndex(null); 
+        setEditIndex(null);
+        toast.success('Jogador atualizado com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
       } else {
         setJogadores([...jogadores, novoJogador]);
+        toast.success('Jogador adicionado com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
       }
 
       setNome('');
       setEmail('');
       setTelefone('');
     } else {
-      alert('Preencha todos os campos antes de adicionar.');
+      toast.error('Preencha todos os campos antes de adicionar.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
     }
   };
 
@@ -47,16 +73,41 @@ export default function CadEquipe() {
   const handleDelete = (index) => {
     const jogadoresAtualizados = jogadores.filter((_, i) => i !== index);
     setJogadores(jogadoresAtualizados);
+    toast.success('Jogador removido com sucesso!', {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "light",
+    });
   };
 
   const handleSubmit = async () => {
     if (!nomeEquipe) {
-      alert('Preencha o nome da equipe antes de finalizar o cadastro.');
+      toast.error('Preencha o nome da equipe antes de finalizar o cadastro.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
       return;
     }
 
     if (jogadores.length === 0) {
-      alert('Adicione pelo menos um jogador antes de finalizar o cadastro.');
+      toast.error('Adicione pelo menos um jogador antes de finalizar o cadastro.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
       return;
     }
 
@@ -70,36 +121,43 @@ export default function CadEquipe() {
       });
 
       if (response.ok) {
-        toast('Cadastro da equipe realizado com sucesso', {
+        toast.success('Cadastro da equipe realizado com sucesso!', {
           position: "top-right",
-          autoClose: 5000,
+          autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
           theme: "light",
         });
         setJogadores([]);
-        setNomeEquipe(''); 
+        setNomeEquipe('');
         setTimeout(() => {
           navigate("/estoque");
-        }, 5000);
+        }, 3000);
       } else {
-        const errorData = await response.json(); // Captura a resposta de erro
+        const errorData = await response.json();
         toast.error(`Erro ao realizar cadastro: ${errorData.message || 'Erro desconhecido'}`, {
           position: "top-right",
-          autoClose: 5000,
+          autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
           theme: "light",
         });
       }
     } catch (error) {
       console.error('Erro ao enviar os dados:', error);
+      toast.error('Erro ao conectar com o servidor. Tente novamente mais tarde.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
     }
   };
 

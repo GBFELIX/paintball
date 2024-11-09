@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
@@ -96,43 +95,105 @@ export default function CardJogador({ jogadores, setJogadores }) {
   const handleConfirmPayment = () => {
     const jogador = jogadores[jogadorIndexForPayment];
     const itemsToUpdate = jogador.items;
-  
     const valorTotalJogador = jogador.items.reduce((sum, item) => sum + item.valor, 0);
 
-    
-  
+    if (!selectedPayment) {
+      toast.error('Por favor, selecione uma forma de pagamento', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+      return;
+    }
+
+    if (!jogador.nome) {
+      toast.error('Por favor, preencha o nome do jogador', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+      return;
+    }
+
     const itemCountMap = itemsToUpdate.reduce((acc, item) => {
       acc[item.nome] = (acc[item.nome] || 0) + 1;
       return acc;
     }, {});
-  
+
     let podeFechar = true;
-  
+
     const promises = Object.keys(itemCountMap).map(nome => {
       const quantidadeParaSubtrair = itemCountMap[nome];
       return axios.get(`/.netlify/functions/api-estoque/${nome}`)
         .then(response => {
           const quantidadeAtual = response.data.quantidade;
           if (quantidadeAtual < quantidadeParaSubtrair) {
-            console.warn(`Quantidade insuficiente no estoque para o item ${nome}`);
+            toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              theme: "light",
+            });
             podeFechar = false;
           } else {
             const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
             return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
-              .then(() => console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`))
-              .catch(error => console.error('Erro ao atualizar estoque:', error));
+              .then(() => {
+                console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
+              })
+              .catch(error => {
+                console.error('Erro ao atualizar estoque:', error);
+                toast.error('Erro ao atualizar estoque', {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  theme: "light",
+                });
+              });
           }
         })
-        .catch(error => console.error('Erro ao obter quantidade atual do estoque:', error));
+        .catch(error => {
+          console.error('Erro ao obter quantidade atual do estoque:', error);
+          toast.error('Erro ao verificar estoque', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+          });
+        });
     });
-  
+
     Promise.all(promises).then(() => {
       if (!podeFechar) {
-        console.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.');
+        toast.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
       } else {
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
-
         const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
 
         axios.post('/.netlify/functions/api-pedidos', {
@@ -142,21 +203,41 @@ export default function CardJogador({ jogadores, setJogadores }) {
           valorTotal: valorTotalJogador,
           dataJogo: dataHoraJogo, 
         })
-        .then(() => console.log('Pedido e pagamento cadastrados com sucesso!'))
-        .catch(error => console.error('Erro ao cadastrar pedido:', error));
-  
-        const updatedJogadores = [...jogadores];
-        updatedJogadores[jogadorIndexForPayment].isClosed = true;
-        setJogadores(updatedJogadores);
-        setShowPaymentModal(false);
-  
-        // Armazenar os dados no localStorage
-        const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-        pagamentosAnteriores.push({
-          valorTotal: valorTotalJogador,
-          formaPagamento: selectedPayment
+        .then(() => {
+          toast.success('Pedido finalizado com sucesso!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+          });
+
+          const updatedJogadores = [...jogadores];
+          updatedJogadores[jogadorIndexForPayment].isClosed = true;
+          setJogadores(updatedJogadores);
+          setShowPaymentModal(false);
+
+          const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+          pagamentosAnteriores.push({
+            valorTotal: valorTotalJogador,
+            formaPagamento: selectedPayment
+          });
+          localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+        })
+        .catch(error => {
+          console.error('Erro ao cadastrar pedido:', error);
+          toast.error('Erro ao finalizar pedido', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+          });
         });
-        localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
       }
     });
   };

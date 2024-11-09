@@ -2,56 +2,91 @@ import logo from '../images/logo_la.png';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
+import 'react-toastify/dist/ReactToastify.css';
+import { ClipLoader } from "react-spinners";
 
 function Loginjog() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    const response = await fetch('./.netlify/functions/api-jogador', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ username, email })
-    });
-    
-    const data = await response.json();
-    
-    if (data.success) {
-        toast('sucesso', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        navigate("/cadequipe");
-    } else {
-      toast.error('Usuário ou senha incorretos!', {
+    // Validação dos campos
+    if (!username || !email) {
+      toast.error('Por favor, preencha todos os campos', {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        progress: undefined,
         theme: "light",
       });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('./.netlify/functions/api-jogador', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, email })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success('Login realizado com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+        
+        // Pequeno delay antes de redirecionar para garantir que o usuário veja o toast
+        setTimeout(() => {
+          navigate("/cadequipe");
+        }, 1000);
+      } else {
+        toast.error('Usuário ou senha incorretos!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      }
+    } catch (error) {
+      toast.error('Erro ao conectar com o servidor. Tente novamente.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className='w-full h-screen bg-black flex items-center justify-center'>
       <ToastContainer />
-      <div className='flex flex-col justify-center items-center '>
+      <div className='flex flex-col justify-center items-center'>
         <img src={logo} className="m-4 w-[150px]" title='PaintBall - LA' alt='PaintBall - LA' />
         <h1 className='text-white font-bold text-3xl m-3'>Jogador! Acesse sua conta.</h1>
+        
         <input
           id="username"
           type='text'
@@ -59,6 +94,7 @@ function Loginjog() {
           placeholder='Digite seu nome'
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          disabled={loading}
         />
         <input
           id="password"
@@ -67,16 +103,39 @@ function Loginjog() {
           placeholder='Digite sua senha'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={loading}
         />
+        
         <button
           id="bt-log"
-          className='bg-primary p-1 rounded-sm text-center m-2 w-[250px]'
+          className='bg-primary p-1 rounded-sm text-center m-2 w-[250px] flex justify-center items-center'
           onClick={handleLogin}
+          disabled={loading}
         >
-          Acessar Conta
+          {loading ? (
+            <ClipLoader
+              color="#000000"
+              loading={loading}
+              size={20}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
+          ) : (
+            'Acessar Conta'
+          )}
         </button>
-        <p className='text-primary mt-10'><a href='/mudarsenhajog'>Esqueci minha senha</a></p>
-        <p className='text-primary mt-10'><span className='text-white'>Não possuo cadastro!!</span> <a href='/cadjog'>Clique aqui</a></p>
+
+        <p className='text-primary mt-10'>
+          <a href='/mudarsenhajog' className={loading ? 'pointer-events-none opacity-50' : ''}>
+            Esqueci minha senha
+          </a>
+        </p>
+        <p className='text-primary mt-10'>
+          <span className='text-white'>Não possuo cadastro!!</span>{' '}
+          <a href='/cadjog' className={loading ? 'pointer-events-none opacity-50' : ''}>
+            Clique aqui
+          </a>
+        </p>
       </div>
     </div>
   );

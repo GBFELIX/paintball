@@ -93,17 +93,30 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     const despesa = despesas[despesaIndexForPayment];
     const itemsToUpdate = despesa.items;  
     
-    setValorTotalGeral((prevTotal) => prevTotal + valorTotalDespesa);
-    // Cálculo do valor total do pedido
     const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + item.valor, 0);
   
+    setValorTotalGeral((prevTotal) => prevTotal + valorTotalDespesa);
+
+    if (!selectedPayment) {
+      toast.error('Por favor, selecione uma forma de pagamento', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+      return;
+    }
+
     const itemCountMap = itemsToUpdate.reduce((acc, item) => {
       acc[item.nome] = (acc[item.nome] || 0) + 1;
       return acc;
     }, {});
-  
+
     let podeFechar = true;
-  
+
     const promises = Object.keys(itemCountMap).map(nome => {
       const quantidadeParaSubtrair = itemCountMap[nome];
       return axios.get(`/.netlify/functions/api-estoque/${nome}`)
@@ -112,28 +125,59 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
           if (quantidadeAtual < quantidadeParaSubtrair) {
             toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
               position: "top-right",
-              autoClose: 5000,
+              autoClose: 3000,
               hideProgressBar: false,
               closeOnClick: true,
               pauseOnHover: true,
               draggable: true,
-              progress: undefined,
               theme: "light",
             });
             podeFechar = false;
           } else {
             const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
             return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
-              .then(() => console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`))
-              .catch(error => console.error('Erro ao atualizar estoque:', error));
+              .then(() => {
+                console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
+              })
+              .catch(error => {
+                console.error('Erro ao atualizar estoque:', error);
+                toast.error('Erro ao atualizar estoque', {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  theme: "light",
+                });
+              });
           }
         })
-        .catch(error => console.error('Erro ao obter quantidade atual do estoque:', error));
+        .catch(error => {
+          console.error('Erro ao obter quantidade atual do estoque:', error);
+          toast.error('Erro ao verificar estoque', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+          });
+        });
     });
-  
+
     Promise.all(promises).then(() => {
       if (!podeFechar) {
-        console.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.');
+        toast.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
       } else {
         const storedData = localStorage.getItem('dataJogo');
 
@@ -144,24 +188,44 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
           valorTotal: valorTotalDespesa,
           dataJogo: storedData,  
         })
-        .then(() => console.log('Pedido e pagamento cadastrados com sucesso!'))
-        .catch(error => console.error('Erro ao cadastrar pedido:', error));
-  
-        const updatedDespesas = [...despesas];
-        updatedDespesas[despesaIndexForPayment].isClosed = true;
-        setDespesas(updatedDespesas);
-        setShowPaymentModal(false);
+        .then(() => {
+          toast.success('Pedido finalizado com sucesso!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+          });
+          
+          const updatedDespesas = [...despesas];
+          updatedDespesas[despesaIndexForPayment].isClosed = true;
+          setDespesas(updatedDespesas);
+          setShowPaymentModal(false);
 
-        // Armazenar os dados no localStorage
-        const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-        pagamentosAnteriores.push({
-        valorTotal: valorTotalDespesa,
-        formaPagamento: selectedPayment, 
-      });
-      localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
-    }
-  });
-};
+          const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+          pagamentosAnteriores.push({
+            valorTotal: valorTotalDespesa,
+            formaPagamento: selectedPayment, 
+          });
+          localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+        })
+        .catch(error => {
+          console.error('Erro ao cadastrar pedido:', error);
+          toast.error('Erro ao finalizar pedido', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+          });
+        });
+      }
+    });
+  };
   
   return (
     <div className="flex flex-wrap gap-4">

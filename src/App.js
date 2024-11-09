@@ -43,10 +43,15 @@ function Login() {
         localStorage.setItem('auth', 'true');
         localStorage.setItem('role', data.role);
         
-        console.log('Login bem sucedido:', data);
-        console.log('Role:', data.role);
-        navigate('/estoque');
-        toast.success('Login realizado com sucesso!');
+        toast.success('Login realizado com sucesso!', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
 
         setTimeout(() => {
           switch(data.role) {
@@ -62,14 +67,30 @@ function Login() {
             default:
               toast.error('Tipo de usuário não reconhecido');
           }
-        }, 500);
+        }, 1000);
 
       } else {
-        toast.error(data.message || 'Credenciais inválidas');
+        toast.error(data.message || 'Credenciais inválidas', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       }
     } catch (error) {
       console.error('Erro ao fazer login:', error);
-      toast.error('Erro ao conectar com o servidor');
+      toast.error('Erro ao conectar com o servidor', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
   };
 
