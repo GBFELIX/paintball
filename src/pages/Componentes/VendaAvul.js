@@ -8,7 +8,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     const [selectedPayment, setSelectedPayment] = useState('');
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [vendaIndexForPayment, setVendaIndexForPayment] = useState(null);
-    const [setValorTotalGeral] = useState(0);
+    const [valorTotalGeral, setValorTotalGeral] = useState(0);
 
     useEffect(() => {
         axios.get('/.netlify/functions/api-estoque')
@@ -80,10 +80,9 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     const handleConfirmPayment = () => {
         const venda = vendas[vendaIndexForPayment];
         const itemsToUpdate = venda.items;
-
-        setValorTotalGeral((prevTotal) => prevTotal + valorTotalVenda);
-        // Cálculo do valor total do pedido
         const valorTotalVenda = venda.items.reduce((sum, item) => sum + item.valor, 0);
+
+        setValorTotalGeral(prevTotal => prevTotal + valorTotalVenda);
 
         const itemCountMap = itemsToUpdate.reduce((acc, item) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
