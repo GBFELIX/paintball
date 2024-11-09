@@ -32,7 +32,7 @@ export default function Estoque() {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('./.netlify/functions/api-estoque');
+      const response = await api.get('/.netlify/functions/api-estoque');
       setEstoque(response.data);
     } catch (error) {
       console.error('Erro ao buscar estoque:', error);
@@ -42,13 +42,13 @@ export default function Estoque() {
     }
   };
   const fetchDescontos = () => {
-    axios.get('./.netlify/functions/api-descontos') // Endpoint para buscar descontos
+    axios.get('/.netlify/functions/api-descontos') // Endpoint para buscar descontos
       .then(response => setDescontos(response.data))
       .catch(error => console.error('Erro ao buscar descontos:', error));
   };
   const removeDesconto = (id) => {
     console.log(`Tentando excluir desconto com ID: ${id}`); // Log para depuração
-    axios.delete(`./.netlify/functions/api-descontos/${id}`)
+    axios.delete(`/.netlify/functions/api-descontos/${id}`)
       .then(response => {
         console.log(response.data.message);
         fetchDescontos(); // Atualiza a lista de descontos
@@ -67,7 +67,7 @@ export default function Estoque() {
     const nomeDesconto = document.getElementById('NomeDesconto').value;
     const valorDesconto = document.getElementById('ValorDesconto').value;
     
-    axios.post('./.netlify/functions/api-descontos', { nome: nomeDesconto, valor: valorDesconto })
+    axios.post('/.netlify/functions/api-descontos', { nome: nomeDesconto, valor: valorDesconto })
       .then(response => {
         fetchDescontos();
         document.getElementById('NomeDesconto').value = '';
@@ -90,7 +90,7 @@ export default function Estoque() {
     setError(null);
     
     try {
-      await api.post('./.netlify/functions/api-estoque', {
+      await api.post('/.netlify/functions/api-estoque', {
         item: nomeProduto,
         valor: parseFloat(valorProduto),
         quantidade: parseInt(qtdProduto)
@@ -110,7 +110,7 @@ export default function Estoque() {
     }
   };
   const updateDesconto = (id, novoValor) => {
-    axios.put(`./.netlify/functions/api-descontos/${id}`, { valor: novoValor })
+    axios.put(`/.netlify/functions/api-descontos/${id}`, { valor: novoValor })
       .then(() => {
         fetchDescontos();
         setInputs(prev => ({ ...prev, [id]: { ...prev[id], valor: '' } }));
@@ -124,7 +124,7 @@ export default function Estoque() {
   const removeEstoque = () => {
     const nomeProduto = document.getElementById('NomeProduto').value;
 
-    axios.delete(`./.netlify/functions/api-estoque/${nomeProduto}`)
+    axios.delete(`/.netlify/functions/api-estoque/${nomeProduto}`)
       .then(response => {
         fetchEstoque();
         document.getElementById('NomeProduto').value = '';
@@ -135,7 +135,7 @@ export default function Estoque() {
   };
 
   const updateQuantidade = (nome, novaQuantidade) => {
-    axios.put(`./.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
+    axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
       .then(response => {
         fetchEstoque();
         setInputs(prev => ({ ...prev, [nome]: { ...prev[nome], quantidade: '' } }));
@@ -146,7 +146,7 @@ export default function Estoque() {
   };
 
   const updateValor = (nome, novoValor) => {
-    axios.put(`./.netlify/functions/api-estoque/${nome}`, { valor: novoValor })
+    axios.put(`/.netlify/functions/api-estoque/${nome}`, { valor: novoValor })
       .then(response => {
         fetchEstoque();
         setInputs(prev => ({ ...prev, [nome]: { ...prev[nome], valor: '' } }));
