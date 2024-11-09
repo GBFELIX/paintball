@@ -29,7 +29,7 @@ function Login() {
 
     const handleLogin = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/login`, { 
+        const response = await fetch(`/.netlify/functions/login`, { 
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
