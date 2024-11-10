@@ -129,6 +129,24 @@ export default function StatusGame() {
     };
 
     const confirmCloseGame = () => {
+        const jogadoresAbertos = jogadores.filter(jogador => !jogador.isClosed);
+        const vendasAbertos = vendasAvulsas.filter(venda => !venda.isClosed);
+        const despesasAbertas = despesas.filter(despesa => !despesa.isClosed);
+
+        if (jogadoresAbertos.length > 0 || vendasAbertos.length > 0 || despesasAbertas.length > 0) {
+            toast.error('Não é possível fechar a partida com cards abertos!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            setShowConfirmationModal(false);
+            return;
+        }
+
         setLoading(true);
         try {
             // Aqui você pode adicionar lógica para salvar os dados finais
