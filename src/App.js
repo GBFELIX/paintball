@@ -1,7 +1,7 @@
 import './App.css';
 import logo from './images/logo_la.png';
 import { useState } from "react";  
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate, Link } from 'react-router-dom';
 import CadJog from './pages/login/CadJog';
 import Loginjog from './pages/Loginjog';
 import NavBar from './pages/Componentes/Navbar';
@@ -124,7 +124,14 @@ function Login() {
         >
           Acessa sistema
         </button>
-        <p className='text-primary mt-10'><a href='/mudarsenhaadm'>Esqueci minha senha</a></p>
+        <p className='text-primary mt-10'>
+          <Link 
+            to="/mudarsenhaadm" 
+            className="hover:underline"
+          >
+            Esqueci minha senha
+          </Link>
+        </p>
       </div>
     </div>
   );
