@@ -10,6 +10,18 @@ const db = mysql.createConnection({
 });
 
 exports.handler = async (event, context) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS'
+      },
+      body: ''
+    };
+  }
+
   switch (event.httpMethod) {
     case 'GET':
       return handleGet();
@@ -28,13 +40,28 @@ exports.handler = async (event, context) => {
 async function handleGet() {
   try {
     const [results] = await db.promise().query('SELECT * FROM descontos');
+    
+    const descontosFormatados = results.reduce((acc, desconto) => {
+      acc[desconto.nome] = desconto.valor;
+      return acc;
+    }, {});
+
     return {
       statusCode: 200,
-      body: JSON.stringify(results)
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(descontosFormatados)
     };
   } catch (error) {
+    console.error('Erro ao buscar descontos:', error);
     return {
       statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ error: 'Erro ao buscar descontos' })
     };
   }
