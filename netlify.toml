@@ -77,3 +77,5 @@
   DISABLE_ESLINT_PLUGIN = "true"
   GENERATE_SOURCEMAP = "false"
   FAST_REFRESH = "false"
+  NODE_VERSION = "18.x"
+  NPM_VERSION = "9.x"
