@@ -72,3 +72,10 @@
   to = "/.netlify/functions/api-resetpassword"
   status = 200
   force = true
+
+[build.environment]
+  DISABLE_ESLINT_PLUGIN = "true"
+  GENERATE_SOURCEMAP = "false"
+  FAST_REFRESH = "false"
+  NODE_VERSION = "16.20.2"
+  NPM_VERSION = "8.19.4"
