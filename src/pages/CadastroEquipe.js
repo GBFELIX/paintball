@@ -64,10 +64,12 @@ export default function CadEquipe() {
 
   const handleEdit = (index) => {
     const jogador = jogadores[index];
-    setNome(jogador.nome);
-    setEmail(jogador.email);
-    setTelefone(jogador.telefone);
-    setEditIndex(index); 
+    if (jogador) {
+      setNome(jogador.nome || '');
+      setEmail(jogador.email || '');
+      setTelefone(jogador.telefone || '');
+      setEditIndex(index);
+    }
   };
 
   const handleDelete = (index) => {
@@ -149,7 +151,11 @@ export default function CadEquipe() {
       }
     } catch (error) {
       console.error('Erro ao enviar os dados:', error);
-      toast.error('Erro ao conectar com o servidor. Tente novamente mais tarde.', {
+      const errorMessage = error.response && error.response.data && error.response.data.message 
+        ? error.response.data.message 
+        : 'Erro ao conectar com o servidor. Tente novamente mais tarde.';
+      
+      toast.error(errorMessage, {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,

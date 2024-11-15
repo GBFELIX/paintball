@@ -184,16 +184,18 @@ export default function StatusGame() {
 
     const calcularTotalAvulsos = () => {
         return vendasAvulsas.reduce((total, venda) => {
+            if (!venda || !venda.items) return total;
             return total + venda.items.reduce((subtotal, item) => {
-                return subtotal + (Number(item.valor) || 0);
+                return subtotal + (Number(item && item.valor) || 0);
             }, 0);
         }, 0);
     };
 
     const calcularTotalDespesas = () => {
         return despesas.reduce((total, despesa) => {
+            if (!despesa || !despesa.items) return total;
             return total + despesa.items.reduce((subtotal, item) => {
-                return subtotal + (Number(item.valor) || 0);
+                return subtotal + (Number(item && item.valor) || 0);
             }, 0);
         }, 0);
     };
@@ -218,7 +220,9 @@ export default function StatusGame() {
                         <div className="flex justify-between w-full gap-4 mb-4">
                             <div className="flex flex-col items-start">
                                 <p className="font-semibold">Data da Partida</p>
-                                <p id="dataPartida" className="font-semibold text-3xl">{jogo.data || 'Carregando...'}</p>
+                                <p id="dataPartida" className="font-semibold text-3xl">
+                                    {(jogo && jogo.data) || 'Carregando...'}
+                                </p>
                             </div>
                             <div className="flex flex-col items-start">
                                 <p className="font-semibold">Jogadores Ativos</p>

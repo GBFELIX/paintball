@@ -169,14 +169,14 @@ export default function Financeiro() {
             <tbody>
               {financeiroData.map((item, index) => (
                 <tr key={index} className="p-1 text-white flex justify-around hover:bg-green-700 duration-300 border border-gray-500">
-                  <td className="w-full">{new Date(item.data_jogo).toLocaleDateString('pt-BR')}</td>
-                  <td className="w-full">{item.total_jogadores}</td>
-                  <td className="w-full">R${item.credito}</td>
-                  <td className="w-full">R${item.debito}</td>
-                  <td className="w-full">R${item.dinheiro}</td>
-                  <td className="w-full">R${item.pix}</td>
-                  <td className="w-full">R${item.avulso}</td>
-                  <td className="w-full">R${item.total_arrecadado}</td>
+                  <td className="w-full">{item && item.data_jogo ? new Date(item.data_jogo).toLocaleDateString('pt-BR') : ''}</td>
+                  <td className="w-full">{item && item.total_jogadores}</td>
+                  <td className="w-full">R${item && item.credito}</td>
+                  <td className="w-full">R${item && item.debito}</td>
+                  <td className="w-full">R${item && item.dinheiro}</td>
+                  <td className="w-full">R${item && item.pix}</td>
+                  <td className="w-full">R${item && item.avulso}</td>
+                  <td className="w-full">R${item && item.total_arrecadado}</td>
                 </tr>
               ))}
             </tbody>
