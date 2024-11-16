@@ -26,6 +26,40 @@ function AddJogo() {
 
   const handleAdicionar = async () => {
     try {
+      // Validar data e hora antes de prosseguir
+      if (!data || !hora) {
+        toast.error('Data e hora são obrigatórios.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+        return;
+      }
+
+      // Array de chaves para limpar localStorage
+      const keysToRemove = [
+        'pagamentos', 'totalAvulso', 'dataJogo', 'horaJogo',
+        'jogadores', 'vendasAvulsas', 'despesas', 'descontos',
+        'totalArrecadado', 'formasPagamento'
+      ];
+      
+      // Limpar localStorage de forma mais segura
+      keysToRemove.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.error(`Erro ao remover ${key}:`, e);
+        }
+      });
+
+      // Agora sim, adicionar os novos dados
+      localStorage.setItem('dataJogo', data);
+      localStorage.setItem('horaJogo', hora);
+
       const response = await fetch('/.netlify/functions/api-jogos', {
         method: 'POST',
         headers: {
@@ -37,9 +71,6 @@ function AddJogo() {
       const result = await response.json();
   
       if (result.success) {
-        // Armazena a data e a hora no localStorage
-        localStorage.setItem('dataJogo', data);
-        localStorage.setItem('horaJogo', hora);
         toast('Jogo adicionado com sucesso!', {
           position: "top-right",
           autoClose: 5000,
