@@ -184,7 +184,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
                 const quantidadeAtual = response.data.quantidade;
 
                 // Verifique se quantidadeAtual e quantidadeParaSubtrair são números válidos
-                if (typeof quantidadeAtual !== 'number' || typeof itemCountMap[nome] !== 'number') {
+                if (typeof quantidadeAtual !== 'number') {
                     toast.error(`Quantidade inválida para o item ${nome}`, {
                         position: "top-right",
                         autoClose: 3000,
