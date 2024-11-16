@@ -26,13 +26,17 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
 
     useEffect(() => {
         axios.get('/.netlify/functions/api-estoque')
-            .then(response => setEstoque(response.data))
+            .then(response => {
+                setEstoque(response.data);
+            })
             .catch(error => console.error('Erro ao buscar estoque:', error));
     }, []);
 
     useEffect(() => {
         axios.get('/.netlify/functions/api-descontos')
-            .then(response => setDescontos(response.data))
+            .then(response => {
+                setDescontos(response.data);
+            })
             .catch(error => console.error('Erro ao buscar descontos:', error));
     }, []);
 

@@ -22,6 +22,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   const [descontos, setDescontos] = useState({});
   const [descontoSelecionado, setDescontoSelecionado] = useState('');
   const [valorComDesconto, setValorComDesconto] = useState(0);
+  const [estoque, setEstoque] = useState([]);
 
   useEffect(() => {
     axios.get('/.netlify/functions/api-estoque')
