@@ -159,7 +159,9 @@ export default function PreAgendado() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-primary w-full max-w-4xl rounded-sm flex flex-col p-5 items-center justify-center">
-            <h2 className="text-black font-bold mb-5">Equipe: {selectedEquipe.nomeEquipe}</h2>
+            <h2 className="text-black font-bold mb-5">
+              Equipe: {selectedEquipe && selectedEquipe.nomeEquipe}
+            </h2>
             <div className="w-full flex flex-col">
               <div className="w-full flex justify-between px-3">
                 <p className="text-black font-semibold w-1/2 text-center">Nome do Jogador</p>
