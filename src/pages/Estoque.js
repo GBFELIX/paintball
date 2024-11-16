@@ -15,7 +15,7 @@ const api = axios.create({
   timeout: 5000
 });
 
-// Primeiro, adicione este CSS no seu arquivo de estilos ou inline
+
 const spinnerStyle = `
   @keyframes spin {
     0% { transform: rotate(0deg); }
@@ -420,28 +420,7 @@ export default function Estoque() {
                     className="w-full flex justify-between items-center px-4 py-2 border-t border-gray-200"
                   >
                     <p className="w-1/3 text-black font-semibold text-left">{desconto.nome}</p>
-                    {editMode[desconto.id] ? (
-                      <input
-                        type="text"
-                        className="text-black font-semibold w-1/3 text-left p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
-                        value={inputs[desconto.id] && inputs[desconto.id].valor || desconto.valor}
-                        onChange={(e) => handleInputChange(desconto.id, 'valor', e.target.value)}
-                        onBlur={() => {
-                          const input = inputs[desconto.id];
-                          if (input && input.valor) {
-                            updateDesconto(desconto.id, input.valor);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <p className="w-1/3 mr-20 text-black font-semibold ">{desconto.valor}%</p>
-                    )}
-                    <button
-                      className="text-blue-500 hover:text-blue-700 mx-2"
-                      onClick={() => toggleEditMode(desconto.id)}
-                    >
-                      {editMode[desconto.id] ? 'Salvar' : <FaRegEdit />}
-                    </button>
+                    <p className="w-1/3 text-black font-semibold">{desconto.valor}%</p>
                     <button 
                       className="text-red-500 hover:text-red-700"
                       onClick={() => removeDesconto(desconto.id)}
