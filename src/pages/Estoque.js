@@ -298,16 +298,13 @@ export default function Estoque() {
   };
 
   const handleInputChange = (nome, tipo, valor) => {
-    setInputs(prev => {
-      const current = prev[nome] || {};
-      return {
-        ...prev,
-        [nome]: {
-          ...current,
-          [tipo]: valor
-        }
-      };
-    });
+    setInputs(prev => ({
+      ...prev,
+      [nome]: {
+        ...prev[nome],
+        [tipo]: valor
+      }
+    }));
   };
 
   const toggleEditMode = (nome) => {
@@ -421,12 +418,11 @@ export default function Estoque() {
                       <input
                         type="text"
                         className="text-black font-semibold w-1/3 text-left p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
-                        value={inputs[desconto.id] && inputs[desconto.id].valor || desconto.valor}
+                        value={inputs[desconto.id]?.valor || desconto.valor}
                         onChange={(e) => handleInputChange(desconto.id, 'valor', e.target.value)}
                         onBlur={() => {
-                          const input = inputs[desconto.id];
-                          if (input && input.valor) {
-                            updateDesconto(desconto.id, input.valor);
+                          if (inputs[desconto.id]?.valor) {
+                            updateDesconto(desconto.id, inputs[desconto.id].valor);
                           }
                         }}
                       />
@@ -473,14 +469,13 @@ export default function Estoque() {
                         {editMode[item.nome] && (
                           <input
                             type="number"
-                            value={inputs[item.nome] && inputs[item.nome].quantidade || ''}
+                            value={inputs[item.nome]?.quantidade || ''}
                             onChange={(e) => handleInputChange(item.nome, 'quantidade', e.target.value)}
                             className="w-24 p-1 m-1 rounded-md text-center"
                             placeholder="Nova qtd"
                             onBlur={() => {
-                              const input = inputs[item.nome];
-                              if (input && input.quantidade) {
-                                updateQuantidade(item.nome, input.quantidade);
+                              if (inputs[item.nome]?.quantidade) {
+                                updateQuantidade(item.nome, inputs[item.nome].quantidade);
                                 toggleEditMode(item.nome);
                               }
                             }}
@@ -494,14 +489,13 @@ export default function Estoque() {
                         {editMode[item.nome] && (
                           <input
                             type="number"
-                            value={inputs[item.nome] && inputs[item.nome].valor || ''}
+                            value={inputs[item.nome]?.valor || ''}
                             onChange={(e) => handleInputChange(item.nome, 'valor', e.target.value)}
                             className="w-24 p-1 m-1 rounded-md text-center"
                             placeholder="Novo valor"
                             onBlur={() => {
-                              const input = inputs[item.nome];
-                              if (input && input.valor) {
-                                updateValor(item.nome, input.valor);
+                              if (inputs[item.nome]?.valor) {
+                                updateValor(item.nome, inputs[item.nome].valor);
                                 toggleEditMode(item.nome); 
                               }
                             }}

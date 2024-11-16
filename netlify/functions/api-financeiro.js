@@ -1,4 +1,4 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const db = mysql.createConnection({
@@ -10,46 +10,74 @@ const db = mysql.createConnection({
 });
 
 exports.handler = async (event, context) => {
+  const connection = await db;
+
+  // GET /financeiro
   if (event.httpMethod === 'GET') {
     try {
-      const data = event.queryStringParameters.data;
+      const params = new URLSearchParams(event.queryStringParameters);
+      const data = params.get('data');
       
-      const query = `
-        SELECT 
-          data_jogo,
-          COUNT(DISTINCT id_jogador) as total_jogadores,
-          SUM(CASE WHEN forma_pagamento = 'credito' THEN valor ELSE 0 END) as credito,
-          SUM(CASE WHEN forma_pagamento = 'debito' THEN valor ELSE 0 END) as debito,
-          SUM(CASE WHEN forma_pagamento = 'dinheiro' THEN valor ELSE 0 END) as dinheiro,
-          SUM(CASE WHEN forma_pagamento = 'pix' THEN valor ELSE 0 END) as pix,
-          SUM(CASE WHEN tipo = 'avulso' THEN valor ELSE 0 END) as avulso,
-          SUM(valor) as total_arrecadado
-        FROM pagamentos
-        WHERE DATE(data_jogo) = ?
-        GROUP BY data_jogo
-      `;
-
-      const [results] = await db.promise().query(query, [data]);
+      const query = 'SELECT * FROM financeiro WHERE DATE(data_jogo) = ?';
+      const [results] = await connection.query(query, [data]);
 
       return {
         statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify(results)
       };
-
-    } catch (error) {
-      console.error('Erro ao buscar dados financeiros:', error);
+    } catch (err) {
+      console.error("Erro ao consultar dados financeiros:", err);
       return {
         statusCode: 500,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ error: 'Erro ao buscar dados financeiros' })
+        body: JSON.stringify(err)
       };
     }
   }
+
+  // POST /financeiro
+  if (event.httpMethod === 'POST') {
+    try {
+      const { dataJogo, totalJogadores, formasPagamento, totalAvulso, totalArrecadado } = JSON.parse(event.body);
+
+      const query = `
+        INSERT INTO financeiro (
+          data_jogo, 
+          total_jogadores, 
+          credito, 
+          debito, 
+          dinheiro, 
+          pix, 
+          avulso, 
+          total_arrecadado
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      await connection.query(query, [
+        dataJogo,
+        totalJogadores,
+        formasPagamento.credito,
+        formasPagamento.debito,
+        formasPagamento.dinheiro,
+        formasPagamento.pix,
+        totalAvulso,
+        totalArrecadado
+      ]);
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify('Dados financeiros inseridos com sucesso')
+      };
+    } catch (err) {
+      console.error('Erro ao inserir dados financeiros:', err);
+      return {
+        statusCode: 500,
+        body: JSON.stringify('Erro no servidor')
+      };
+    }
+  }
+
+  return {
+    statusCode: 405,
+    body: JSON.stringify({ error: 'Método não permitido' })
+  };
 }; 
