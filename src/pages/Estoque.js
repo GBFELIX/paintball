@@ -70,7 +70,10 @@ export default function Estoque() {
   };
   const fetchDescontos = () => {
     axios.get('/.netlify/functions/api-descontos') // Endpoint para buscar descontos
-      .then(response => setDescontos(response.data))
+      .then(response => {
+        setDescontos(response.data);
+        console.log(response.data);
+      })
       .catch(error => {
         toast.error('Erro ao carregar descontos', {
           position: "top-right",
