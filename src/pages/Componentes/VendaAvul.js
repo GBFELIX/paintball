@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     const [estoque, setEstoque] = useState([]);
@@ -115,7 +114,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     };
 
     const handleConfirmPayment = () => {
-        const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + b, 0);
+        const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
         const valorFinal = valorComDesconto || valorTotalVendaAtual;
 
         if (totalPagamento !== valorFinal) {
@@ -146,7 +145,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
 
         const venda = vendas[vendaIndexForPayment];
         const itemsToUpdate = venda.items;
-        const valorTotalVenda = venda.items.reduce((sum, item) => sum + item.valor, 0);
+        const valorTotalVenda = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
 
         const itemCountMap = itemsToUpdate.reduce((acc, item) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
@@ -206,17 +205,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
         });
 
         Promise.all(promises).then(() => {
-            if (!podeFechar) {
-                toast.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.', {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
-            } else {
+            if (podeFechar) {
                 const dataJogo = localStorage.getItem('dataJogo');
                 const horaJogo = localStorage.getItem('horaJogo');
                 const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
@@ -269,9 +258,8 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
 
     return (
         <div className="flex flex-wrap gap-4">
-            <ToastContainer />
             {vendas.map((venda, index) => {
-                const valorTotalVenda = venda.items.reduce((sum, item) => sum + item.valor, 0);
+                const valorTotalVenda = venda.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
                 return (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${venda.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className="bg-blue-600 w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
@@ -294,12 +282,12 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                                     disabled={venda.isClosed}
                                 />
                                 <div className="inline-flex">
-                                  <button
-                                    className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
-                                    onClick={handleAddVendaAvulsa}
-                                  >
-                                  +
-                                  </button>
+                                    <button
+                                        className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
+                                        onClick={handleAddVendaAvulsa}
+                                    >
+                                        +
+                                    </button>
                                     <button
                                         className="bg-black hover:bg-primary py-1 px-2 rounded-r text-white"
                                         onClick={() => handleRemoveVendaAvulsa(index)}
@@ -373,11 +361,9 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white p-6 rounded-lg w-[500px]">
                         <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
-                        
                         <div className="mb-4">
                             <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
                         </div>
-
                         <div className="mb-4">
                             <select
                                 value={descontoSelecionado}
@@ -395,7 +381,6 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                                 ))}
                             </select>
                         </div>
-
                         <div className="grid grid-cols-2 gap-4 mb-4">
                             {['dinheiro', 'credito', 'debito', 'pix'].map((method) => (
                                 <div key={method} className="flex items-center space-x-2">
@@ -427,7 +412,6 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                                 </div>
                             ))}
                         </div>
-
                         <div className="mb-4">
                             <p className="font-bold">
                                 Valor com Desconto: R$ {valorComDesconto.toFixed(2)}
@@ -436,7 +420,6 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                                 Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + b, 0).toFixed(2)}
                             </p>
                         </div>
-
                         <div className="flex justify-between mt-4">
                             <button
                                 className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"

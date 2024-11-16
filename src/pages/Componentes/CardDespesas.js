@@ -107,9 +107,9 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   const handleConfirmPayment = () => {
     const despesa = despesas[despesaIndexForPayment];
     const itemsToUpdate = despesa.items;
-    const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + item.valor, 0);
+    const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
     const valorFinal = valorComDesconto || valorTotalDespesa;
-    const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + b, 0);
+    const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
     if (!Object.values(paymentMethods).some(method => method === true)) {
         toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
@@ -271,7 +271,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     <div className="flex flex-wrap gap-4">
       <ToastContainer />
       {despesas.map((despesa, index) => {
-        const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + item.valor, 0);
+        const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
         return (
           <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${despesa.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
             <header className="bg-secondary w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
@@ -376,7 +376,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
             
             <div className="mb-4">
               <p className="font-bold">
-                Valor Total: R$ {despesas[despesaIndexForPayment] && despesas[despesaIndexForPayment].items.reduce((sum, item) => sum + item.valor, 0).toFixed(2)}
+                Valor Total: R$ {despesas[despesaIndexForPayment] && despesas[despesaIndexForPayment].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0).toFixed(2)}
               </p>
             </div>
 
@@ -386,7 +386,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                 onChange={(e) => {
                   setDescontoSelecionado(e.target.value);
                   const valorTotal = despesas[despesaIndexForPayment] && 
-                    despesas[despesaIndexForPayment].items.reduce((sum, item) => sum + item.valor, 0);
+                    despesas[despesaIndexForPayment].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
                   const desconto = descontos[e.target.value] || 0;
                   setValorComDesconto(valorTotal * (1 - desconto / 100));
                 }}
@@ -438,7 +438,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                 Valor com Desconto: R$ {valorComDesconto.toFixed(2)}
               </p>
               <p className="font-bold">
-                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + b, 0).toFixed(2)}
+                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0).toFixed(2)}
               </p>
             </div>
 
