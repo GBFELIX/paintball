@@ -198,6 +198,8 @@ export default function CardJogador({ jogadores, setJogadores }) {
                     return;
                 }
 
+                console.log(`Quantidade atual: ${quantidadeAtual}, quantidade para subtrair: ${itemCountMap[nome]}`); // Adicionei log para depuração
+
                 if (quantidadeAtual < itemCountMap[nome]) {
                     toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
                         position: "top-right",
