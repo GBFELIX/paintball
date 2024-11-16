@@ -125,10 +125,24 @@ export default function CardJogador({ jogadores, setJogadores }) {
         return;
     }
 
+    // Verifique se items estão definidos
+    if (!jogador.items || jogador.items.length === 0) {
+        toast.error('Nenhum item encontrado para o jogador', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+        return;
+    }
+
     const itemsToUpdate = jogador.items;
-    const valorTotalJogador = itemsToUpdate.reduce((sum, item) => sum + item.valor, 0);
+    const valorTotalJogador = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
     const valorFinal = valorComDesconto || valorTotalJogador;
-    const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + b, 0);
+    const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
     // Verifica se algum método de pagamento foi selecionado
     if (!Object.values(paymentMethods).some(method => method === true)) {
@@ -183,7 +197,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
             .then(response => {
                 const quantidadeAtual = response.data.quantidade;
 
-                // Verifique se quantidadeAtual e quantidadeParaSubtrair são números válidos
+                // Verifique se quantidadeAtual é um número válido
                 if (typeof quantidadeAtual !== 'number') {
                     toast.error(`Quantidade inválida para o item ${nome}`, {
                         position: "top-right",
@@ -198,7 +212,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
                     return;
                 }
 
-                console.log(`Quantidade atual: ${quantidadeAtual}, quantidade para subtrair: ${itemCountMap[nome]}`); // Adicionei log para depuração
+                console.log(`Quantidade atual: ${quantidadeAtual}, quantidade para subtrair: ${itemCountMap[nome]}`); // Log para depuração
 
                 if (quantidadeAtual < itemCountMap[nome]) {
                     toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
@@ -431,7 +445,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
             <div className="mb-4">
               <p className="font-bold">
                 Valor Total: R$ {jogadores[jogadorIndexForPayment] && 
-                  jogadores[jogadorIndexForPayment].items.reduce((sum, item) => sum + item.valor, 0).toFixed(2)}
+                  jogadores[jogadorIndexForPayment].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0).toFixed(2)}
               </p>
             </div>
 
@@ -441,7 +455,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
                 onChange={(e) => {
                   setDescontoSelecionado(e.target.value);
                   const valorTotal = jogadores[jogadorIndexForPayment] && 
-                    jogadores[jogadorIndexForPayment].items.reduce((sum, item) => sum + item.valor, 0);
+                    jogadores[jogadorIndexForPayment].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
                   const desconto = descontos[e.target.value] || 0;
                   setValorComDesconto(valorTotal * (1 - desconto / 100));
                 }}
