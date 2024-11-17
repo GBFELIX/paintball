@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     const [estoque, setEstoque] = useState([]);
@@ -21,21 +22,16 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     const [descontos, setDescontos] = useState({});
     const [descontoSelecionado, setDescontoSelecionado] = useState('');
     const [valorComDesconto, setValorComDesconto] = useState(0);
-    const [valorTotalVendaAtual, setValorTotalVendaAtual] = useState(0);
 
     useEffect(() => {
         axios.get('/.netlify/functions/api-estoque')
-            .then(response => {
-                setEstoque(response.data);
-            })
+            .then(response => setEstoque(response.data))
             .catch(error => console.error('Erro ao buscar estoque:', error));
     }, []);
 
     useEffect(() => {
         axios.get('/.netlify/functions/api-descontos')
-            .then(response => {
-                setDescontos(response.data);
-            })
+            .then(response => setDescontos(response.data))
             .catch(error => console.error('Erro ao buscar descontos:', error));
     }, []);
 
@@ -44,20 +40,16 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
             const updatedVendas = vendas.filter((_, i) => i !== index);
             setVendas(updatedVendas);
         } else {
-            toast.error('Deve haver pelo menos uma venda na tela.');
+            toast.error('Deve haver pelo menos uma venda na tela.', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
         }
-    };
-
-    const handleNomeChange = (index, event) => {
-        const updatedVendas = [...vendas];
-        updatedVendas[index].nome = event.target.value;
-        setVendas(updatedVendas);
-    };
-
-    const handleNumeroChange = (index, event) => {
-        const updatedVendas = [...vendas];
-        updatedVendas[index].numero = event.target.value;
-        setVendas(updatedVendas);
     };
 
     const handleItemSelectChange = (index, event) => {
@@ -82,7 +74,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                 quantidade: updatedVendas[index].selectedItem.quantidade
             };
             updatedVendas[index].items.push(selectedItem);
-            updatedVendas[index].selectedItem = '';
+            updatedVendas[index].selectedItem = null; // Limpa a seleção após adicionar
             setVendas(updatedVendas);
         }
     };
@@ -93,29 +85,13 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
         setVendas(updatedVendas);
     };
 
-    const handleClosePedido = (index) => {
-        if (vendas[index].isClosed) {
-            const updatedVendas = [...vendas];
-            updatedVendas[index].isClosed = false;
-            updatedVendas[index].items = [];
-            setVendas(updatedVendas);
-        } else {
-            const valorTotal = vendas[index].items.reduce((sum, item) => sum + item.valor, 0);
-            setValorTotalVendaAtual(valorTotal);
-            setVendaIndexForPayment(index);
-            setShowPaymentModal(true);
-        }
-    };
-
-    const calcularDesconto = (valorTotal) => {
-        if (!descontoSelecionado) return valorTotal;
-        const percentualDesconto = descontos[descontoSelecionado] || 0;
-        return valorTotal * (1 - percentualDesconto / 100);
-    };
-
     const handleConfirmPayment = () => {
+        const venda = vendas[vendaIndexForPayment];
+        const itemsToUpdate = venda.items;
+
+        const valorTotalVenda = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-        const valorFinal = valorComDesconto || valorTotalVendaAtual;
+        const valorFinal = valorComDesconto || valorTotalVenda;
 
         if (totalPagamento !== valorFinal) {
             toast.error('O valor total do pagamento deve ser igual ao valor final', {
@@ -142,10 +118,6 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
             });
             return;
         }
-
-        const venda = vendas[vendaIndexForPayment];
-        const itemsToUpdate = venda.items;
-        const valorTotalVenda = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
 
         const itemCountMap = itemsToUpdate.reduce((acc, item) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
@@ -205,15 +177,25 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
         });
 
         Promise.all(promises).then(() => {
-            if (podeFechar) {
+            if (!podeFechar) {
+                toast.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+            } else {
+                // Finalizar o pedido
                 const dataJogo = localStorage.getItem('dataJogo');
                 const horaJogo = localStorage.getItem('horaJogo');
                 const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
 
                 axios.post('/.netlify/functions/api-pedidos', {
-                    nomeJogador: venda.nome,
-                    items: venda.items,
-                    formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                    nomeVenda: venda.nome,
+                    items: itemsToUpdate,
                     valorTotal: valorTotalVenda,
                     dataJogo: dataHoraJogo,
                 })
@@ -227,21 +209,13 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                         draggable: true,
                         theme: "light",
                     });
-
                     const updatedVendas = [...vendas];
                     updatedVendas[vendaIndexForPayment].isClosed = true;
                     setVendas(updatedVendas);
                     setShowPaymentModal(false);
-
-                    const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-                    pagamentosAnteriores.push({
-                        valorTotal: valorTotalVenda,
-                        formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
-                    });
-                    localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
                 })
                 .catch(error => {
-                    console.error('Erro ao cadastrar pedido:', error);
+                    console.error('Erro ao finalizar pedido:', error);
                     toast.error('Erro ao finalizar pedido', {
                         position: "top-right",
                         autoClose: 3000,
@@ -257,7 +231,8 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     };
 
     return (
-        <div className="flex flex-wrap gap-4">
+        <div>
+            <ToastContainer />
             {vendas.map((venda, index) => {
                 const valorTotalVenda = venda.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
                 return (
@@ -352,6 +327,16 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                             >
                                 {venda.isClosed ? 'Fechado' : 'Fechar Pedido'}
                             </button>
+                            <button
+                                className="w-[180px] bg-black hover:bg-primary text-white font-bold py-2 px-4 rounded-r"
+                                onClick={() => {
+                                    setVendaIndexForPayment(index);
+                                    setShowPaymentModal(true);
+                                }}
+                                disabled={venda.isClosed}
+                            >
+                                Confirmar Pagamento
+                            </button>
                         </div>
                     </section>
                 );
@@ -359,17 +344,17 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
 
             {showPaymentModal && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg w-[500px]">
+                    <div className="bg-white p-6 rounded-lg w-96">
                         <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
                         <div className="mb-4">
-                            <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
+                            <p className="font-bold">Valor Total: R$ {valorTotalVenda.toFixed(2)}</p>
                         </div>
                         <div className="mb-4">
                             <select
                                 value={descontoSelecionado}
                                 onChange={(e) => {
                                     setDescontoSelecionado(e.target.value);
-                                    setValorComDesconto(calcularDesconto(valorTotalVendaAtual));
+                                    setValorComDesconto(calcularDesconto(valorTotalVenda));
                                 }}
                                 className="w-full p-2 border border-gray-300 rounded-md"
                             >
