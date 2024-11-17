@@ -149,6 +149,21 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
       return axios.get(`/.netlify/functions/api-estoque/${nome}`)
         .then(response => {
           const quantidadeAtual = response.data.quantidade;
+
+          if (isNaN(quantidadeAtual)) {
+            toast.error(`Erro ao obter quantidade do item ${nome}`, {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              theme: "light",
+            });
+            podeFechar = false;
+            return;
+          }
+
           if (quantidadeAtual < quantidadeParaSubtrair) {
             toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
               position: "top-right",
@@ -162,6 +177,21 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
             podeFechar = false;
           } else {
             const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
+
+            if (novaQuantidade < 0) {
+              toast.error(`Erro: a nova quantidade do item ${nome} não pode ser negativa`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+              });
+              podeFechar = false;
+              return;
+            }
+
             return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
               .then(() => {
                 console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);

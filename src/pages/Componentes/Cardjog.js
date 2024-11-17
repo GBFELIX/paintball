@@ -110,35 +110,6 @@ export default function CardJogador({ jogadores, setJogadores }) {
 
   const handleConfirmPayment = () => {
     const jogador = jogadores[jogadorIndexForPayment];
-
-    // Verifique se o jogador está definido
-    if (!jogador) {
-        toast.error('Jogador não encontrado', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-        return;
-    }
-
-    // Verifique se items estão definidos
-    if (!jogador.items || jogador.items.length === 0) {
-        toast.error('Nenhum item encontrado para o jogador', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-        return;
-    }
-
     const itemsToUpdate = jogador.items;
     const valorTotalJogador = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
     const valorFinal = valorComDesconto || valorTotalJogador;
@@ -172,19 +143,6 @@ export default function CardJogador({ jogadores, setJogadores }) {
         return;
     }
 
-    if (!jogador.nome) {
-        toast.error('Por favor, preencha o nome do jogador', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-        return;
-    }
-
     const itemCountMap = itemsToUpdate.reduce((acc, item) => {
         acc[item.nome] = (acc[item.nome] || 0) + 1;
         return acc;
@@ -193,10 +151,27 @@ export default function CardJogador({ jogadores, setJogadores }) {
     let podeFechar = true;
 
     const promises = Object.keys(itemCountMap).map(nome => {
+        const quantidadeParaSubtrair = itemCountMap[nome];
         return axios.get(`/.netlify/functions/api-estoque/${nome}`)
             .then(response => {
                 const quantidadeAtual = response.data.quantidade;
-                if (quantidadeAtual < itemCountMap[nome]) {
+
+                // Verifica se a quantidade atual é um número
+                if (isNaN(quantidadeAtual)) {
+                    toast.error(`Erro ao obter quantidade do item ${nome}`, {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                    podeFechar = false;
+                    return;
+                }
+
+                if (quantidadeAtual < quantidadeParaSubtrair) {
                     toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
                         position: "top-right",
                         autoClose: 3000,
@@ -208,7 +183,23 @@ export default function CardJogador({ jogadores, setJogadores }) {
                     });
                     podeFechar = false;
                 } else {
-                    const novaQuantidade = quantidadeAtual - itemCountMap[nome];
+                    const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
+
+                    // Verifica se a nova quantidade é negativa
+                    if (novaQuantidade < 0) {
+                        toast.error(`Erro: a nova quantidade do item ${nome} não pode ser negativa`, {
+                            position: "top-right",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            theme: "light",
+                        });
+                        podeFechar = false;
+                        return;
+                    }
+
                     return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
                         .then(() => {
                             console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
