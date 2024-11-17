@@ -193,6 +193,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
     let podeFechar = true;
 
     const promises = Object.keys(itemCountMap).map(nome => {
+        const quantidadeParaSubtrair = itemCountMap[nome];
         return axios.get(`/.netlify/functions/api-estoque/${nome}`)
             .then(response => {
                 const quantidadeAtual = response.data.quantidade;
@@ -212,9 +213,9 @@ export default function CardJogador({ jogadores, setJogadores }) {
                     return;
                 }
 
-                console.log(`Quantidade atual: ${quantidadeAtual}, quantidade para subtrair: ${itemCountMap[nome]}`); // Log para depuração
+                console.log(`Quantidade atual: ${quantidadeAtual}, quantidade para subtrair: ${quantidadeParaSubtrair}`); // Log para depuração
 
-                if (quantidadeAtual < itemCountMap[nome]) {
+                if (quantidadeAtual < quantidadeParaSubtrair) {
                     toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
                         position: "top-right",
                         autoClose: 3000,
@@ -226,7 +227,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
                     });
                     podeFechar = false;
                 } else {
-                    const novaQuantidade = quantidadeAtual - itemCountMap[nome];
+                    const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
                     return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
                         .then(() => {
                             console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
@@ -271,10 +272,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
                 theme: "light",
             });
         } else {
-            const dataJogo = localStorage.getItem('dataJogo');
-            const horaJogo = localStorage.getItem('horaJogo');
-            const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
-
+            // Lógica para finalizar o pedido
             const formasPagamento = Object.entries(paymentMethods)
                 .filter(([_, selected]) => selected)
                 .map(([method]) => ({
@@ -282,14 +280,15 @@ export default function CardJogador({ jogadores, setJogadores }) {
                     valor: paymentValues[method]
                 }));
 
+            // Aqui você pode adicionar a lógica para finalizar o pedido, como enviar os dados para a API
+            // Exemplo:
             axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
-                items: jogador.items,
+                items: itemsToUpdate,
                 formasPagamento: formasPagamento,
                 valorTotal: valorTotalJogador,
                 valorComDesconto: valorComDesconto,
                 descontoAplicado: descontoSelecionado,
-                dataJogo: dataHoraJogo,
             })
             .then(() => {
                 toast.success('Pedido finalizado com sucesso!', {
@@ -301,26 +300,10 @@ export default function CardJogador({ jogadores, setJogadores }) {
                     draggable: true,
                     theme: "light",
                 });
-
-                const updatedJogadores = [...jogadores];
-                updatedJogadores[jogadorIndexForPayment].isClosed = true;
-                setJogadores(updatedJogadores);
-                setShowPaymentModal(false);
-                setPaymentValues({dinheiro: 0, credito: 0, debito: 0, pix: 0});
-                setPaymentMethods({dinheiro: false, credito: false, debito: false, pix: false});
-                setDescontoSelecionado('');
-                setValorComDesconto(0);
-
-                const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-                pagamentosAnteriores.push({
-                    valorTotal: valorTotalJogador,
-                    valorComDesconto: valorComDesconto,
-                    formasPagamento: formasPagamento
-                });
-                localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+                // Aqui você pode adicionar lógica para atualizar o estado ou fechar o modal
             })
             .catch(error => {
-                console.error('Erro ao cadastrar pedido:', error);
+                console.error('Erro ao finalizar pedido:', error);
                 toast.error('Erro ao finalizar pedido', {
                     position: "top-right",
                     autoClose: 3000,
