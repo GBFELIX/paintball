@@ -101,6 +101,12 @@ export default function CardJogador({ jogadores, setJogadores }) {
         const updatedJogadores = [...jogadores];
         updatedJogadores[index].isClosed = !updatedJogadores[index].isClosed;
         setJogadores(updatedJogadores);
+        
+        // Abrir o modal de pagamento ao fechar o pedido
+        if (!updatedJogadores[index].isClosed) {
+            setJogadorIndexForPayment(index);
+            setShowPaymentModal(true);
+        }
     };
 
     const calcularDesconto = (valorTotal) => {
