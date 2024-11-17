@@ -171,7 +171,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                         });
                         podeFechar = false;
                     } else {
-                        const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
+                        const novaQuantidade = quantidadeAtual - 1;
                         return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
                             .then(() => {
                                 console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
