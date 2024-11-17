@@ -15,7 +15,7 @@ const api = axios.create({
   timeout: 5000
 });
 
-
+// Primeiro, adicione este CSS no seu arquivo de estilos ou inline
 const spinnerStyle = `
   @keyframes spin {
     0% { transform: rotate(0deg); }
@@ -46,11 +46,7 @@ export default function Estoque() {
       navigate("/");  
     }
   }, [navigate]);
-  useEffect(() => {
-    axios.get('/.netlify/functions/api-descontos')
-        .then(response => setDescontos(response.data))
-        .catch(error => console.error('Erro ao buscar descontos:', error));
-  }, []);
+  
   const fetchEstoque = () => {
     setLoading(true);
     setError(null);
@@ -72,23 +68,21 @@ export default function Estoque() {
         setLoading(false);
       });
   };
-  
   const fetchDescontos = () => {
     axios.get('/.netlify/functions/api-descontos') // Endpoint para buscar descontos
-    .then(response => setDescontos(response.data))
-    .catch(error => {
-      toast.error('Erro ao carregar descontos', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
+      .then(response => setDescontos(response.data))
+      .catch(error => {
+        toast.error('Erro ao carregar descontos', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
       });
-      
-    });
-};
+  };
   const removeDesconto = (id) => {
     axios.delete(`/.netlify/functions/api-descontos/${id}`)
       .then(response => {
@@ -195,7 +189,7 @@ export default function Estoque() {
       
       toast.success('Produto adicionado com sucesso!', {
         position: "top-right",
-        autoClose: 3000,  
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -304,16 +298,13 @@ export default function Estoque() {
   };
 
   const handleInputChange = (nome, tipo, valor) => {
-    setInputs(prev => {
-      const current = prev[nome] || {};
-      return {
-        ...prev,
-        [nome]: {
-          ...current,
-          [tipo]: valor
-        }
-      };
-    });
+    setInputs(prev => ({
+      ...prev,
+      [nome]: {
+        ...prev[nome],
+        [tipo]: valor
+      }
+    }));
   };
 
   const toggleEditMode = (nome) => {
@@ -417,44 +408,44 @@ export default function Estoque() {
               </div>
               
               {descontos.length > 0 ? (
-            descontos.map((desconto) => (
-              <div
-                key={desconto.id}
-                className="w-full flex justify-between items-center px-4 py-2 border-t border-gray-200"
-              >
-                <p className="w-1/3 text-black font-semibold text-left">{desconto.nome}</p>
-                {editMode[desconto.id] ? (
-                  <input
-                    type="text"
-                    className="text-black font-semibold w-1/3 text-left p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
-                    value={inputs[desconto.id]?.valor || desconto.valor}
-                    onChange={(e) => handleInputChange(desconto.id, 'valor', e.target.value)}
-                    onBlur={() => {
-                      if (inputs[desconto.id]?.valor) {
-                        updateDesconto(desconto.id, inputs[desconto.id].valor);
-                      }
-                    }}
-                  />
-                ) : (
-                  <p className="w-1/3 mr-20 text-black font-semibold ">{desconto.valor}%</p>
-                )}
-                <button
-                  className="text-blue-500 hover:text-blue-700 mx-2"
-                  onClick={() => toggleEditMode(desconto.id)}
-                >
-                  {editMode[desconto.id] ? 'Salvar' : <FaRegEdit />}
-                </button>
-                <button 
-                  className="text-red-500 hover:text-red-700"
-                  onClick={() => removeDesconto(desconto.id)}
-                >
-                  <FaTrashAlt />
-                </button>
-              </div>
-            ))
-          ) : (
-            <p className="text-black font-semibold">Nenhum desconto cadastrado</p>
-          )}
+                descontos.map((desconto) => (
+                  <div
+                    key={desconto.id}
+                    className="w-full flex justify-between items-center px-4 py-2 border-t border-gray-200"
+                  >
+                    <p className="w-1/3 text-black font-semibold text-left">{desconto.nome}</p>
+                    {editMode[desconto.id] ? (
+                      <input
+                        type="text"
+                        className="text-black font-semibold w-1/3 text-left p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
+                        value={inputs[desconto.id]?.valor || desconto.valor}
+                        onChange={(e) => handleInputChange(desconto.id, 'valor', e.target.value)}
+                        onBlur={() => {
+                          if (inputs[desconto.id]?.valor) {
+                            updateDesconto(desconto.id, inputs[desconto.id].valor);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <p className="w-1/3 mr-20 text-black font-semibold ">{desconto.valor}%</p>
+                    )}
+                    <button
+                      className="text-blue-500 hover:text-blue-700 mx-2"
+                      onClick={() => toggleEditMode(desconto.id)}
+                    >
+                      {editMode[desconto.id] ? 'Salvar' : <FaRegEdit />}
+                    </button>
+                    <button 
+                      className="text-red-500 hover:text-red-700"
+                      onClick={() => removeDesconto(desconto.id)}
+                    >
+                      <FaTrashAlt />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-black font-semibold">Nenhum desconto cadastrado</p>
+              )}
             </div>
 
 
@@ -478,14 +469,13 @@ export default function Estoque() {
                         {editMode[item.nome] && (
                           <input
                             type="number"
-                            value={inputs[item.nome] && inputs[item.nome].quantidade || ''}
+                            value={inputs[item.nome]?.quantidade || ''}
                             onChange={(e) => handleInputChange(item.nome, 'quantidade', e.target.value)}
                             className="w-24 p-1 m-1 rounded-md text-center"
                             placeholder="Nova qtd"
                             onBlur={() => {
-                              const input = inputs[item.nome];
-                              if (input && input.quantidade) {
-                                updateQuantidade(item.nome, input.quantidade);
+                              if (inputs[item.nome]?.quantidade) {
+                                updateQuantidade(item.nome, inputs[item.nome].quantidade);
                                 toggleEditMode(item.nome);
                               }
                             }}
@@ -499,14 +489,13 @@ export default function Estoque() {
                         {editMode[item.nome] && (
                           <input
                             type="number"
-                            value={inputs[item.nome] && inputs[item.nome].valor || ''}
+                            value={inputs[item.nome]?.valor || ''}
                             onChange={(e) => handleInputChange(item.nome, 'valor', e.target.value)}
                             className="w-24 p-1 m-1 rounded-md text-center"
                             placeholder="Novo valor"
                             onBlur={() => {
-                              const input = inputs[item.nome];
-                              if (input && input.valor) {
-                                updateValor(item.nome, input.valor);
+                              if (inputs[item.nome]?.valor) {
+                                updateValor(item.nome, inputs[item.nome].valor);
                                 toggleEditMode(item.nome); 
                               }
                             }}
