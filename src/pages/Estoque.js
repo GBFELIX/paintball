@@ -46,7 +46,11 @@ export default function Estoque() {
       navigate("/");  
     }
   }, [navigate]);
-  
+  useEffect(() => {
+    axios.get('/.netlify/functions/api-descontos')
+        .then(response => setDescontos(response.data))
+        .catch(error => console.error('Erro ao buscar descontos:', error));
+  }, []);
   const fetchEstoque = () => {
     setLoading(true);
     setError(null);
@@ -68,6 +72,7 @@ export default function Estoque() {
         setLoading(false);
       });
   };
+  
   const fetchDescontos = () => {
     axios.get('/.netlify/functions/api-descontos') // Endpoint para buscar descontos
     .then(response => setDescontos(response.data))
@@ -81,6 +86,7 @@ export default function Estoque() {
         draggable: true,
         theme: "light",
       });
+      
     });
 };
   const removeDesconto = (id) => {
