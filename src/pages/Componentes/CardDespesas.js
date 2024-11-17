@@ -97,16 +97,16 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
         setDespesas(updatedDespesas);
     };
 
-    const calcularDesconto = (valorTotal) => {
-        if (!descontoSelecionado) return valorTotal;
-        const percentualDesconto = descontos[descontoSelecionado] || 0;
-        return valorTotal * (1 - percentualDesconto / 100);
+    const handleClosePedido = (index) => {
+        const updatedDespesas = [...despesas];
+        updatedDespesas[index].isClosed = !updatedDespesas[index].isClosed;
+        setDespesas(updatedDespesas);
     };
 
     const handleConfirmPayment = () => {
         const despesa = despesas[despesaIndexForPayment];
         const itemsToUpdate = despesa.items;
-        const valorTotalDespesa = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+        const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
         const valorFinal = valorComDesconto || valorTotalDespesa;
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
@@ -143,59 +143,12 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
 
         let podeFechar = true;
 
-        const promises = Object.keys(itemCountMap).map(nome => {
-            const quantidadeParaSubtrair = itemCountMap[nome];
-            return axios.get(`/.netlify/functions/api-estoque/${nome}`)
-                .then(response => {
-                    const quantidadeAtual = response.data.quantidade;
-                    if (quantidadeAtual < quantidadeParaSubtrair) {
-                        toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
-                            position: "top-right",
-                            autoClose: 3000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            theme: "light",
-                        });
-                        podeFechar = false;
-                    } else {
-                        const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
-                        return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
-                            .then(() => {
-                                console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
-                            })
-                            .catch(error => {
-                                console.error('Erro ao atualizar estoque:', error);
-                                toast.error('Erro ao atualizar estoque', {
-                                    position: "top-right",
-                                    autoClose: 3000,
-                                    hideProgressBar: false,
-                                    closeOnClick: true,
-                                    pauseOnHover: true,
-                                    draggable: true,
-                                    theme: "light",
-                                });
-                            });
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao obter quantidade atual do estoque:', error);
-                    toast.error('Erro ao verificar estoque', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                });
-        });
-
-        Promise.all(promises).then(() => {
-            if (!podeFechar) {
-                toast.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.', {
+        // Verifica se há estoque suficiente para cada item
+        for (const item of itemsToUpdate) {
+            const quantidadeNoEstoque = estoque.find(i => i.nome === item.nome)?.quantidade || 0;
+            if (itemCountMap[item.nome] > quantidadeNoEstoque) {
+                podeFechar = false;
+                toast.error(`Quantidade insuficiente para o item: ${item.nome}`, {
                     position: "top-right",
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -204,70 +157,41 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
                     draggable: true,
                     theme: "light",
                 });
-            } else {
-                const storedData = localStorage.getItem('dataJogo');
-                const formasPagamento = Object.entries(paymentMethods)
-                    .filter(([_, selected]) => selected)
-                    .map(([method]) => ({
-                        tipo: method,
-                        valor: paymentValues[method]
-                    }));
-
-                axios.post('/.netlify/functions/api-pedidos', {
-                    nomeDespesa: despesa.nome,
-                    items: despesa.items,
-                    formasPagamento: formasPagamento,
-                    valorTotal: valorTotalDespesa,
-                    valorComDesconto: valorComDesconto,
-                    descontoAplicado: descontoSelecionado,
-                    dataJogo: storedData,
-                })
-                .then(() => {
-                    toast.success('Pedido finalizado com sucesso!', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-
-                    const updatedDespesas = [...despesas];
-                    updatedDespesas[despesaIndexForPayment].isClosed = true;
-                    setDespesas(updatedDespesas);
-                    setShowPaymentModal(false);
-                    setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0 });
-                    setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false });
-                    setDescontoSelecionado('');
-                    setValorComDesconto(0);
-
-                    const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-                    pagamentosAnteriores.push({
-                        valorTotal: valorTotalDespesa,
-                        valorComDesconto: valorComDesconto,
-                        formasPagamento: formasPagamento
-                    });
-                    localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
-                })
-                .catch(error => {
-                    console.error('Erro ao cadastrar pedido:', error);
-                    toast.error('Erro ao finalizar pedido', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                });
+                break;
             }
-        });
+        }
+
+        if (podeFechar) {
+            // Atualiza o estoque e finaliza o pedido
+            const updatedEstoque = estoque.map(item => {
+                if (itemCountMap[item.nome]) {
+                    return {
+                        ...item,
+                        quantidade: item.quantidade - itemCountMap[item.nome]
+                    };
+                }
+                return item;
+            });
+
+            setEstoque(updatedEstoque);
+            const updatedDespesas = [...despesas];
+            updatedDespesas[despesaIndexForPayment].isClosed = true;
+            setDespesas(updatedDespesas);
+            toast.success('Pagamento confirmado e pedido fechado!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            setShowPaymentModal(false);
+        }
     };
 
     return (
-        <div className="flex flex-wrap gap-4">
+        <div>
             <ToastContainer />
             {despesas.map((despesa, index) => {
                 const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
@@ -308,7 +232,6 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
                                 </div>
                             </div>
                         </header>
-
                         <div className="w-full h-auto p-1" id="itemsObrigatorio">
                             <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
                                 <select
@@ -334,7 +257,6 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
                                     </button>
                                 </div>
                             </div>
-
                             {despesa.items.map((item, itemIndex) => (
                                 <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
                                     <div className="inline-flex">
@@ -351,11 +273,9 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
                                 </div>
                             ))}
                         </div>
-
                         <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
                             <h1 className="text-md font-semibold">Total: R${valorTotalDespesa.toFixed(2)}</h1>
                         </div>
-
                         <div className="flex justify-center items-center mt-2">
                             <button
                                 className="w-[180px] bg-gray-300 hover:bg-secondary text-gray-800 font-bold py-2 px-4 rounded-l"
@@ -367,18 +287,15 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
                     </section>
                 );
             })}
-
             {showPaymentModal && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white p-6 rounded-lg w-[500px]">
                         <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
-                        
                         <div className="mb-4">
                             <p className="font-bold">
                                 Valor Total: R$ {despesas[despesaIndexForPayment] && despesas[despesaIndexForPayment].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0).toFixed(2)}
                             </p>
                         </div>
-
                         <div className="mb-4">
                             <select
                                 value={descontoSelecionado}
@@ -399,7 +316,6 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
                                 ))}
                             </select>
                         </div>
-
                         <div className="grid grid-cols-2 gap-4 mb-4">
                             {['dinheiro', 'credito', 'debito', 'pix'].map((method) => (
                                 <div key={method} className="flex items-center space-x-2">
@@ -431,7 +347,6 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
                                 </div>
                             ))}
                         </div>
-
                         <div className="mb-4">
                             <p className="font-bold">
                                 Valor com Desconto: R$ {valorComDesconto.toFixed(2)}
@@ -440,14 +355,13 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa }
                                 Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0).toFixed(2)}
                             </p>
                         </div>
-
                         <div className="flex justify-between mt-4">
                             <button
                                 className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
                                 onClick={() => {
                                     setShowPaymentModal(false);
-                                    setPaymentValues({dinheiro: 0, credito: 0, debito: 0, pix: 0});
-                                    setPaymentMethods({dinheiro: false, credito: false, debito: false, pix: false});
+                                    setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0 });
+                                    setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false });
                                     setDescontoSelecionado('');
                                     setValorComDesconto(0);
                                 }}

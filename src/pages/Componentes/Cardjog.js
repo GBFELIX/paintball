@@ -72,7 +72,12 @@ export default function CardJogador({ jogadores, setJogadores }) {
     const handleItemSelectChange = (index, event) => {
         const updatedJogadores = [...jogadores];
         const selectedItem = estoque.find(item => item.nome === event.target.value);
-        updatedJogadores[index].selectedItem = selectedItem;
+        updatedJogadores[index].selectedItem = selectedItem ? {
+            id: selectedItem.id,
+            nome: selectedItem.nome,
+            valor: parseFloat(selectedItem.valor || 0),
+            quantidade: selectedItem.quantidade
+        } : null;
         setJogadores(updatedJogadores);
     };
 
@@ -80,9 +85,8 @@ export default function CardJogador({ jogadores, setJogadores }) {
         const updatedJogadores = [...jogadores];
         if (updatedJogadores[index].selectedItem) {
             const selectedItem = { ...updatedJogadores[index].selectedItem };
-            selectedItem.valor = parseFloat(selectedItem.valor) || 0;
             updatedJogadores[index].items.push(selectedItem);
-            updatedJogadores[index].selectedItem = '';
+            updatedJogadores[index].selectedItem = null; // Limpa a seleção após adicionar
             setJogadores(updatedJogadores);
         }
     };
@@ -97,6 +101,12 @@ export default function CardJogador({ jogadores, setJogadores }) {
         const updatedJogadores = [...jogadores];
         updatedJogadores[index].isClosed = !updatedJogadores[index].isClosed;
         setJogadores(updatedJogadores);
+    };
+
+    const calcularDesconto = (valorTotal) => {
+        if (!descontoSelecionado) return valorTotal;
+        const percentualDesconto = descontos[descontoSelecionado] || 0;
+        return valorTotal * (1 - percentualDesconto / 100);
     };
 
     const handleConfirmPayment = () => {
@@ -176,6 +186,22 @@ export default function CardJogador({ jogadores, setJogadores }) {
             return axios.get(`/.netlify/functions/api-estoque/${nome}`)
                 .then(response => {
                     const quantidadeAtual = response.data.quantidade;
+
+                    // Verifique se quantidadeAtual é um número válido
+                    if (typeof quantidadeAtual !== 'number') {
+                        toast.error(`Quantidade inválida para o item ${nome}`, {
+                            position: "top-right",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            theme: "light",
+                        });
+                        podeFechar = false;
+                        return;
+                    }
+
                     if (quantidadeAtual < quantidadeParaSubtrair) {
                         toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
                             position: "top-right",
@@ -284,22 +310,153 @@ export default function CardJogador({ jogadores, setJogadores }) {
     return (
         <div>
             <ToastContainer />
-            {/* Renderização do componente */}
-            {jogadores.map((jogador, index) => (
-                <div key={index}>
-                    {/* Renderização do card do jogador */}
-                    <h2>{jogador.nome}</h2>
-                    <button onClick={() => handleClosePedido(index)}>
-                        {jogador.isClosed ? 'Reabrir Pedido' : 'Fechar Pedido'}
-                    </button>
-                    <button onClick={() => setJogadorIndexForPayment(index) || setShowPaymentModal(true)}>
-                        Confirmar Pagamento
-                    </button>
-                </div>
-            ))}
+            {jogadores.map((jogador, index) => {
+                const valorTotalJogador = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+                return (
+                    <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <header className="bg-primary w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
+                            <p className="text-black">Jogador</p>
+                            <div className="flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
+                                <input
+                                    type="text"
+                                    className="text-center w-10 rounded-sm px-2 py-1"
+                                    placeholder="N°"
+                                    value={jogador.numero}
+                                    onChange={(e) => handleNumeroChange(index, e)}
+                                    disabled={jogador.isClosed}
+                                />
+                                <input
+                                    type="text"
+                                    className="text-center w-44 rounded-sm px-2 py-1"
+                                    placeholder="Jogador"
+                                    value={jogador.nome}
+                                    onChange={(e) => handleNomeChange(index, e)}
+                                    disabled={jogador.isClosed}
+                                />
+                                <div className="inline-flex">
+                                    <button
+                                        className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
+                                        onClick={handleAddJogador}
+                                    >
+                                        +
+                                    </button>
+                                    <button
+                                        className="bg-black hover:bg-primary py-1 px-2 rounded-r text-white"
+                                        onClick={() => handleRemoveJogador(index)}
+                                    >
+                                        -
+                                    </button>
+                                </div>
+                            </div>
+                        </header>
+                        <div className="w-full h-auto p-1" id="itemsObrigatorio">
+                            <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
+                                <select
+                                    className="w-full border border-slate-400 rounded px-2 p-1 text-center"
+                                    value={jogador.selectedItem && jogador.selectedItem.nome || ''}
+                                    onChange={(e) => handleItemSelectChange(index, e)}
+                                    disabled={jogador.isClosed}
+                                >
+                                    <option value="">Selecione o item</option>
+                                    {estoque.map((item) => (
+                                        <option key={item.id} value={item.nome}>
+                                            {item.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="inline-flex">
+                                    <button
+                                        className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                        onClick={() => handleAddItem(index)}
+                                        disabled={jogador.isClosed}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                            {jogador.items.map((item, itemIndex) => (
+                                <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
+                                    <div className="inline-flex">
+                                        <button
+                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
+                                            onClick={() => handleRemoveItem(index, itemIndex)}
+                                            disabled={jogador.isClosed}
+                                        >
+                                            -
+                                        </button>
+                                    </div>
+                                    <p>{item.nome}</p>
+                                    <p>R${parseFloat(item.valor).toFixed(2)}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
+                            <h1 className="text-md font-semibold">Total: R${valorTotalJogador.toFixed(2)}</h1>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            {['dinheiro', 'credito', 'debito', 'pix'].map((method) => (
+                                <div key={method} className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={paymentMethods[method]}
+                                        onChange={(e) => {
+                                            setPaymentMethods({
+                                                ...paymentMethods,
+                                                [method]: e.target.checked
+                                            });
+                                        }}
+                                        className="w-4 h-4"
+                                    />
+                                    <input
+                                        type="number"
+                                        value={paymentValues[method]}
+                                        onChange={(e) => {
+                                            setPaymentValues({
+                                                ...paymentValues,
+                                                [method]: parseFloat(e.target.value) || 0
+                                            });
+                                        }}
+                                        disabled={!paymentMethods[method]}
+                                        placeholder={`Valor ${method}`}
+                                        className="w-full p-2 border border-gray-300 rounded-md"
+                                    />
+                                    <label className="capitalize">{method}</label>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mb-4">
+                            <p className="font-bold">
+                                Valor com Desconto: R$ {valorComDesconto.toFixed(2)}
+                            </p>
+                            <p className="font-bold">
+                                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + b, 0).toFixed(2)}
+                            </p>
+                        </div>
+                        <div className="flex justify-between mt-4">
+                            <button
+                                className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
+                                onClick={() => {
+                                    setShowPaymentModal(false);
+                                    setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0 });
+                                    setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false });
+                                    setDescontoSelecionado('');
+                                    setValorComDesconto(0);
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="bg-black hover:bg-secondary py-2 px-4 rounded-lg text-white"
+                                onClick={handleConfirmPayment}
+                            >
+                                Confirmar Pagamento
+                            </button>
+                        </div>
+                    </section>
+                );
+            })}
             {showPaymentModal && (
                 <div className="modal">
-                    {/* Modal de pagamento */}
                     <h2>Selecione a Forma de Pagamento</h2>
                     <select onChange={(e) => setDescontoSelecionado(e.target.value)}>
                         <option value="">Selecione o desconto</option>

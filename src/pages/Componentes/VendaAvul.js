@@ -22,16 +22,21 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     const [descontos, setDescontos] = useState({});
     const [descontoSelecionado, setDescontoSelecionado] = useState('');
     const [valorComDesconto, setValorComDesconto] = useState(0);
+    const [valorTotalVendaAtual, setValorTotalVendaAtual] = useState(0);
 
     useEffect(() => {
         axios.get('/.netlify/functions/api-estoque')
-            .then(response => setEstoque(response.data))
+            .then(response => {
+                setEstoque(response.data);
+            })
             .catch(error => console.error('Erro ao buscar estoque:', error));
     }, []);
 
     useEffect(() => {
         axios.get('/.netlify/functions/api-descontos')
-            .then(response => setDescontos(response.data))
+            .then(response => {
+                setDescontos(response.data);
+            })
             .catch(error => console.error('Erro ao buscar descontos:', error));
     }, []);
 
@@ -40,16 +45,20 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
             const updatedVendas = vendas.filter((_, i) => i !== index);
             setVendas(updatedVendas);
         } else {
-            toast.error('Deve haver pelo menos uma venda na tela.', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
+            toast.error('Deve haver pelo menos uma venda na tela.');
         }
+    };
+
+    const handleNomeChange = (index, event) => {
+        const updatedVendas = [...vendas];
+        updatedVendas[index].nome = event.target.value;
+        setVendas(updatedVendas);
+    };
+
+    const handleNumeroChange = (index, event) => {
+        const updatedVendas = [...vendas];
+        updatedVendas[index].numero = event.target.value;
+        setVendas(updatedVendas);
     };
 
     const handleItemSelectChange = (index, event) => {
@@ -74,7 +83,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                 quantidade: updatedVendas[index].selectedItem.quantidade
             };
             updatedVendas[index].items.push(selectedItem);
-            updatedVendas[index].selectedItem = null; // Limpa a seleção após adicionar
+            updatedVendas[index].selectedItem = '';
             setVendas(updatedVendas);
         }
     };
@@ -83,6 +92,26 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
         const updatedVendas = [...vendas];
         updatedVendas[vendaIndex].items.splice(itemIndex, 1);
         setVendas(updatedVendas);
+    };
+
+    const handleClosePedido = (index) => {
+        if (vendas[index].isClosed) {
+            const updatedVendas = [...vendas];
+            updatedVendas[index].isClosed = false;
+            updatedVendas[index].items = [];
+            setVendas(updatedVendas);
+        } else {
+            const valorTotal = vendas[index].items.reduce((sum, item) => sum + item.valor, 0);
+            setValorTotalVendaAtual(valorTotal);
+            setVendaIndexForPayment(index);
+            setShowPaymentModal(true);
+        }
+    };
+
+    const calcularDesconto = (valorTotal) => {
+        if (!descontoSelecionado) return valorTotal;
+        const percentualDesconto = descontos[descontoSelecionado] || 0;
+        return valorTotal * (1 - percentualDesconto / 100);
     };
 
     const handleConfirmPayment = () => {
@@ -194,8 +223,9 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                 const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
 
                 axios.post('/.netlify/functions/api-pedidos', {
-                    nomeVenda: venda.nome,
-                    items: itemsToUpdate,
+                    nomeJogador: venda.nome,
+                    items: venda.items,
+                    formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
                     valorTotal: valorTotalVenda,
                     dataJogo: dataHoraJogo,
                 })
@@ -209,13 +239,21 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                         draggable: true,
                         theme: "light",
                     });
+
                     const updatedVendas = [...vendas];
                     updatedVendas[vendaIndexForPayment].isClosed = true;
                     setVendas(updatedVendas);
                     setShowPaymentModal(false);
+
+                    const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+                    pagamentosAnteriores.push({
+                        valorTotal: valorTotalVenda,
+                        formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                    });
+                    localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
                 })
                 .catch(error => {
-                    console.error('Erro ao finalizar pedido:', error);
+                    console.error('Erro ao cadastrar pedido:', error);
                     toast.error('Erro ao finalizar pedido', {
                         position: "top-right",
                         autoClose: 3000,
@@ -233,195 +271,187 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     return (
         <div>
             <ToastContainer />
-            {vendas.map((venda, index) => {
-                const valorTotalVenda = venda.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
-                return (
-                    <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${venda.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <header className="bg-blue-600 w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
-                            <p className="text-black">Venda Avulsa</p>
-                            <div className="flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
-                                <input
-                                    type="text"
-                                    className="text-center w-10 rounded-sm px-2 py-1"
-                                    placeholder="N°"
-                                    value={venda.numero}
-                                    onChange={(e) => handleNumeroChange(index, e)}
-                                    disabled={venda.isClosed}
-                                />
-                                <input
-                                    type="text"
-                                    className="text-center w-44 rounded-sm px-2 py-1"
-                                    placeholder="Cliente"
-                                    value={venda.nome}
-                                    onChange={(e) => handleNomeChange(index, e)}
-                                    disabled={venda.isClosed}
-                                />
-                                <div className="inline-flex">
-                                    <button
-                                        className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
-                                        onClick={handleAddVendaAvulsa}
-                                    >
-                                        +
-                                    </button>
-                                    <button
-                                        className="bg-black hover:bg-primary py-1 px-2 rounded-r text-white"
-                                        onClick={() => handleRemoveVendaAvulsa(index)}
-                                    >
-                                        -
-                                    </button>
-                                </div>
-                            </div>
-                        </header>
-
-                        <div className="w-full h-auto p-1" id="itemsObrigatorio">
-                            <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
-                                <select
-                                    className="w-full border border-slate-400 rounded px-2 p-1 text-center"
-                                    value={(venda.selectedItem && venda.selectedItem.nome) || ''}
-                                    onChange={(e) => handleItemSelectChange(index, e)}
-                                    disabled={venda.isClosed}
-                                >
-                                    <option value="">Selecione o item</option>
-                                    {estoque.map((item) => (
-                                        <option key={item.id} value={item.nome}>
-                                            {item.nome}
-                                        </option>
-                                    ))}
-                                </select>
-                                <div className="inline-flex">
-                                    <button
-                                        className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                        onClick={() => handleAddItem(index)}
+            <div className="flex flex-wrap gap-4">
+                {vendas.map((venda, index) => {
+                    const valorTotalVenda = venda.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+                    return (
+                        <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${venda.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
+                            <header className="bg-blue-600 w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
+                                <p className="text-black">Venda Avulsa</p>
+                                <div className="flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
+                                    <input
+                                        type="text"
+                                        className="text-center w-10 rounded-sm px-2 py-1"
+                                        placeholder="N°"
+                                        value={venda.numero}
+                                        onChange={(e) => handleNumeroChange(index, e)}
                                         disabled={venda.isClosed}
-                                    >
-                                        +
-                                    </button>
-                                </div>
-                            </div>
-
-                            {venda.items.map((item, itemIndex) => (
-                                <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
+                                    />
+                                    <input
+                                        type="text"
+                                        className="text-center w-44 rounded-sm px-2 py-1"
+                                        placeholder="Cliente"
+                                        value={venda.nome}
+                                        onChange={(e) => handleNomeChange(index, e)}
+                                        disabled={venda.isClosed}
+                                    />
                                     <div className="inline-flex">
                                         <button
-                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleRemoveItem(index, itemIndex)}
-                                            disabled={venda.isClosed}
+                                            className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
+                                            onClick={handleAddVendaAvulsa}
+                                        >
+                                            +
+                                        </button>
+                                        <button
+                                            className="bg-black hover:bg-primary py-1 px-2 rounded-r text-white"
+                                            onClick={() => handleRemoveVendaAvulsa(index)}
                                         >
                                             -
                                         </button>
                                     </div>
-                                    <p>{item.nome}</p>
-                                    <p>R${parseFloat(item.valor).toFixed(2)}</p>
                                 </div>
-                            ))}
-                        </div>
+                            </header>
 
-                        <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
-                            <h1 className="text-md font-semibold">Total: R${valorTotalVenda.toFixed(2)}</h1>
-                        </div>
+                            <div className="w-full h-auto p-1" id="itemsObrigatorio">
+                                <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
+                                    <select
+                                        className="w-full border border-slate-400 rounded px-2 p-1 text-center"
+                                        value={(venda.selectedItem && venda.selectedItem.nome) || ''}
+                                        onChange={(e) => handleItemSelectChange(index, e)}
+                                        disabled={venda.isClosed}
+                                    >
+                                        <option value="">Selecione o item</option>
+                                        {estoque.map((item) => (
+                                            <option key={item.id} value={item.nome}>
+                                                {item.nome}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="inline-flex">
+                                        <button
+                                            className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                            onClick={() => handleAddItem(index)}
+                                            disabled={venda.isClosed}
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
 
-                        <div className="flex justify-center items-center mt-2">
-                            <button
-                                className="w-[180px] bg-gray-300 hover:bg-secondary text-gray-800 font-bold py-2 px-4 rounded-l"
-                                onClick={() => handleClosePedido(index)}
-                            >
-                                {venda.isClosed ? 'Fechado' : 'Fechar Pedido'}
-                            </button>
-                            <button
-                                className="w-[180px] bg-black hover:bg-primary text-white font-bold py-2 px-4 rounded-r"
-                                onClick={() => {
-                                    setVendaIndexForPayment(index);
-                                    setShowPaymentModal(true);
-                                }}
-                                disabled={venda.isClosed}
-                            >
-                                Confirmar Pagamento
-                            </button>
-                        </div>
-                    </section>
-                );
-            })}
-
-            {showPaymentModal && (
-                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg w-96">
-                        <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
-                        <div className="mb-4">
-                            <p className="font-bold">Valor Total: R$ {valorTotalVenda.toFixed(2)}</p>
-                        </div>
-                        <div className="mb-4">
-                            <select
-                                value={descontoSelecionado}
-                                onChange={(e) => {
-                                    setDescontoSelecionado(e.target.value);
-                                    setValorComDesconto(calcularDesconto(valorTotalVenda));
-                                }}
-                                className="w-full p-2 border border-gray-300 rounded-md"
-                            >
-                                <option value="">Selecione o desconto</option>
-                                {Object.entries(descontos).map(([tipo, percentual]) => (
-                                    <option key={tipo} value={tipo}>
-                                        {tipo} - {percentual}%
-                                    </option>
+                                {venda.items.map((item, itemIndex) => (
+                                    <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
+                                        <div className="inline-flex">
+                                            <button
+                                                className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
+                                                onClick={() => handleRemoveItem(index, itemIndex)}
+                                                disabled={venda.isClosed}
+                                            >
+                                                -
+                                            </button>
+                                        </div>
+                                        <p>{item.nome}</p>
+                                        <p>R${parseFloat(item.valor).toFixed(2)}</p>
+                                    </div>
                                 ))}
-                            </select>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                            {['dinheiro', 'credito', 'debito', 'pix'].map((method) => (
-                                <div key={method} className="flex items-center space-x-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={paymentMethods[method]}
-                                        onChange={(e) => {
-                                            setPaymentMethods({
-                                                ...paymentMethods,
-                                                [method]: e.target.checked
-                                            });
-                                        }}
-                                        className="w-4 h-4"
-                                    />
-                                    <input
-                                        type="number"
-                                        value={paymentValues[method]}
-                                        onChange={(e) => {
-                                            setPaymentValues({
-                                                ...paymentValues,
-                                                [method]: parseFloat(e.target.value) || 0
-                                            });
-                                        }}
-                                        disabled={!paymentMethods[method]}
-                                        placeholder={`Valor ${method}`}
-                                        className="w-full p-2 border border-gray-300 rounded-md"
-                                    />
-                                    <label className="capitalize">{method}</label>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mb-4">
-                            <p className="font-bold">
-                                Valor com Desconto: R$ {valorComDesconto.toFixed(2)}
-                            </p>
-                            <p className="font-bold">
-                                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + b, 0).toFixed(2)}
-                            </p>
-                        </div>
-                        <div className="flex justify-between mt-4">
-                            <button
-                                className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
-                                onClick={() => setShowPaymentModal(false)}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                className="bg-black hover:bg-secondary py-2 px-4 rounded-lg text-white"
-                                onClick={handleConfirmPayment}
-                            >
-                                Confirmar Pagamento
-                            </button>
+                            </div>
+
+                            <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
+                                <h1 className="text-md font-semibold">Total: R${valorTotalVenda.toFixed(2)}</h1>
+                            </div>
+
+                            <div className="flex justify-center items-center mt-2">
+                                <button
+                                    className="w-[180px] bg-gray-300 hover:bg-secondary text-gray-800 font-bold py-2 px-4 rounded-l"
+                                    onClick={() => handleClosePedido(index)}
+                                >
+                                    {venda.isClosed ? 'Fechado' : 'Fechar Pedido'}
+                                </button>
+                            </div>
+                        </section>
+                    );
+                })}
+
+                {showPaymentModal && (
+                    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                        <div className="bg-white p-6 rounded-lg w-[500px]">
+                            <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
+                            <div className="mb-4">
+                                <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
+                            </div>
+                            <div className="mb-4">
+                                <select
+                                    value={descontoSelecionado}
+                                    onChange={(e) => {
+                                        setDescontoSelecionado(e.target.value);
+                                        setValorComDesconto(calcularDesconto(valorTotalVendaAtual));
+                                    }}
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                >
+                                    <option value="">Selecione o desconto</option>
+                                    {Object.entries(descontos).map(([tipo, percentual]) => (
+                                        <option key={tipo} value={tipo}>
+                                            {tipo} - {percentual}%
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                {['dinheiro', 'credito', 'debito', 'pix'].map((method) => (
+                                    <div key={method} className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={paymentMethods[method]}
+                                            onChange={(e) => {
+                                                setPaymentMethods({
+                                                    ...paymentMethods,
+                                                    [method]: e.target.checked
+                                                });
+                                            }}
+                                            className="w-4 h-4"
+                                        />
+                                        <input
+                                            type="number"
+                                            value={paymentValues[method]}
+                                            onChange={(e) => {
+                                                setPaymentValues({
+                                                    ...paymentValues,
+                                                    [method]: parseFloat(e.target.value) || 0
+                                                });
+                                            }}
+                                            disabled={!paymentMethods[method]}
+                                            placeholder={`Valor ${method}`}
+                                            className="w-full p-2 border border-gray-300 rounded-md"
+                                        />
+                                        <label className="capitalize">{method}</label>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mb-4">
+                                <p className="font-bold">
+                                    Valor com Desconto: R$ {valorComDesconto.toFixed(2)}
+                                </p>
+                                <p className="font-bold">
+                                    Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + b, 0).toFixed(2)}
+                                </p>
+                            </div>
+                            <div className="flex justify-between mt-4">
+                                <button
+                                    className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
+                                    onClick={() => setShowPaymentModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="bg-black hover:bg-secondary py-2 px-4 rounded-lg text-white"
+                                    onClick={handleConfirmPayment}
+                                >
+                                    Confirmar Pagamento
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }
