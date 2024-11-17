@@ -196,24 +196,6 @@ export default function CardJogador({ jogadores, setJogadores }) {
         return axios.get(`/.netlify/functions/api-estoque/${nome}`)
             .then(response => {
                 const quantidadeAtual = response.data.quantidade;
-
-                // Verifique se quantidadeAtual é um número válido
-                if (typeof quantidadeAtual !== 'number') {
-                    toast.error(`Quantidade inválida para o item ${nome}`, {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                    podeFechar = false;
-                    return;
-                }
-
-                console.log(`Quantidade atual: ${quantidadeAtual}, quantidade para subtrair: ${itemCountMap[nome]}`); // Log para depuração
-
                 if (quantidadeAtual < itemCountMap[nome]) {
                     toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
                         position: "top-right",
