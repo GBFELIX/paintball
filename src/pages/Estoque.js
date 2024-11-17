@@ -70,22 +70,19 @@ export default function Estoque() {
   };
   const fetchDescontos = () => {
     axios.get('/.netlify/functions/api-descontos') // Endpoint para buscar descontos
-      .then(response => {
-        setDescontos(response.data);
-        console.log(response.data);
-      })
-      .catch(error => {
-        toast.error('Erro ao carregar descontos', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "light",
-        });
+    .then(response => setDescontos(response.data))
+    .catch(error => {
+      toast.error('Erro ao carregar descontos', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
       });
-  };
+    });
+};
   const removeDesconto = (id) => {
     axios.delete(`/.netlify/functions/api-descontos/${id}`)
       .then(response => {
@@ -192,7 +189,7 @@ export default function Estoque() {
       
       toast.success('Produto adicionado com sucesso!', {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 3000,  
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -420,7 +417,27 @@ export default function Estoque() {
                     className="w-full flex justify-between items-center px-4 py-2 border-t border-gray-200"
                   >
                     <p className="w-1/3 text-black font-semibold text-left">{desconto.nome}</p>
-                    <p className="w-1/3 text-black font-semibold">{desconto.valor}%</p>
+                    {editMode[desconto.id] ? (
+                      <input
+                        type="text"
+                        className="text-black font-semibold w-1/3 text-left p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
+                        value={inputs[desconto.id]?.valor || desconto.valor}
+                        onChange={(e) => handleInputChange(desconto.id, 'valor', e.target.value)}
+                        onBlur={() => {
+                          if (inputs[desconto.id]?.valor) {
+                            updateDesconto(desconto.id, inputs[desconto.id].valor);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <p className="w-1/3 mr-20 text-black font-semibold ">{desconto.valor}%</p>
+                    )}
+                    <button
+                      className="text-blue-500 hover:text-blue-700 mx-2"
+                      onClick={() => toggleEditMode(desconto.id)}
+                    >
+                      {editMode[desconto.id] ? 'Salvar' : <FaRegEdit />}
+                    </button>
                     <button 
                       className="text-red-500 hover:text-red-700"
                       onClick={() => removeDesconto(desconto.id)}
