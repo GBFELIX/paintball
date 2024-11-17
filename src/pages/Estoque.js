@@ -69,19 +69,16 @@ export default function Estoque() {
       });
   };
   const fetchDescontos = () => {
-    axios.get('/.netlify/functions/api-descontos') // Endpoint para buscar descontos
-      .then(response => setDescontos(response.data))
-      .catch(error => {
-        toast.error('Erro ao carregar descontos', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "light",
-        });
-      });
+    axios.get('/.netlify/functions/api-descontos')
+        .then(response => {
+            const descontosFormatados = Object.entries(response.data).map(([nome, valor]) => ({
+                nome,
+                valor,
+                id: nome
+            }));
+            setDescontos(descontosFormatados);
+        })
+        .catch(error => console.error('Erro ao buscar descontos:', error));
   };
   const removeDesconto = (id) => {
     axios.delete(`/.netlify/functions/api-descontos/${id}`)
@@ -410,19 +407,19 @@ export default function Estoque() {
               {descontos.length > 0 ? (
                 descontos.map((desconto) => (
                   <div
-                    key={desconto.id}
+                    key={desconto.nome}
                     className="w-full flex justify-between items-center px-4 py-2 border-t border-gray-200"
                   >
                     <p className="w-1/3 text-black font-semibold text-left">{desconto.nome}</p>
-                    {editMode[desconto.id] ? (
+                    {editMode[desconto.nome] ? (
                       <input
                         type="text"
                         className="text-black font-semibold w-1/3 text-left p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
-                        value={inputs[desconto.id]?.valor || desconto.valor}
-                        onChange={(e) => handleInputChange(desconto.id, 'valor', e.target.value)}
+                        value={inputs[desconto.nome]?.valor || desconto.valor}
+                        onChange={(e) => handleInputChange(desconto.nome, 'valor', e.target.value)}
                         onBlur={() => {
-                          if (inputs[desconto.id]?.valor) {
-                            updateDesconto(desconto.id, inputs[desconto.id].valor);
+                          if (inputs[desconto.nome]?.valor) {
+                            updateDesconto(desconto.nome, inputs[desconto.nome].valor);
                           }
                         }}
                       />
@@ -431,13 +428,13 @@ export default function Estoque() {
                     )}
                     <button
                       className="text-blue-500 hover:text-blue-700 mx-2"
-                      onClick={() => toggleEditMode(desconto.id)}
+                      onClick={() => toggleEditMode(desconto.nome)}
                     >
-                      {editMode[desconto.id] ? 'Salvar' : <FaRegEdit />}
+                      {editMode[desconto.nome] ? 'Salvar' : <FaRegEdit />}
                     </button>
                     <button 
                       className="text-red-500 hover:text-red-700"
-                      onClick={() => removeDesconto(desconto.id)}
+                      onClick={() => removeDesconto(desconto.nome)}
                     >
                       <FaTrashAlt />
                     </button>
