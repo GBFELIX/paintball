@@ -167,7 +167,6 @@ export default function CardJogador({ jogadores, setJogadores }) {
         // Verifique se os valores foram inseridos
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
         const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
-        
         if (totalPagamento !== valorTotal) {
             toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
                 position: "top-right",
@@ -183,9 +182,9 @@ export default function CardJogador({ jogadores, setJogadores }) {
 
         // Se todas as validações passarem, feche o pedido
         const updatedJogadores = [...jogadores];
-        updatedJogadores[jogadorIndexForPayment].isClosed = true; // Marcar o jogador como fechado
-        setJogadores(updatedJogadores); // Atualizar o estado dos jogadores
-        setShowPaymentModal(false); // Fechar o modal
+        updatedJogadores[jogadorIndexForPayment].isClosed = true;
+        setJogadores(updatedJogadores);
+        setShowPaymentModal(false);
         toast.success('Pagamento confirmado com sucesso!', {
             position: "top-right",
             autoClose: 3000,
@@ -198,8 +197,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
     };
 
     return (
-        <div>
-            <button onClick={handleAddJogador}>Adicionar Jogador</button>
+        <div className="flex flex-wrap gap-4">
             {jogadores.map((jogador, index) => {
                 const valorTotalJogador = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
                 return (
@@ -239,7 +237,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
                             </div>
                         </header>
                         <div className="p-2 flex flex-col justify-center items-center">
-                            <h1 className="text-md font-semibold">Total: R${valorTotalJogador.toFixed(2)}</h1>
+                            <h1 className="text-md font-semibold">Total: R$ {valorTotalJogador.toFixed(2)}</h1>
                             <select onChange={(e) => handleItemSelectChange(index, e)} disabled={jogador.isClosed}>
                                 <option value="">Selecione um item</option>
                                 {estoque.map(item => (
