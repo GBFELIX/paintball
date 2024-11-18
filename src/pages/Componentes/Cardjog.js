@@ -97,14 +97,30 @@ export default function CardJogador({ jogadores, setJogadores }) {
   };
 
   const handleClosePedido = (index) => {
-    if (jogadores[index].isClosed) {
-      const updatedJogadores = [...jogadores];
-      updatedJogadores[index].isClosed = false;
-      updatedJogadores[index].items = [];
-      setJogadores(updatedJogadores);
+    const jogador = jogadores[index];
+
+    // Verifique se o nome do jogador está preenchido
+    if (!jogador.nome || jogador.nome.trim() === '') {
+        toast.error('O nome do jogador é obrigatório antes de fechar o pedido.', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+        return; // Não fecha o pedido se o nome não estiver preenchido
+    }
+
+    if (jogador.isClosed) {
+        const updatedJogadores = [...jogadores];
+        updatedJogadores[index].isClosed = false;
+        updatedJogadores[index].items = [];
+        setJogadores(updatedJogadores);
     } else {
-      setJogadorIndexForPayment(index);
-      setShowPaymentModal(true);
+        setJogadorIndexForPayment(index);
+        setShowPaymentModal(true);
     }
   };
 
@@ -140,51 +156,6 @@ export default function CardJogador({ jogadores, setJogadores }) {
     }
 
     const itemsToUpdate = jogador.items;
-    const valorTotalJogador = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
-    const valorFinal = valorComDesconto || valorTotalJogador;
-    const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-
-    // Verifica se algum método de pagamento foi selecionado
-    if (!Object.values(paymentMethods).some(method => method === true)) {
-        toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-        return;
-    }
-
-    // Verifica se o valor total do pagamento está correto
-    if (totalPagamento !== valorFinal) {
-        toast.error('O valor total do pagamento deve ser igual ao valor final', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-        return;
-    }
-
-    if (!jogador.nome) {
-        toast.error('Por favor, preencha o nome do jogador', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-        return;
-    }
-
     const itemCountMap = itemsToUpdate.reduce((acc, item) => {
         acc[item.nome] = (acc[item.nome] || 0) + 1;
         return acc;
@@ -193,7 +164,6 @@ export default function CardJogador({ jogadores, setJogadores }) {
     let podeFechar = true;
 
     const promises = Object.keys(itemCountMap).map(nome => {
-        // Encontre o item no estoque já carregado
         const selectedItem = estoque.find(item => item.nome === nome);
         
         if (!selectedItem) {
@@ -207,10 +177,10 @@ export default function CardJogador({ jogadores, setJogadores }) {
                 theme: "light",
             });
             podeFechar = false;
-            return Promise.resolve(); // Retorna uma Promise resolvida para evitar falhas
+            return Promise.resolve();
         }
 
-        const quantidadeAtual = selectedItem.quantidade; // Acesse a quantidade diretamente do item encontrado
+        const quantidadeAtual = selectedItem.quantidade;
 
         if (quantidadeAtual < itemCountMap[nome]) {
             toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
@@ -223,7 +193,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
                 theme: "light",
             });
             podeFechar = false;
-            return Promise.resolve(); // Retorna uma Promise resolvida para evitar falhas
+            return Promise.resolve();
         } else {
             const novaQuantidade = quantidadeAtual - itemCountMap[nome];
             return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
@@ -245,10 +215,19 @@ export default function CardJogador({ jogadores, setJogadores }) {
         }
     });
 
-    // Aguarde todas as promessas serem resolvidas
     Promise.all(promises).then(() => {
         if (podeFechar) {
-            // Lógica para fechar o pedido, se necessário
+            // Lógica para finalizar o pedido
+            toast.success('Pagamento confirmado com sucesso!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            // Atualizar o estado dos jogadores ou redirecionar
         }
     });
   };
@@ -388,7 +367,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 gap-4 mb-4">
               {['dinheiro', 'credito', 'debito', 'pix'].map((method) => (
                 <div key={method} className="flex items-center space-x-2">
                   <input
@@ -425,7 +404,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
                 Valor com Desconto: R$ {valorComDesconto.toFixed(2)}
               </p>
               <p className="font-bold">
-                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + b, 0).toFixed(2)}
+                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0).toFixed(2)}
               </p>
             </div>
 

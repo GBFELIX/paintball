@@ -93,14 +93,29 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   };
 
   const handleClosePedido = (index) => {
-    if (despesas[index].isClosed) {
-      const updatedDespesas = [...despesas];
-      updatedDespesas[index].isClosed = false;
-      updatedDespesas[index].items = [];
-      setDespesas(updatedDespesas);
+    const despesa = despesas[index];
+
+    if (!despesa.nome || despesa.nome.trim() === '') {
+        toast.error('O nome da despesa é obrigatório antes de fechar o pedido.', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+        return;
+    }
+
+    if (despesa.isClosed) {
+        const updatedDespesas = [...despesas];
+        updatedDespesas[index].isClosed = false;
+        updatedDespesas[index].items = [];
+        setDespesas(updatedDespesas);
     } else {
-      setDespesaIndexForPayment(index);
-      setShowPaymentModal(true);
+        setDespesaIndexForPayment(index);
+        setShowPaymentModal(true);
     }
   };
 
@@ -211,8 +226,12 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     });
 
     Promise.all(promises).then(() => {
-        if (!podeFechar) {
-            toast.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.', {
+        if (podeFechar) {
+            const updatedDespesas = [...despesas];
+            updatedDespesas[despesaIndexForPayment].isClosed = true;
+            setDespesas(updatedDespesas);
+            setShowPaymentModal(false);
+            toast.success('Pagamento confirmado com sucesso!', {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -220,64 +239,6 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                 pauseOnHover: true,
                 draggable: true,
                 theme: "light",
-            });
-        } else {
-            const storedData = localStorage.getItem('dataJogo');
-            const formasPagamento = Object.entries(paymentMethods)
-                .filter(([_, selected]) => selected)
-                .map(([method]) => ({
-                    tipo: method,
-                    valor: paymentValues[method]
-                }));
-
-            axios.post('/.netlify/functions/api-pedidos', {
-                nomeDespesa: despesa.nome,
-                items: despesa.items,
-                formasPagamento: formasPagamento,
-                valorTotal: valorTotalDespesa,
-                valorComDesconto: valorComDesconto,
-                descontoAplicado: descontoSelecionado,
-                dataJogo: storedData,
-            })
-            .then(() => {
-                toast.success('Pedido finalizado com sucesso!', {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
-                
-                const updatedDespesas = [...despesas];
-                updatedDespesas[despesaIndexForPayment].isClosed = true;
-                setDespesas(updatedDespesas);
-                setShowPaymentModal(false);
-                setPaymentValues({dinheiro: 0, credito: 0, debito: 0, pix: 0});
-                setPaymentMethods({dinheiro: false, credito: false, debito: false, pix: false});
-                setDescontoSelecionado('');
-                setValorComDesconto(0);
-
-                const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-                pagamentosAnteriores.push({
-                    valorTotal: valorTotalDespesa,
-                    valorComDesconto: valorComDesconto,
-                    formasPagamento: formasPagamento
-                });
-                localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
-            })
-            .catch(error => {
-                console.error('Erro ao cadastrar pedido:', error);
-                toast.error('Erro ao finalizar pedido', {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
             });
         }
     });
@@ -417,7 +378,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 gap-4 mb-4">
               {['dinheiro', 'credito', 'debito', 'pix'].map((method) => (
                 <div key={method} className="flex items-center space-x-2">
                   <input

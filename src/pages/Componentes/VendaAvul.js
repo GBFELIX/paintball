@@ -96,14 +96,27 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     };
 
     const handleClosePedido = (index) => {
-        const updatedVendas = [...vendas];
-        if (updatedVendas[index].isClosed) {
+        const venda = vendas[index];
+
+        if (!venda.nome || venda.nome.trim() === '') {
+            toast.error('O nome da venda é obrigatório antes de fechar o pedido.', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            return;
+        }
+
+        if (venda.isClosed) {
+            const updatedVendas = [...vendas];
             updatedVendas[index].isClosed = false;
             updatedVendas[index].items = [];
-            updateVendas(updatedVendas);
+            setVendas(updatedVendas);
         } else {
-            const valorTotal = updatedVendas[index].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
-            setValorTotalVendaAtual(valorTotal);
             setVendaIndexForPayment(index);
             setShowPaymentModal(true);
         }
