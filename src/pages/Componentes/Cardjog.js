@@ -134,6 +134,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
     };
 
     const handleConfirmPayment = () => {
+        // Obtenha o jogador atual
         const jogador = jogadores[jogadorIndexForPayment];
 
         // Verifique se items estão definidos
@@ -167,6 +168,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
         // Verifique se os valores foram inseridos
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
         const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+        
         if (totalPagamento !== valorTotal) {
             toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
                 position: "top-right",
@@ -182,9 +184,9 @@ export default function CardJogador({ jogadores, setJogadores }) {
 
         // Se todas as validações passarem, feche o pedido
         const updatedJogadores = [...jogadores];
-        updatedJogadores[jogadorIndexForPayment].isClosed = true;
-        setJogadores(updatedJogadores);
-        setShowPaymentModal(false);
+        updatedJogadores[jogadorIndexForPayment].isClosed = true; // Marcar o jogador como fechado
+        setJogadores(updatedJogadores); // Atualizar o estado dos jogadores
+        setShowPaymentModal(false); // Fechar o modal
         toast.success('Pagamento confirmado com sucesso!', {
             position: "top-right",
             autoClose: 3000,
@@ -197,66 +199,46 @@ export default function CardJogador({ jogadores, setJogadores }) {
     };
 
     return (
-        <div className="flex flex-wrap gap-4">
-            {jogadores.map((jogador, index) => {
-                const valorTotalJogador = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
-                return (
-                    <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <header className="bg-primary w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
-                            <p className="text-black">Jogador</p>
-                            <div className="flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
-                                <input
-                                    type="text"
-                                    className="text-center w-10 rounded-sm px-2 py-1"
-                                    placeholder="N°"
-                                    value={jogador.numero}
-                                    onChange={(e) => handleNumeroChange(index, e)}
-                                    disabled={jogador.isClosed}
-                                />
-                                <input
-                                    type="text"
-                                    className="text-center w-44 rounded-sm px-2 py-1"
-                                    placeholder="Jogador"
-                                    value={jogador.nome}
-                                    onChange={(e) => handleNomeChange(index, e)}
-                                    disabled={jogador.isClosed}
-                                />
-                                <button
-                                    className="bg-black hover:bg-primary py-1 px-2 rounded-lg text-white"
-                                    onClick={() => handleClosePedido(index)}
-                                    disabled={jogador.isClosed}
-                                >
-                                    Fechar Pedido
-                                </button>
-                                <button
-                                    className="bg-red-500 hover:bg-red-700 py-1 px-2 rounded-lg text-white"
-                                    onClick={() => handleRemoveJogador(index)}
-                                >
-                                    Remover Jogador
-                                </button>
-                            </div>
-                        </header>
-                        <div className="p-2 flex flex-col justify-center items-center">
-                            <h1 className="text-md font-semibold">Total: R$ {valorTotalJogador.toFixed(2)}</h1>
-                            <select onChange={(e) => handleItemSelectChange(index, e)} disabled={jogador.isClosed}>
-                                <option value="">Selecione um item</option>
-                                {estoque.map(item => (
-                                    <option key={item.nome} value={item.nome}>{item.nome}</option>
-                                ))}
-                            </select>
-                            <button onClick={() => handleAddItem(index)} disabled={jogador.isClosed}>Adicionar Item</button>
-                            <div>
-                                {jogador.items.map((item, itemIndex) => (
-                                    <div key={itemIndex}>
-                                        <span>{item.nome} - R$ {item.valor.toFixed(2)}</span>
-                                        <button onClick={() => handleRemoveItem(index, itemIndex)}>Remover</button>
-                                    </div>
-                                ))}
-                            </div>
+        <div>
+            {jogadores.map((jogador, index) => (
+                <section key={index}>
+                    <h2>{jogador.nome || 'Jogador ' + jogador.numero}</h2>
+                    <div>
+                        <input
+                            type="text"
+                            value={jogador.nome}
+                            onChange={(e) => handleNomeChange(index, e)}
+                        />
+                        <button onClick={() => handleRemoveJogador(index)}>Remover Jogador</button>
+                    </div>
+                    <div>
+                        <select
+                            value={jogador.selectedItem && jogador.selectedItem.nome || ''}
+                            onChange={(e) => handleItemSelectChange(index, e)}
+                            disabled={jogador.isClosed}
+                        >
+                            <option value="">Selecione o item</option>
+                            {estoque.map((item) => (
+                                <option key={item.id} value={item.nome}>
+                                    {item.nome}
+                                </option>
+                            ))}
+                        </select>
+                        <button onClick={() => handleAddItem(index)} disabled={jogador.isClosed}>Adicionar Item</button>
+                        <div>
+                            {jogador.items.map((item, itemIndex) => (
+                                <div key={itemIndex}>
+                                    <span>{item.nome} - R$ {item.valor.toFixed(2)}</span>
+                                    <button onClick={() => handleRemoveItem(index, itemIndex)}>Remover</button>
+                                </div>
+                            ))}
                         </div>
-                    </section>
-                );
-            })}
+                    </div>
+                    <div>
+                        <h1>Total: R$ {jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0).toFixed(2)}</h1>
+                    </div>
+                </section>
+            ))}
 
             {showPaymentModal && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
