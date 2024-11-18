@@ -18,6 +18,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             try {
                 const response = await axios.get('/.netlify/functions/api-estoque');
                 setEstoque(response.data);
+                console.log(response.data);
             } catch (error) {
                 console.error('Erro ao buscar estoque:', error);
             }
