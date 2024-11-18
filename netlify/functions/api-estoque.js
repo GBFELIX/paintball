@@ -33,8 +33,11 @@ exports.handler = async (event, context) => {
   if (event.httpMethod === 'GET' && event.path.includes('/estoque/')) {
     try {
       const nome = event.path.split('/').pop();
+      console.log(`Buscando item: ${nome}`);
       const query = 'SELECT * FROM estoque WHERE nome = ?';
       const [results] = await connection.query(query, [nome]);
+
+      console.log(`Resultados da busca:`, results);
 
       if (results.length === 0) {
         return {
