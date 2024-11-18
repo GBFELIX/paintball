@@ -2,47 +2,49 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
+const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     const [estoque, setEstoque] = useState([]);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [vendaIndexForPayment, setVendaIndexForPayment] = useState(null);
-    const [paymentValues, setPaymentValues] = useState({
-        dinheiro: 0,
-        credito: 0,
-        debito: 0,
-        pix: 0
-    });
-    const [paymentMethods, setPaymentMethods] = useState({
-        dinheiro: false,
-        credito: false,
-        debito: false,
-        pix: false
-    });
+    const [paymentValues, setPaymentValues] = useState({ dinheiro: 0, credito: 0, debito: 0, pix: 0 });
+    const [paymentMethods, setPaymentMethods] = useState({ dinheiro: false, credito: false, debito: false, pix: false });
     const [descontos, setDescontos] = useState({});
     const [descontoSelecionado, setDescontoSelecionado] = useState('');
     const [valorComDesconto, setValorComDesconto] = useState(0);
     const [valorTotalVendaAtual, setValorTotalVendaAtual] = useState(0);
 
     useEffect(() => {
-        axios.get('/.netlify/functions/api-estoque')
-            .then(response => {
+        const fetchEstoque = async () => {
+            try {
+                const response = await axios.get('/.netlify/functions/api-estoque');
                 setEstoque(response.data);
-            })
-            .catch(error => console.error('Erro ao buscar estoque:', error));
+            } catch (error) {
+                console.error('Erro ao buscar estoque:', error);
+            }
+        };
+        fetchEstoque();
     }, []);
 
     useEffect(() => {
-        axios.get('/.netlify/functions/api-descontos')
-            .then(response => {
+        const fetchDescontos = async () => {
+            try {
+                const response = await axios.get('/.netlify/functions/api-descontos');
                 setDescontos(response.data);
-            })
-            .catch(error => console.error('Erro ao buscar descontos:', error));
+            } catch (error) {
+                console.error('Erro ao buscar descontos:', error);
+            }
+        };
+        fetchDescontos();
     }, []);
+
+    const updateVendas = (updatedVendas) => {
+        setVendas(updatedVendas);
+    };
 
     const handleRemoveVendaAvulsa = (index) => {
         if (vendas.length > 1) {
             const updatedVendas = vendas.filter((_, i) => i !== index);
-            setVendas(updatedVendas);
+            updateVendas(updatedVendas);
         } else {
             toast.error('Deve haver pelo menos uma venda na tela.');
         }
@@ -51,13 +53,13 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     const handleNomeChange = (index, event) => {
         const updatedVendas = [...vendas];
         updatedVendas[index].nome = event.target.value;
-        setVendas(updatedVendas);
+        updateVendas(updatedVendas);
     };
 
     const handleNumeroChange = (index, event) => {
         const updatedVendas = [...vendas];
         updatedVendas[index].numero = event.target.value;
-        setVendas(updatedVendas);
+        updateVendas(updatedVendas);
     };
 
     const handleItemSelectChange = (index, event) => {
@@ -69,7 +71,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
             valor: parseFloat(selectedItem.valor || 0),
             quantidade: selectedItem.quantidade
         } : null;
-        setVendas(updatedVendas);
+        updateVendas(updatedVendas);
     };
 
     const handleAddItem = (index) => {
@@ -83,24 +85,24 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
             };
             updatedVendas[index].items.push(selectedItem);
             updatedVendas[index].selectedItem = '';
-            setVendas(updatedVendas);
+            updateVendas(updatedVendas);
         }
     };
 
     const handleRemoveItem = (vendaIndex, itemIndex) => {
         const updatedVendas = [...vendas];
         updatedVendas[vendaIndex].items.splice(itemIndex, 1);
-        setVendas(updatedVendas);
+        updateVendas(updatedVendas);
     };
 
     const handleClosePedido = (index) => {
-        if (vendas[index].isClosed) {
-            const updatedVendas = [...vendas];
+        const updatedVendas = [...vendas];
+        if (updatedVendas[index].isClosed) {
             updatedVendas[index].isClosed = false;
             updatedVendas[index].items = [];
-            setVendas(updatedVendas);
+            updateVendas(updatedVendas);
         } else {
-            const valorTotal = vendas[index].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+            const valorTotal = updatedVendas[index].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
             setValorTotalVendaAtual(valorTotal);
             setVendaIndexForPayment(index);
             setShowPaymentModal(true);
@@ -113,9 +115,38 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
         return valorTotal * (1 - percentualDesconto / 100);
     };
 
-    const handleConfirmPayment = () => {
+    const handleConfirmPayment = async () => {
+        const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+        const valorFinal = valorComDesconto || valorTotalVendaAtual;
+
+        if (totalPagamento !== valorFinal) {
+            toast.error('O valor total do pagamento deve ser igual ao valor final', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            return;
+        }
+
+        if (!Object.values(paymentMethods).some(method => method === true)) {
+            toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            return;
+        }
+
         const venda = vendas[vendaIndexForPayment];
-        const itemsToUpdate = venda.items;  
+        const itemsToUpdate = venda.items;
         const valorTotalVenda = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
 
         const itemCountMap = itemsToUpdate.reduce((acc, item) => {
@@ -125,107 +156,93 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
 
         let podeFechar = true;
 
-        const promises = Object.keys(itemCountMap).map(nome => {
+        const promises = Object.keys(itemCountMap).map(async (nome) => {
             const quantidadeParaSubtrair = itemCountMap[nome];
-            return axios.get(`/.netlify/functions/api-estoque/${nome}`)
-                .then(response => {
-                    const quantidadeAtual = response.data.quantidade;
+            try {
+                const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
+                const quantidadeAtual = response.data.quantidade;
 
-                    if (quantidadeAtual < quantidadeParaSubtrair) {
-                        toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
-                            position: "top-right",
-                            autoClose: 3000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            theme: "light",
-                        });
-                        podeFechar = false;
-                    } else {
-                        const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
-                        return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
-                            .then(() => {
-                                console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
-                            })
-                            .catch(error => {
-                                console.error('Erro ao atualizar estoque:', error);
-                                toast.error('Erro ao atualizar estoque', {
-                                    position: "top-right",
-                                    autoClose: 3000,
-                                    hideProgressBar: false,
-                                    closeOnClick: true,
-                                    pauseOnHover: true,
-                                    draggable: true,
-                                    theme: "light",
-                                });
-                            });
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao obter quantidade atual do estoque:', error);
-                    toast.error('Erro ao verificar estoque', {
+                if (isNaN(quantidadeAtual) || quantidadeAtual < quantidadeParaSubtrair) {
+                    toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
                         position: "top-right",
-                        autoClose: 3000,
+                        autoClose: 5000,
                         hideProgressBar: false,
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
+                        progress: undefined,
                         theme: "light",
                     });
+                    podeFechar = false;
+                    return; // Retorna para não continuar com a atualização
+                }
+
+                const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
+                await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
+                console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
+            } catch (error) {
+                console.error('Erro ao atualizar estoque:', error);
+                toast.error('Erro ao atualizar estoque', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
                 });
+            }
         });
 
-        Promise.all(promises).then(() => {
-            if (podeFechar) {
-                const dataJogo = localStorage.getItem('dataJogo');
-                const horaJogo = localStorage.getItem('horaJogo');
-                const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
+        await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
 
-                axios.post('/.netlify/functions/api-pedidos', {
+        if (podeFechar) {
+            const dataJogo = localStorage.getItem('dataJogo');
+            const horaJogo = localStorage.getItem('horaJogo');
+            const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
+
+            try {
+                await axios.post('/.netlify/functions/api-pedidos', {
                     nomeJogador: venda.nome,
                     items: venda.items,
                     formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
                     valorTotal: valorTotalVenda,
                     dataJogo: dataHoraJogo,
-                })
-                .then(() => {
-                    toast.success('Pedido finalizado com sucesso!', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
+                });
+                toast.success('Pedido finalizado com sucesso!', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
 
-                    const updatedVendas = [...vendas];
-                    updatedVendas[vendaIndexForPayment].isClosed = true;
-                    setVendas(updatedVendas);
-                    setShowPaymentModal(false);
+                const updatedVendas = [...vendas];
+                updatedVendas[vendaIndexForPayment].isClosed = true;
+                updateVendas(updatedVendas);
+                setShowPaymentModal(false);
 
-                    const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-                    pagamentosAnteriores.push({
-                        valorTotal: valorTotalVenda,
-                        formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
-                    });
-                    localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
-                })
-                .catch(error => {
-                    console.error('Erro ao cadastrar pedido:', error);
-                    toast.error('Erro ao finalizar pedido', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
+                const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+                pagamentosAnteriores.push({
+                    valorTotal: valorTotalVenda,
+                    formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                });
+                localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+            } catch (error) {
+                console.error('Erro ao cadastrar pedido:', error);
+                toast.error('Erro ao finalizar pedido', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
                 });
             }
-        });
+        }
     };
 
     return (
@@ -411,4 +428,6 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
             )}
         </div>
     );
-}
+};
+
+export default VendaAvul;
