@@ -148,7 +148,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
         const valorTotalVenda = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
 
         const itemCountMap = itemsToUpdate.reduce((acc, item) => {
-            acc[item.nome] = (acc[item.nome] || 0) + 1;
+            acc[item.nome] = (acc[item.nome] || 0) + (item.quantidade || 1);
             return acc;
         }, {});
 
