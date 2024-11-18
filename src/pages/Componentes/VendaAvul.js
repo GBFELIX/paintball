@@ -178,6 +178,19 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 }
 
                 const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
+                if (novaQuantidade < 0) {
+                    toast.error(`Quantidade não pode ser negativa para o item ${nome}`, {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                    return; // Não prosseguir com a requisição
+                }
+
                 await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
                 console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
             } catch (error) {
