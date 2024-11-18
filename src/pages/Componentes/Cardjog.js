@@ -113,17 +113,15 @@ export default function CardJogador({ jogadores, setJogadores }) {
         return; // Não fecha o pedido se o nome não estiver preenchido
     }
 
-    const updatedJogadores = [...jogadores];
-
     if (jogador.isClosed) {
-        // Se já estiver fechado, você pode querer permitir reabri-lo ou apenas ignorar
+        const updatedJogadores = [...jogadores];
         updatedJogadores[index].isClosed = false;
         updatedJogadores[index].items = [];
+        setJogadores(updatedJogadores);
     } else {
-        updatedJogadores[index].isClosed = true; // Marcar o jogador como fechado
+        setJogadorIndexForPayment(index);
+        setShowPaymentModal(true);
     }
-
-    setJogadores(updatedJogadores);
   };
 
   const handleConfirmPayment = () => {
@@ -157,83 +155,50 @@ export default function CardJogador({ jogadores, setJogadores }) {
         return;
     }
 
-    const itemsToUpdate = jogador.items;
-    const itemCountMap = itemsToUpdate.reduce((acc, item) => {
-        acc[item.nome] = (acc[item.nome] || 0) + 1;
-        return acc;
-    }, {});
+    // Verifique se pelo menos uma forma de pagamento foi selecionada
+    if (!Object.values(paymentMethods).some(method => method === true)) {
+        toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+        return;
+    }
 
-    let podeFechar = true;
+    // Verifique se os valores foram inseridos
+    const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+    const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+    
+    if (totalPagamento !== valorTotal) {
+        toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+        return;
+    }
 
-    const promises = Object.keys(itemCountMap).map(nome => {
-        const selectedItem = estoque.find(item => item.nome === nome);
-        
-        if (!selectedItem) {
-            toast.error(`Item ${nome} não encontrado no estoque`, {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            podeFechar = false;
-            return Promise.resolve();
-        }
-
-        const quantidadeAtual = selectedItem.quantidade;
-
-        if (quantidadeAtual < itemCountMap[nome]) {
-            toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            podeFechar = false;
-            return Promise.resolve();
-        } else {
-            const novaQuantidade = quantidadeAtual - itemCountMap[nome];
-            return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
-                .then(() => {
-                    console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
-                })
-                .catch(error => {
-                    console.error('Erro ao atualizar estoque:', error);
-                    toast.error('Erro ao atualizar estoque', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                });
-        }
-    });
-
-    Promise.all(promises).then(() => {
-        if (podeFechar) {
-            // Lógica para finalizar o pedido
-            const updatedJogadores = [...jogadores];
-            updatedJogadores[jogadorIndexForPayment].isClosed = true; // Marcar o jogador como fechado
-            setJogadores(updatedJogadores); // Atualizar o estado dos jogadores
-            setShowPaymentModal(false); // Fechar o modal
-            toast.success('Pagamento confirmado com sucesso!', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-        }
+    // Se todas as validações passarem, feche o pedido
+    const updatedJogadores = [...jogadores];
+    updatedJogadores[jogadorIndexForPayment].isClosed = true; // Marcar o jogador como fechado
+    setJogadores(updatedJogadores); // Atualizar o estado dos jogadores
+    setShowPaymentModal(false); // Fechar o modal
+    toast.success('Pagamento confirmado com sucesso!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
     });
   };
 
@@ -330,10 +295,9 @@ export default function CardJogador({ jogadores, setJogadores }) {
             <div className="flex justify-center items-center mt-2">
               <button
                 className="w-[180px] bg-gray-300 hover:bg-primary text-gray-800 font-bold py-2 px-4 rounded-l"
-                onClick={() => handleClosePedido(index)}
-                disabled={jogador.isClosed}
+                onClick={() => setShowPaymentModal(true)}
               >
-                {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
+                Fechar Pedido
               </button>
             </div>
           </section>
