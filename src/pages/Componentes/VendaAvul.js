@@ -159,7 +159,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
             return axios.get(`/.netlify/functions/api-estoque/${nome}`)
                 .then(response => {
                     const quantidadeAtual = response.data.quantidade;
-        
+                    console.log(response.data.quantidade)
                     if (isNaN(quantidadeAtual)) {
                         toast.error(`Quantidade atual do estoque para o item ${nome} é inválida`, {
                             position: "top-right",
