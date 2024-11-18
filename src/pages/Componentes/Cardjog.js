@@ -113,15 +113,17 @@ export default function CardJogador({ jogadores, setJogadores }) {
         return; // Não fecha o pedido se o nome não estiver preenchido
     }
 
+    const updatedJogadores = [...jogadores];
+
     if (jogador.isClosed) {
-        const updatedJogadores = [...jogadores];
+        // Se já estiver fechado, você pode querer permitir reabri-lo ou apenas ignorar
         updatedJogadores[index].isClosed = false;
         updatedJogadores[index].items = [];
-        setJogadores(updatedJogadores);
     } else {
-        setJogadorIndexForPayment(index);
-        setShowPaymentModal(true);
+        updatedJogadores[index].isClosed = true; // Marcar o jogador como fechado
     }
+
+    setJogadores(updatedJogadores);
   };
 
   const handleConfirmPayment = () => {
@@ -329,6 +331,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
               <button
                 className="w-[180px] bg-gray-300 hover:bg-primary text-gray-800 font-bold py-2 px-4 rounded-l"
                 onClick={() => handleClosePedido(index)}
+                disabled={jogador.isClosed}
               >
                 {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
               </button>
