@@ -37,7 +37,7 @@ exports.handler = async (event, context) => {
       const query = 'SELECT * FROM estoque WHERE nome = ?';
       const [results] = await connection.query(query, [nome]);
 
-      console.log(`Resultados da busca:`, results);
+      console.log('Resultados da busca:', results);
 
       if (results.length === 0) {
         return {
