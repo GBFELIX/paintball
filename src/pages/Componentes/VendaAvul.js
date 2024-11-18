@@ -158,9 +158,11 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
             const quantidadeParaSubtrair = itemCountMap[nome];
             return axios.get(`/.netlify/functions/api-estoque/${nome}`)
                 .then(response => {
+                    console.log('Resposta da API:', response);
                     const quantidadeAtual = response.data.quantidade;
-                    console.log(quantidadeAtual);
-                    console.log(response.data.quantidade);
+
+                    console.log(`Quantidade atual do item ${nome}: ${quantidadeAtual}, quantidade para subtrair: ${quantidadeParaSubtrair}`);
+
                     if (isNaN(quantidadeAtual)) {
                         toast.error(`Quantidade atual do estoque para o item ${nome} é inválida`, {
                             position: "top-right",
@@ -174,7 +176,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
                         podeFechar = false;
                         return;
                     }
-        
+
                     if (quantidadeAtual < quantidadeParaSubtrair) {
                         toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
                             position: "top-right",
