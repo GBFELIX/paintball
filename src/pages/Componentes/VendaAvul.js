@@ -18,7 +18,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             try {
                 const response = await axios.get('/.netlify/functions/api-estoque');
                 setEstoque(response.data);
-                console.log(response.data);
             } catch (error) {
                 console.error('Erro ao buscar estoque:', error);
             }
@@ -160,9 +159,13 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
         const promises = Object.keys(itemCountMap).map(async (nome) => {
             const quantidadeParaSubtrair = itemCountMap[nome];
             try {
-                const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
-                console.log('Resposta da API:', response.data);
-                const quantidadeAtual = response.data.quantidade;
+                const selectedItem = estoque.find(item => item.nome === nome);
+                
+                if (!selectedItem) {
+                    throw new Error(`Item ${nome} não encontrado no estoque`);
+                }
+
+                const quantidadeAtual = selectedItem.quantidade;
 
                 if (quantidadeAtual === undefined) {
                     throw new Error(`Quantidade não encontrada para o item ${nome}`);
