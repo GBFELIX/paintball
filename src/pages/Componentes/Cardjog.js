@@ -125,7 +125,10 @@ export default function CardJogador({ jogadores, setJogadores }) {
   };
 
   const handleConfirmPayment = () => {
+    // Obtenha o jogador atual
+    const jogador = jogadores[jogadorIndexForPayment];
 
+    // Verifique se items estão definidos
     if (!jogador.items || jogador.items.length === 0) {
         toast.error('Nenhum item encontrado para o jogador', {
             position: "top-right",
@@ -295,8 +298,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
             
             <div className="mb-4">
               <p className="font-bold">
-                Valor Total: R$ {jogadores[jogadorIndexForPayment] && 
-                  jogadores[jogadorIndexForPayment].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0).toFixed(2)}
+                Valor Total: R$ {jogadores[jogadorIndexForPayment].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0).toFixed(2)}
               </p>
             </div>
 
