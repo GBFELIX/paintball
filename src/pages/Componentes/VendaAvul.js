@@ -114,37 +114,8 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
     };
 
     const handleConfirmPayment = () => {
-        const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-        const valorFinal = valorComDesconto || valorTotalVendaAtual;
-
-        if (totalPagamento !== valorFinal) {
-            toast.error('O valor total do pagamento deve ser igual ao valor final', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            return;
-        }
-
-        if (!Object.values(paymentMethods).some(method => method === true)) {
-            toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            return;
-        }
-
         const venda = vendas[vendaIndexForPayment];
-        const itemsToUpdate = venda.items;
+        const itemsToUpdate = venda.items;  
         const valorTotalVenda = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
 
         const itemCountMap = itemsToUpdate.reduce((acc, item) => {
@@ -158,24 +129,7 @@ export default function VendaAvul({ vendas, setVendas, handleAddVendaAvulsa }) {
             const quantidadeParaSubtrair = itemCountMap[nome];
             return axios.get(`/.netlify/functions/api-estoque/${nome}`)
                 .then(response => {
-                    console.log('Resposta da API:', response);
                     const quantidadeAtual = response.data.quantidade;
-
-                    console.log(`Quantidade atual do item ${nome}: ${quantidadeAtual}, quantidade para subtrair: ${quantidadeParaSubtrair}`);
-
-                    if (isNaN(quantidadeAtual)) {
-                        toast.error(`Quantidade atual do estoque para o item ${nome} é inválida`, {
-                            position: "top-right",
-                            autoClose: 3000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            theme: "light",
-                        });
-                        podeFechar = false;
-                        return;
-                    }
 
                     if (quantidadeAtual < quantidadeParaSubtrair) {
                         toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
