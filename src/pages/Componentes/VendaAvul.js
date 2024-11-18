@@ -160,7 +160,12 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             const quantidadeParaSubtrair = itemCountMap[nome];
             try {
                 const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
+                console.log('Resposta da API:', response.data);
                 const quantidadeAtual = response.data.quantidade;
+
+                if (quantidadeAtual === undefined) {
+                    throw new Error(`Quantidade não encontrada para o item ${nome}`);
+                }
 
                 if (isNaN(quantidadeAtual) || quantidadeAtual < quantidadeParaSubtrair) {
                     toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
@@ -178,24 +183,11 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 }
 
                 const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
-                if (novaQuantidade < 0) {
-                    toast.error(`Quantidade não pode ser negativa para o item ${nome}`, {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                    return; // Não prosseguir com a requisição
-                }
-
                 await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
                 console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
             } catch (error) {
-                console.error('Erro ao atualizar estoque:', error);
-                toast.error('Erro ao atualizar estoque', {
+                console.error('Erro ao obter quantidade atual do estoque:', error);
+                toast.error('Erro ao verificar estoque', {
                     position: "top-right",
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -383,7 +375,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                                 ))}
                             </select>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="flex flex-col gap-4 mb-4">
                             {['dinheiro', 'credito', 'debito', 'pix'].map((method) => (
                                 <div key={method} className="flex items-center space-x-2">
                                     <input
