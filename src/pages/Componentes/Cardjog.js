@@ -125,23 +125,7 @@ export default function CardJogador({ jogadores, setJogadores }) {
   };
 
   const handleConfirmPayment = () => {
-    const jogador = jogadores[jogadorIndexForPayment];
 
-    // Verifique se o jogador está definido
-    if (!jogador) {
-        toast.error('Jogador não encontrado', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-        return;
-    }
-
-    // Verifique se items estão definidos
     if (!jogador.items || jogador.items.length === 0) {
         toast.error('Nenhum item encontrado para o jogador', {
             position: "top-right",
