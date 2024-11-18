@@ -24,7 +24,34 @@ exports.handler = async (event, context) => {
       console.error('Erro ao buscar estoque:', err);
       return {
         statusCode: 500,
-        body: JSON.stringify(err)
+        body: JSON.stringify({ error: 'Erro ao buscar estoque', details: err.message })
+      };
+    }
+  }
+
+  // GET /estoque/:nome
+  if (event.httpMethod === 'GET' && event.path.includes('/estoque/')) {
+    try {
+      const nome = event.path.split('/').pop();
+      const query = 'SELECT * FROM estoque WHERE nome = ?';
+      const [results] = await connection.query(query, [nome]);
+
+      if (results.length === 0) {
+        return {
+          statusCode: 404,
+          body: JSON.stringify({ error: 'Item não encontrado' })
+        };
+      }
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify(results[0])
+      };
+    } catch (err) {
+      console.error('Erro ao buscar item do estoque:', err);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Erro ao buscar item do estoque', details: err.message })
       };
     }
   }
@@ -44,7 +71,7 @@ exports.handler = async (event, context) => {
       console.error('Erro ao adicionar item ao estoque:', err);
       return {
         statusCode: 500,
-        body: JSON.stringify(err)
+        body: JSON.stringify({ error: 'Erro ao adicionar item ao estoque', details: err.message })
       };
     }
   }
@@ -64,7 +91,7 @@ exports.handler = async (event, context) => {
       console.error('Erro ao remover item do estoque:', err);
       return {
         statusCode: 500,
-        body: JSON.stringify(err)
+        body: JSON.stringify({ error: 'Erro ao remover item do estoque', details: err.message })
       };
     }
   }
@@ -78,14 +105,14 @@ exports.handler = async (event, context) => {
       if (nome === 'marcador especial' && quantidade !== undefined) {
         return {
           statusCode: 400,
-          body: JSON.stringify("A quantidade do 'marcador especial' não pode ser alterada.")
+          body: JSON.stringify({ error: `A quantidade do 'marcador especial' não pode ser alterada.` })
         };
       }
 
       if (quantidade === undefined && valor === undefined) {
         return {
           statusCode: 400,
-          body: JSON.stringify("Nenhum valor para atualizar fornecido")
+          body: JSON.stringify({ error: 'Nenhum valor para atualizar fornecido' })
         };
       }
 
@@ -93,11 +120,23 @@ exports.handler = async (event, context) => {
       const values = [];
 
       if (quantidade !== undefined) {
+        if (typeof quantidade !== 'number' || quantidade < 0) {
+          return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Quantidade deve ser um número não negativo' })
+          };
+        }
         query += 'quantidade = ? ';
         values.push(quantidade);
       }
 
       if (valor !== undefined) {
+        if (typeof valor !== 'number' || valor < 0) {
+          return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Valor deve ser um número não negativo' })
+          };
+        }
         if (values.length > 0) {
           query += ', ';
         }
@@ -118,7 +157,7 @@ exports.handler = async (event, context) => {
       console.error('Erro ao atualizar estoque:', err);
       return {
         statusCode: 500,
-        body: JSON.stringify('Erro ao atualizar estoque')
+        body: JSON.stringify({ error: 'Erro ao atualizar estoque', details: err.message })
       };
     }
   }
