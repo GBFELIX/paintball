@@ -110,6 +110,35 @@ export default function CardJogador({ jogadores, setJogadores }) {
 
   const handleConfirmPayment = () => {
     const jogador = jogadores[jogadorIndexForPayment];
+
+    // Verifique se o jogador está definido
+    if (!jogador) {
+        toast.error('Jogador não encontrado', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+        return;
+    }
+
+    // Verifique se items estão definidos
+    if (!jogador.items || jogador.items.length === 0) {
+        toast.error('Nenhum item encontrado para o jogador', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+        return;
+    }
+
     const itemsToUpdate = jogador.items;
     const valorTotalJogador = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
     const valorFinal = valorComDesconto || valorTotalJogador;
@@ -143,6 +172,19 @@ export default function CardJogador({ jogadores, setJogadores }) {
         return;
     }
 
+    if (!jogador.nome) {
+        toast.error('Por favor, preencha o nome do jogador', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+        return;
+    }
+
     const itemCountMap = itemsToUpdate.reduce((acc, item) => {
         acc[item.nome] = (acc[item.nome] || 0) + 1;
         return acc;
@@ -151,90 +193,11 @@ export default function CardJogador({ jogadores, setJogadores }) {
     let podeFechar = true;
 
     const promises = Object.keys(itemCountMap).map(nome => {
-        const quantidadeParaSubtrair = itemCountMap[nome];
-        return axios.get(`/.netlify/functions/api-estoque/${nome}`)
-            .then(response => {
-                const quantidadeAtual = response.data.quantidade;
-
-                // Verifica se a quantidade atual é um número
-                if (isNaN(quantidadeAtual)) {
-                    toast.error(`Erro ao obter quantidade do item ${nome}`, {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                    podeFechar = false;
-                    return;
-                }
-
-                if (quantidadeAtual < quantidadeParaSubtrair) {
-                    toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                    podeFechar = false;
-                } else {
-                    const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
-
-                    // Verifica se a nova quantidade é negativa
-                    if (novaQuantidade < 0) {
-                        toast.error(`Erro: a nova quantidade do item ${nome} não pode ser negativa`, {
-                            position: "top-right",
-                            autoClose: 3000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            theme: "light",
-                        });
-                        podeFechar = false;
-                        return;
-                    }
-
-                    return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
-                        .then(() => {
-                            console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
-                        })
-                        .catch(error => {
-                            console.error('Erro ao atualizar estoque:', error);
-                            toast.error('Erro ao atualizar estoque', {
-                                position: "top-right",
-                                autoClose: 3000,
-                                hideProgressBar: false,
-                                closeOnClick: true,
-                                pauseOnHover: true,
-                                draggable: true,
-                                theme: "light",
-                            });
-                        });
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao obter quantidade atual do estoque:', error);
-                toast.error('Erro ao verificar estoque', {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
-            });
-    });
-
-    Promise.all(promises).then(() => {
-        if (!podeFechar) {
-            toast.error('Não foi possível fechar o pedido devido à quantidade insuficiente no estoque.', {
+        // Encontre o item no estoque já carregado
+        const selectedItem = estoque.find(item => item.nome === nome);
+        
+        if (!selectedItem) {
+            toast.error(`Item ${nome} não encontrado no estoque`, {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -243,67 +206,49 @@ export default function CardJogador({ jogadores, setJogadores }) {
                 draggable: true,
                 theme: "light",
             });
-        } else {
-            const dataJogo = localStorage.getItem('dataJogo');
-            const horaJogo = localStorage.getItem('horaJogo');
-            const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
+            podeFechar = false;
+            return Promise.resolve(); // Retorna uma Promise resolvida para evitar falhas
+        }
 
-            const formasPagamento = Object.entries(paymentMethods)
-                .filter(([_, selected]) => selected)
-                .map(([method]) => ({
-                    tipo: method,
-                    valor: paymentValues[method]
-                }));
+        const quantidadeAtual = selectedItem.quantidade; // Acesse a quantidade diretamente do item encontrado
 
-            axios.post('/.netlify/functions/api-pedidos', {
-                nomeJogador: jogador.nome,
-                items: jogador.items,
-                formasPagamento: formasPagamento,
-                valorTotal: valorTotalJogador,
-                valorComDesconto: valorComDesconto,
-                descontoAplicado: descontoSelecionado,
-                dataJogo: dataHoraJogo,
-            })
-            .then(() => {
-                toast.success('Pedido finalizado com sucesso!', {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
-
-                const updatedJogadores = [...jogadores];
-                updatedJogadores[jogadorIndexForPayment].isClosed = true;
-                setJogadores(updatedJogadores);
-                setShowPaymentModal(false);
-                setPaymentValues({dinheiro: 0, credito: 0, debito: 0, pix: 0});
-                setPaymentMethods({dinheiro: false, credito: false, debito: false, pix: false});
-                setDescontoSelecionado('');
-                setValorComDesconto(0);
-
-                const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-                pagamentosAnteriores.push({
-                    valorTotal: valorTotalJogador,
-                    valorComDesconto: valorComDesconto,
-                    formasPagamento: formasPagamento
-                });
-                localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
-            })
-            .catch(error => {
-                console.error('Erro ao cadastrar pedido:', error);
-                toast.error('Erro ao finalizar pedido', {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
+        if (quantidadeAtual < itemCountMap[nome]) {
+            toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
             });
+            podeFechar = false;
+            return Promise.resolve(); // Retorna uma Promise resolvida para evitar falhas
+        } else {
+            const novaQuantidade = quantidadeAtual - itemCountMap[nome];
+            return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
+                .then(() => {
+                    console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar estoque:', error);
+                    toast.error('Erro ao atualizar estoque', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                });
+        }
+    });
+
+    // Aguarde todas as promessas serem resolvidas
+    Promise.all(promises).then(() => {
+        if (podeFechar) {
+            // Lógica para fechar o pedido, se necessário
         }
     });
   };
