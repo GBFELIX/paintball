@@ -218,6 +218,10 @@ export default function CardJogador({ jogadores, setJogadores }) {
     Promise.all(promises).then(() => {
         if (podeFechar) {
             // Lógica para finalizar o pedido
+            const updatedJogadores = [...jogadores];
+            updatedJogadores[jogadorIndexForPayment].isClosed = true; // Marcar o jogador como fechado
+            setJogadores(updatedJogadores); // Atualizar o estado dos jogadores
+            setShowPaymentModal(false); // Fechar o modal
             toast.success('Pagamento confirmado com sucesso!', {
                 position: "top-right",
                 autoClose: 3000,
@@ -227,7 +231,6 @@ export default function CardJogador({ jogadores, setJogadores }) {
                 draggable: true,
                 theme: "light",
             });
-            // Atualizar o estado dos jogadores ou redirecionar
         }
     });
   };
