@@ -251,7 +251,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   
   return (
     <div className="flex flex-wrap gap-4">
-      <ToastContainer />
+
       {despesas.map((despesa, index) => {
         const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
         return (

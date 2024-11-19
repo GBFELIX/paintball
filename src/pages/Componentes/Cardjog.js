@@ -167,6 +167,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
         updateJogadores(updatedJogadores);
         setShowPaymentModal(false);
+        toast.dismiss();
         toast.success('Pagamento confirmado com sucesso!', {
             position: "top-right",
             autoClose: 3000,
@@ -180,7 +181,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
     return (
         <div className="flex flex-wrap gap-4">
-          <ToastContainer/>
+
             {jogadores.map((jogador, index) => {
                 const valorTotalVenda = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
                 return (
