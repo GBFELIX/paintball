@@ -228,18 +228,23 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     Promise.all(promises).then(() => {
         if (podeFechar) {
             const updatedDespesas = [...despesas];
-            updatedDespesas[despesaIndexForPayment].isClosed = true;
-            setDespesas(updatedDespesas);
-            setShowPaymentModal(false);
-            toast.success('Pagamento confirmado com sucesso!', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
+            
+            if (despesaIndexForPayment !== undefined && despesaIndexForPayment < updatedDespesas.length) {
+                updatedDespesas[despesaIndexForPayment].isClosed = true;
+                setDespesas(updatedDespesas);
+                setShowPaymentModal(false);
+                toast.success('Pagamento confirmado com sucesso!', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+            } else {
+                console.error('Índice de despesa inválido:', despesaIndexForPayment);
+            }
         }
     });
   };
