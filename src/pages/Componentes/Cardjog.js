@@ -180,11 +180,12 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
     return (
         <div className="flex flex-wrap gap-4">
+          <ToastContainer/>
             {jogadores.map((jogador, index) => {
                 const valorTotalVenda = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
                 return (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <header className="bg-yellow-600 w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
+                        <header className="bg-primary w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
                             <p className="text-black">Jogador</p>
                             <div className="flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
                                 <input

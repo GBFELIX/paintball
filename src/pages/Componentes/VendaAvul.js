@@ -256,6 +256,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
 
     return (
         <div className="flex flex-wrap gap-4">
+            <ToastContainer/>
             {vendas.map((venda, index) => {
                 const valorTotalVenda = venda.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
                 return (
