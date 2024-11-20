@@ -39,21 +39,8 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   }, []);
 
   const handleRemoveDespesa = (index) => {
-    if (despesas.length > 1) {
       const updatedDespesas = despesas.filter((_, i) => i !== index);
       setDespesas(updatedDespesas);
-    } else {
-      toast.error('Deve haver pelo menos um card de despesas na tela.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-    }
   };
 
   const handleNomeChange = (index, event) => {
@@ -260,9 +247,11 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                 });
 
                 const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+                const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
+
                 pagamentosAnteriores.push({
                     valorTotal: valorTotalDespesa,
-                    formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                    formasPagamento: formasSelecionadas,
                 });
                 localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
             } catch (error) {

@@ -193,9 +193,11 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
 
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+            const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
+
             pagamentosAnteriores.push({
                 valorTotal: valorTotal,
-                formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                formasPagamento: formasSelecionadas,
             });
             localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
         } catch (error) {

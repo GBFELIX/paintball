@@ -42,12 +42,8 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     };
 
     const handleRemoveVendaAvulsa = (index) => {
-        if (vendas.length > 1) {
             const updatedVendas = vendas.filter((_, i) => i !== index);
             updateVendas(updatedVendas);
-        } else {
-            toast.error('Deve haver pelo menos uma venda na tela.');
-        }
     };
 
     const handleNomeChange = (index, event) => {
@@ -235,9 +231,11 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 setShowPaymentModal(false);
 
                 const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+                const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
+
                 pagamentosAnteriores.push({
                     valorTotal: valorTotalVenda,
-                    formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                    formasPagamento: formasSelecionadas,
                 });
                 localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
             } catch (error) {
