@@ -115,7 +115,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }
     };
 
-    const handleConfirmPayment = () => {
+    const handleConfirmPayment = async () => {
         const jogador = jogadores[jogadorIndexForPayment];
 
         // Verifique se items estão definidos
@@ -177,6 +177,39 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             draggable: true,
             theme: "light",
         });
+
+        // Enviar o pedido para a API
+        const dataJogo = localStorage.getItem('dataJogo');
+        const horaJogo = localStorage.getItem('horaJogo');
+        const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
+
+        try {
+            await axios.post('/.netlify/functions/api-pedidos', {
+                nomeJogador: jogador.nome,
+                items: jogador.items,
+                formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                valorTotal: valorTotal,
+                dataJogo: dataHoraJogo,
+            });
+
+            const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+            pagamentosAnteriores.push({
+                valorTotal: valorTotal,
+                formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+            });
+            localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+        } catch (error) {
+            console.error('Erro ao cadastrar pedido:', error);
+            toast.error('Erro ao finalizar pedido', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+        }
     };
 
     return (

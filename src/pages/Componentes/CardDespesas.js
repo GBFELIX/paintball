@@ -119,7 +119,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     }
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     const despesa = despesas[despesaIndexForPayment];
 
     if (!despesa) {
@@ -173,7 +173,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
 
     let podeFechar = true;
 
-    const promises = Object.keys(itemCountMap).map(nome => {
+    const promises = Object.keys(itemCountMap).map(async (nome) => {
         const selectedItem = estoque.find(item => item.nome === nome);
         
         if (!selectedItem) {
@@ -222,18 +222,52 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                         theme: "light",
                     });
                 });
+                
         }
     });
 
-    Promise.all(promises).then(() => {
-        if (podeFechar) {
-            const updatedDespesas = [...despesas];
-            
-            if (despesaIndexForPayment !== undefined && despesaIndexForPayment < updatedDespesas.length) {
-                updatedDespesas[despesaIndexForPayment].isClosed = true;
-                setDespesas(updatedDespesas);
-                setShowPaymentModal(false);
-                toast.success('Pagamento confirmado com sucesso!', {
+    await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
+
+    if (podeFechar) {
+        const updatedDespesas = [...despesas];
+        
+        if (despesaIndexForPayment !== undefined && despesaIndexForPayment < updatedDespesas.length) {
+            updatedDespesas[despesaIndexForPayment].isClosed = true;
+            setDespesas(updatedDespesas);
+            setShowPaymentModal(false);
+            toast.success('Pagamento confirmado com sucesso!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+
+            // Enviar o pedido para a API
+            const dataJogo = localStorage.getItem('dataJogo');
+            const horaJogo = localStorage.getItem('horaJogo');
+            const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
+
+            try {
+                await axios.post('/.netlify/functions/api-pedidos', {
+                    nomeJogador: despesa.nome,
+                    items: despesa.items,
+                    formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                    valorTotal: valorTotalDespesa,
+                    dataJogo: dataHoraJogo,
+                });
+
+                const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+                pagamentosAnteriores.push({
+                    valorTotal: valorTotalDespesa,
+                    formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                });
+                localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+            } catch (error) {
+                console.error('Erro ao cadastrar pedido:', error);
+                toast.error('Erro ao finalizar pedido', {
                     position: "top-right",
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -242,11 +276,11 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                     draggable: true,
                     theme: "light",
                 });
-            } else {
-                console.error('Índice de despesa inválido:', despesaIndexForPayment);
             }
+        } else {
+            console.error('Índice de despesa inválido:', despesaIndexForPayment);
         }
-    });
+    }
   };
   
   return (
