@@ -233,10 +233,15 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
                 const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
 
-                pagamentosAnteriores.push({
-                    valorTotal: valorTotalVenda,
-                    formasPagamento: formasSelecionadas,
+                const valorPorForma = valorTotalVenda / formasSelecionadas.length;
+
+                formasSelecionadas.forEach(forma => {
+                    pagamentosAnteriores.push({
+                        valorTotal: valorPorForma,
+                        formasPagamento: forma,
+                    });
                 });
+
                 localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
             } catch (error) {
                 console.error('Erro ao cadastrar pedido:', error);

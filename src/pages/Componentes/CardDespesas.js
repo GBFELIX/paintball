@@ -249,10 +249,16 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                 const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
                 const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
 
-                pagamentosAnteriores.push({
-                    valorTotal: valorTotalDespesa,
-                    formasPagamento: formasSelecionadas,
+                // Calcular o valor a ser atribuído a cada forma de pagamento
+                const valorPorForma = valorTotalDespesa / formasSelecionadas.length; // Divide o total pelo número de formas selecionadas
+
+                formasSelecionadas.forEach(forma => {
+                    pagamentosAnteriores.push({
+                        valorTotal: valorPorForma, // Armazena o valor correspondente a cada forma
+                        formasPagamento: forma, // Armazena a forma de pagamento
+                    });
                 });
+
                 localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
             } catch (error) {
                 console.error('Erro ao cadastrar pedido:', error);
