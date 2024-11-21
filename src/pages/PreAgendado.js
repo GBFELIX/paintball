@@ -20,8 +20,9 @@ export default function PreAgendado() {
       setLoading(true);
       try {
         const response = await axios.get('./.netlify/functions/api-equipes'); 
-        setEquipes(response.data);
-        if (response.data.length === 0) {
+        const sortedEquipes = response.data.sort((a, b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+        setEquipes(sortedEquipes);
+        if (sortedEquipes.length === 0) {
           toast.info('Nenhuma equipe pré-agendada encontrada', {
             position: "top-right",
             autoClose: 3000,
