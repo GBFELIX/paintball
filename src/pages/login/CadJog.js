@@ -1,6 +1,6 @@
 import logo from '../../images/logo_la.png';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 //import NavBar from '../Componentes/Navbar';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
@@ -14,55 +14,60 @@ function CadJog() {
   const navigate = useNavigate();
 
   const handleCadastro = async () => {
-    try {
-      const response = await fetch('/.netlify/functions/api-cadastro', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, email, cpf, telefone, senha })
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast('Cadastro realizado com sucesso!', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        navigate("/loginjog");
-      } else {
-        toast.error('Erro ao realizar o cadastro.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      }
-    } catch (error) {
-      console.error('Erro na solicitação:', error);
-      toast.error('Erro ao realizar o cadastro.', {
+    // Validar campos obrigatórios antes de enviar
+    if (!username || !email || !telefone || !senha) {
+      toast.error('Por favor, preencha os campos obrigatórios (nome, email, telefone e senha).', {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        progress: undefined,
+        theme: "light",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/.netlify/functions/api-cadastro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          username, 
+          email, 
+          cpf: cpf || null, // CPF é opcional
+          telefone, 
+          senha 
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast.success('Cadastro realizado com sucesso!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+        navigate("/loginjog");
+      } else {
+        throw new Error(data.message || 'Erro ao realizar o cadastro.');
+      }
+    } catch (error) {
+      console.error('Erro na solicitação:', error);
+      toast.error(error.message || 'Erro ao realizar o cadastro.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
         theme: "light",
       });
     }
@@ -95,7 +100,7 @@ function CadJog() {
             id="cpf"
             type='text'
             className='border border-white p-1 rounded-sm text-center mt-2 w-[250px]'
-            placeholder='Digite seu CPF'
+            placeholder='Digite seu CPF (opcional)'
             value={cpf}
             onChange={(e) => setCpf(e.target.value)}
           />
@@ -122,7 +127,11 @@ function CadJog() {
           >
             Fazer Cadastro
           </button>
-          <p className='text-primary mt-10'><span className='text-white'>Já possuo cadastro!</span> <a href='./loginjog/'>Clique aqui</a></p>
+          <p className='text-primary mt-10'>
+            <Link to="/loginjog" className="text-primary">
+                <span className='text-white'>Já possuo cadastro! Clique aqui</span>
+            </Link>
+          </p>
         </div>
       </div>
     </div>
