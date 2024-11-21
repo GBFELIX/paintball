@@ -167,16 +167,20 @@ export default function PreAgendado() {
                 <p className="text-black font-semibold w-1/2 text-center">Nome do Jogador</p>
                 <p className="text-black font-semibold w-1/2 text-center">Contato</p>
               </div>
-              {jogadores.map((jogador, index) => (
-                <div key={index} className="w-full flex justify-between items-center px-3 py-2 border-t border-gray-300">
-                  <div className="w-1/2 text-center">
-                    <p className="text-black font-semibold">{jogador.nomeJogador}</p>
+              {jogadores.length > 0 ? (
+                jogadores.map((jogador, index) => (
+                  <div key={index} className="w-full flex justify-between items-center px-3 py-2 border-t border-gray-300">
+                    <div className="w-1/2 text-center">
+                      <p className="text-black font-semibold">{jogador.nomeJogador}</p>
+                    </div>
+                    <div className="w-1/2 text-center">
+                      <p className="text-black font-semibold">{jogador.contato}</p>
+                    </div>
                   </div>
-                  <div className="w-1/2 text-center">
-                    <p className="text-black font-semibold">{jogador.contato}</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-black text-center">Nenhum jogador encontrado.</p>
+              )}
             </div>
             <button
               className="mt-5 p-2 bg-red-600 text-white rounded-md"

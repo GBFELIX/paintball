@@ -14,6 +14,7 @@ export default function CadEquipe() {
   const [jogadores, setJogadores] = useState([]); 
   const [editIndex, setEditIndex] = useState(null); 
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false); // Estado para controlar o botão
 
   const handleAdd = () => {
     if (nome && email && telefone) {
@@ -87,6 +88,8 @@ export default function CadEquipe() {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true); // Desabilita o botão ao iniciar o cadastro
+
     if (!nomeEquipe) {
       toast.error('Preencha o nome da equipe antes de finalizar o cadastro.', {
         position: "top-right",
@@ -97,6 +100,7 @@ export default function CadEquipe() {
         draggable: true,
         theme: "light",
       });
+      setIsSubmitting(false); // Reabilita o botão após o erro
       return;
     }
 
@@ -110,6 +114,7 @@ export default function CadEquipe() {
         draggable: true,
         theme: "light",
       });
+      setIsSubmitting(false); // Reabilita o botão após o erro
       return;
     }
 
@@ -164,6 +169,8 @@ export default function CadEquipe() {
         draggable: true,
         theme: "light",
       });
+    } finally {
+      setIsSubmitting(false); // Reabilita o botão após a operação
     }
   };
 
@@ -249,8 +256,9 @@ export default function CadEquipe() {
       <button 
         onClick={handleSubmit}
         className="mt-4 rounded-sm bg-green-600 text-white px-4 py-2 hover:bg-green-700 duration-300"
+        disabled={isSubmitting} // Desabilita o botão se isSubmitting for true
       >
-        Finalizar Cadastro
+        {isSubmitting ? 'Cadastrando...' : 'Finalizar Cadastro'} {/* Muda o texto do botão */}
       </button>
     </section>
   );
