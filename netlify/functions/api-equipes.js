@@ -12,6 +12,34 @@ const db = mysql.createConnection({
 exports.handler = async (event, context) => {
   const connection = await db;
 
+  // DELETE /equipes/:team_id
+  if (event.httpMethod === 'DELETE' && event.path.includes('/equipes/')) {
+    try {
+      const team_id = event.path.split('/')[2];
+      const sql = 'DELETE FROM equipes WHERE team_id = ?';
+      
+      const [result] = await connection.query(sql, [team_id]);
+      
+      if (result.affectedRows === 0) {
+        return {
+          statusCode: 404,
+          body: JSON.stringify({ error: 'Equipe não encontrada.' })
+        };
+      }
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'Equipe excluída com sucesso.' })
+      };
+    } catch (error) {
+      console.error('Erro ao excluir equipe:', error);
+      return {
+        statusCode: 500,
+        body: JSON.stringify('Erro ao excluir equipe.')
+      };
+    }
+  }
+
   // GET /equipes/:team_id/jogadores
   if (event.httpMethod === 'GET' && event.path.includes('/jogadores')) {
     try {
