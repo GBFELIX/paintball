@@ -29,6 +29,10 @@ exports.handler = async (event, context) => {
 
       return {
         statusCode: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, DELETE',
+        },
         body: JSON.stringify({ message: 'Equipe excluída com sucesso.' })
       };
     } catch (error) {
