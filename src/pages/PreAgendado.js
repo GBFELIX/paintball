@@ -50,7 +50,9 @@ export default function PreAgendado() {
   const handleMostrarEquipe = async (equipe) => {
     setLoadingEquipe(true);
     try {
+      console.log('ID da equipe:', equipe.equipe_id);
       const response = await axios.get(`./.netlify/functions/api-equipes/${equipe.equipe_id}/jogadores`);
+      console.log('Jogadores recebidos:', response.data);
       setJogadores(response.data);
       setSelectedEquipe(equipe);
       setShowModal(true);
@@ -179,7 +181,7 @@ export default function PreAgendado() {
                   </div>
                 ))
               ) : (
-                <p className="text-black text-center">Nenhum jogador encontrado.</p>
+                <p className="text-black text-center"></p>
               )}
             </div>
             <button
