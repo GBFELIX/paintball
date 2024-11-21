@@ -12,17 +12,14 @@ export default function PreAgendado() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingEquipe, setLoadingEquipe] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [equipeIdToDelete, setEquipeIdToDelete] = useState(null);
   
   useEffect(() => {
     const fetchEquipes = async () => {
       setLoading(true);
       try {
         const response = await axios.get('./.netlify/functions/api-equipes'); 
-        const sortedEquipes = response.data.sort((a, b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
-        setEquipes(sortedEquipes);
-        if (sortedEquipes.length === 0) {
+        setEquipes(response.data);
+        if (response.data.length === 0) {
           toast.info('Nenhuma equipe pré-agendada encontrada', {
             position: "top-right",
             autoClose: 3000,
@@ -84,36 +81,6 @@ export default function PreAgendado() {
       });
     } finally {
       setLoadingEquipe(false);
-    }
-  };
-
-  const handleDeleteEquipe = async () => {
-    setLoading(true);
-    try {
-      await axios.delete(`./.netlify/functions/api-equipes/${equipeIdToDelete}`);
-      setEquipes(equipes.filter(equipe => equipe.equipe_id !== equipeIdToDelete));
-      toast.success('Equipe excluída com sucesso!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
-      });
-    } catch (error) {
-      toast.error('Erro ao excluir equipe. Tente novamente.', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
-      });
-    } finally {
-      setLoading(false);
-      setShowConfirmModal(false);
     }
   };
 
@@ -186,13 +153,8 @@ export default function PreAgendado() {
                     Entrar em contato
                   </button>
                   <button 
-                    className="rounded-md bg-red-600 p-2 hover:bg-black duration-300"
-                    onClick={() => {
-                      setEquipeIdToDelete(equipe.equipe_id);
-                      setShowConfirmModal(true);
-                    }}
-                  >
-                    <FaTrashAlt />
+                    className="rounded-md bg-green-600 p-2 hover:bg-black duration-300"
+                  ><FaTrashAlt />
                   </button>
                 </td>
               </tr>
@@ -201,24 +163,38 @@ export default function PreAgendado() {
         </table>
       )}
 
-      {showConfirmModal && (
+      {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-primary w-full max-w-md rounded-sm flex flex-col p-5 items-center justify-center">
-            <h2 className="text-black font-bold mb-5">Tem certeza que deseja excluir esta equipe?</h2>
-            <div className="flex gap-4">
-              <button
-                className="p-2 bg-red-600 text-white rounded-md"
-                onClick={handleDeleteEquipe}
-              >
-                Sim, excluir
-              </button>
-              <button
-                className="p-2 bg-gray-600 text-white rounded-md"
-                onClick={() => setShowConfirmModal(false)}
-              >
-                Cancelar
-              </button>
+          <div className="bg-primary w-full max-w-4xl rounded-sm flex flex-col p-5 items-center justify-center">
+            <h2 className="text-black font-bold mb-5">
+              Equipe: {selectedEquipe && selectedEquipe.nomeEquipe}
+            </h2>
+            <div className="w-full flex flex-col">
+              <div className="w-full flex justify-between px-3">
+                <p className="text-black font-semibold w-1/2 text-center">Nome do Jogador</p>
+                <p className="text-black font-semibold w-1/2 text-center">Contato</p>
+              </div>
+              {jogadores.length > 0 ? (
+                jogadores.map((jogador, index) => (
+                  <div key={index} className="w-full flex justify-between items-center px-3 py-2 border-t border-gray-300">
+                    <div className="w-1/2 text-center">
+                      <p className="text-black font-semibold">{jogador.nomeJogador}</p>
+                    </div>
+                    <div className="w-1/2 text-center">
+                      <p className="text-black font-semibold">{jogador.contato}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-black text-center"></p>
+              )}
             </div>
+            <button
+              className="mt-5 p-2 bg-red-600 text-white rounded-md"
+              onClick={() => setShowModal(false)}
+            >
+              Fechar
+            </button>
           </div>
         </div>
       )}
