@@ -48,14 +48,14 @@ export default function ResumoGame() {
         setPagamentos(pagamentosArmazenados);
 
         const totais = pagamentosArmazenados.reduce((acc, pagamento) => {
-            const forma = normalizarFormaPagamento(pagamento.formaPagamento);
             const valor = parseFloat(pagamento.valorTotal);
-
-            if (forma in acc) {
-                acc[forma] += valor;
-            } else {
-                acc[forma] = valor;
-            }
+            pagamento.formasPagamento.forEach(forma => {
+                if (forma in acc) {
+                    acc[forma] += valor;
+                } else {
+                    acc[forma] = valor;
+                }
+            });
             return acc;
         }, {
             credito: 0,
