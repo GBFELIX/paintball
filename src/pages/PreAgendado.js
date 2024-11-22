@@ -139,22 +139,14 @@ export default function PreAgendado() {
                   <button 
                     className="rounded-md bg-green-600 p-2 hover:bg-black duration-300"
                     onClick={() => {
-                      toast.info('Funcionalidade em desenvolvimento', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                      });
+                      const numeroWhatsApp = `55${equipe.contato}`; // Adiciona o código do país 55 ao número de contato da equipe
+                      const mensagem = "Olá, gostaria de mais informações sobre a equipe."; // Mensagem pré-definida
+                      const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+                      
+                      window.open(urlWhatsApp, "_blank"); // Abre o WhatsApp em uma nova aba
                     }}
                   >
                     Entrar em contato
-                  </button>
-                  <button 
-                    className="rounded-md bg-green-600 p-2 hover:bg-black duration-300"
-                  ><FaTrashAlt />
                   </button>
                 </td>
               </tr>
