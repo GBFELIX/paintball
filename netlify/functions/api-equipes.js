@@ -81,11 +81,6 @@ exports.handler = async (event, context) => {
                j.username AS nomeJogador, j.telefone AS contato
         FROM equipes e
         LEFT JOIN jogadores j ON e.team_id = j.team_id
-        WHERE j.id = (
-          SELECT MIN(id)
-          FROM jogadores
-          WHERE team_id = e.team_id
-        )
       `;
       
       const [results] = await connection.query(sql);
