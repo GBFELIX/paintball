@@ -10,10 +10,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
 
 // Adicionar configuração base do axios
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || '/.netlify/functions',
-  timeout: 5000
-});
 
 // Primeiro, adicione este CSS no seu arquivo de estilos ou inline
 const spinnerStyle = `
@@ -92,9 +88,10 @@ export default function Estoque() {
           draggable: true,
           theme: "light",
         });
-        fetchDescontos(); // Atualiza a lista de descontos
+        fetchDescontos(); // Verifique se esta função está correta e atualiza a lista
       })
       .catch(error => {
+        console.error('Erro ao excluir desconto:', error);
         toast.error('Erro ao excluir desconto', {
           position: "top-right",
           autoClose: 3000,
@@ -178,7 +175,7 @@ export default function Estoque() {
     setLoading(true);
     
     try {
-      await api.post('/.netlify/functions/api-estoque', {
+      await post('/.netlify/functions/api-estoque', {
         item: nomeProduto,
         valor: parseFloat(valorProduto),
         quantidade: parseInt(qtdProduto)
@@ -221,6 +218,15 @@ export default function Estoque() {
       })
       .catch(error => {
         console.error('Erro ao atualizar valor do desconto:', error);
+        toast.error('Erro ao atualizar desconto', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
       });
   };
   
