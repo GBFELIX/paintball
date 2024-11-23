@@ -175,7 +175,7 @@ export default function Estoque() {
     setLoading(true);
     
     try {
-      await post('/.netlify/functions/api-estoque', {
+      await axios.post('/.netlify/functions/api-estoque', {
         item: nomeProduto,
         valor: parseFloat(valorProduto),
         quantidade: parseInt(qtdProduto)
