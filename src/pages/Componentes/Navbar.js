@@ -59,11 +59,13 @@ function NavBar() {
       </nav>
 
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-4 rounded">
-            <p>Você realmente deseja sair?</p>
-            <button onClick={confirmLogout} className="text-red-500">Sim</button>
-            <button onClick={() => setIsModalOpen(false)} className="text-gray-500">Não</button>
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+          <h2 className="text-black text-2xl font-semibold mb-4">
+                Realmente deseja sair?
+            </h2>
+            <button onClick={confirmLogout} className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg">Sim</button>
+            <button onClick={() => setIsModalOpen(false)} className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white">Não</button>
           </div>
         </div>
       )}
