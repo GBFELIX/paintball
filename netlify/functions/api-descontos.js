@@ -94,15 +94,25 @@ async function handlePost(event) {
 async function handleDelete(event) {
   try {
     const id = event.path.split('/').pop();
+    console.log(`Tentando remover desconto com ID: ${id}`);
     const query = 'DELETE FROM descontos WHERE id = ?';
     
-    await db.promise().query(query, [id]);
+    const [result] = await db.promise().query(query, [id]);
+    console.log(`Resultado da remoção: ${JSON.stringify(result)}`);
+
+    if (result.affectedRows === 0) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: 'Desconto não encontrado' })
+      };
+    }
 
     return {
       statusCode: 200,
       body: JSON.stringify({ message: 'Desconto removido com sucesso' })
     };
   } catch (error) {
+    console.error('Erro ao remover desconto:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Erro ao remover desconto' })
@@ -114,9 +124,18 @@ async function handlePut(event) {
   try {
     const id = event.path.split('/').pop();
     const { valor } = JSON.parse(event.body);
+    console.log(`Tentando atualizar desconto com ID: ${id} para o valor: ${valor}`);
     const query = 'UPDATE descontos SET valor = ? WHERE id = ?';
     
-    await db.promise().query(query, [valor, id]);
+    const [result] = await db.promise().query(query, [valor, id]);
+    console.log(`Resultado da atualização: ${JSON.stringify(result)}`);
+
+    if (result.affectedRows === 0) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: 'Desconto não encontrado' })
+      };
+    }
 
     return {
       statusCode: 200,
