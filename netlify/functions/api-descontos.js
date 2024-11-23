@@ -95,7 +95,7 @@ async function handleDelete(event) {
   try {
     const id = event.path.split('/').pop();
     console.log(`Tentando remover desconto com ID: ${id}`);
-    const query = 'DELETE FROM descontos WHERE id = ?';
+    const query = 'DELETE FROM descontos WHERE nome = ?';
     
     const [result] = await db.promise().query(query, [id]);
     console.log(`Resultado da remoção: ${JSON.stringify(result)}`);
@@ -125,7 +125,7 @@ async function handlePut(event) {
     const id = event.path.split('/').pop();
     const { valor } = JSON.parse(event.body);
     console.log(`Tentando atualizar desconto com ID: ${id} para o valor: ${valor}`);
-    const query = 'UPDATE descontos SET valor = ? WHERE id = ?';
+    const query = 'UPDATE descontos SET valor = ? WHERE nome = ?';
     
     const [result] = await db.promise().query(query, [valor, id]);
     console.log(`Resultado da atualização: ${JSON.stringify(result)}`);
