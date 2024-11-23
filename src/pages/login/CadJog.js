@@ -37,7 +37,7 @@ function CadJog() {
         body: JSON.stringify({ 
           username, 
           email, 
-          cpf: cpf || null, // CPF é opcional
+          cpf: cpf || null, 
           telefone, 
           senha 
         })
@@ -128,10 +128,14 @@ function CadJog() {
             Fazer Cadastro
           </button>
           <p className='text-primary mt-10'>
-            <Link to="/loginjog" className="text-primary">
-                <span className='text-white'>Já possuo cadastro! Clique aqui</span>
-            </Link>
-          </p>
+          <span className='text-white'>Já cadastro!!</span>{' '}
+          <Link 
+            to="/loginjog" 
+            className="hover:underline"
+          >
+            Clique aqui
+          </Link>
+        </p>
         </div>
       </div>
     </div>
