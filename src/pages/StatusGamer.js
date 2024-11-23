@@ -200,6 +200,12 @@ export default function StatusGame() {
         }, 0);
     };
 
+    const calcularTotalJogadores = () => {
+        return jogadores.reduce((total, jogador) => {
+            return total + (Number(jogador.valor) || 0);
+        }, 0);
+    };
+
     return (
         <section className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
             <ToastContainer />
@@ -233,6 +239,12 @@ export default function StatusGame() {
                                 <p id="playerInativo" className="font-semibold text-3xl">{jogadoresInativos}</p> 
                             </div>
                             <div className="flex flex-col items-start">
+                                <p className="font-semibold">Total dos Jogadores</p>
+                                <p id="TotalJogadores" className="font-semibold text-3xl">
+                                    R$ {calcularTotalJogadores().toFixed(2)}
+                                </p> 
+                            </div>
+                            <div className="flex flex-col items-start">
                                 <p className="font-semibold">Avulsos</p>
                                 <p id="Avulsos" className="font-semibold text-3xl">
                                     R$ {calcularTotalAvulsos().toFixed(2)}
@@ -246,7 +258,7 @@ export default function StatusGame() {
                             </div>
                         </div>
 
-                        {/* Componentes VendaAvulsa, CardJog e CardDespesas */}
+   
                         <div className="flex flex-wrap gap-4 text-black">
                             <CardJog 
                                 jogadores={jogadores} 
