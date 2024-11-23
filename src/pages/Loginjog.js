@@ -10,7 +10,10 @@ function Loginjog() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
+  const handleLogout = () => {
+    localStorage.removeItem('auth'); 
+    navigate('/'); 
+  };
   const handleLogin = async () => {
     // Validação dos campos
     if (!username || !email) {
@@ -82,6 +85,25 @@ function Loginjog() {
 
   return (
     <div className='w-full h-screen bg-black flex items-center justify-center'>
+       <nav className="bg-black">
+      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <img src={logo} className="h-8" alt="LA PaintBall" />
+        
+        <div className="hidden w-full md:block md:w-auto" id="navbar-default">
+          <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+            
+            <li>
+              <Link to="#" className="text-white hover:text-primary duration-150">Administradores</Link>
+            </li>
+            <li>
+              <button onClick={handleLogout} className="text-white hover:text-primary duration-150">
+                Sair do sistema
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
       <ToastContainer />
       <div className='flex flex-col justify-center items-center'>
         <img src={logo} className="m-4 w-[150px]" title='PaintBall - LA' alt='PaintBall - LA' />
