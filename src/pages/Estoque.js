@@ -70,7 +70,7 @@ export default function Estoque() {
             const descontosFormatados = Object.entries(response.data).map(([nome, valor]) => ({
                 nome,
                 valor,
-                id: nome
+                id
             }));
             setDescontos(descontosFormatados);
         })
