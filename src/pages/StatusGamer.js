@@ -202,7 +202,10 @@ export default function StatusGame() {
 
     const calcularTotalJogadores = () => {
         return jogadores.reduce((total, jogador) => {
-            return total + (Number(jogador.valor) || 0);
+            const valorTotalJogador = jogador.items.reduce((subtotal, item) => {
+                return subtotal + (parseFloat(item.valor) || 0);
+            }, 0);
+            return total + valorTotalJogador;
         }, 0);
     };
 
