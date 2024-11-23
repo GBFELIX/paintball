@@ -29,6 +29,8 @@ exports.handler = async (event, context) => {
       return handlePost(event);
     case 'DELETE':
       return handleDelete(event);
+    case 'PUT':
+      return handlePut(event);
     default:
       return {
         statusCode: 405,
@@ -104,6 +106,27 @@ async function handleDelete(event) {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Erro ao remover desconto' })
+    };
+  }
+}
+
+async function handlePut(event) {
+  try {
+    const id = event.path.split('/').pop();
+    const { valor } = JSON.parse(event.body);
+    const query = 'UPDATE descontos SET valor = ? WHERE id = ?';
+    
+    await db.promise().query(query, [valor, id]);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'Desconto atualizado com sucesso' })
+    };
+  } catch (error) {
+    console.error('Erro ao atualizar desconto:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Erro ao atualizar desconto' })
     };
   }
 } 
