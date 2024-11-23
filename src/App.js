@@ -29,7 +29,7 @@ function Login() {
 
     const handleLogin = async () => {
       try {
-        const response = await fetch(`https://www.lapaintball.com.br/.netlify/functions/api-login`, { 
+        const response = await fetch(`http://www.lapaintball.com.br/.netlify/functions/api-login`, { 
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
