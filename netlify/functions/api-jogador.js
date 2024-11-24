@@ -39,15 +39,23 @@ exports.handler = async (event, context) => {
     }
   }
 
-  // GET /jogador
+  // GET /jogador?team_id=1
   if (event.httpMethod === 'GET') {
+    const teamId = event.queryStringParameters.team_id; // Obtém o team_id da query string
+    if (!teamId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'team_id é necessário' })
+      };
+    }
+
     try {
-      const query = 'SELECT * FROM jogadores'; // Consulta para buscar todos os jogadores
-      const [results] = await connection.query(query);
+      const query = 'SELECT * FROM jogadores WHERE team_id = ?'; // Consulta para buscar jogadores pelo team_id
+      const [results] = await connection.query(query, [teamId]);
 
       return {
         statusCode: 200,
-        body: JSON.stringify(results) // Retorna todos os jogadores
+        body: JSON.stringify(results) // Retorna os jogadores que pertencem ao team_id
       };
     } catch (err) {
       console.error('Erro ao buscar jogadores:', err);
