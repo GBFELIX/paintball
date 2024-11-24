@@ -23,30 +23,18 @@ exports.handler = async (event, context) => {
       if (result.affectedRows === 0) {
         return {
           statusCode: 404,
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, DELETE',
-          },
           body: JSON.stringify({ error: 'Equipe não encontrada.' })
         };
       }
 
       return {
         statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, DELETE',
-        },
         body: JSON.stringify({ message: 'Equipe excluída com sucesso.' })
       };
     } catch (error) {
       console.error('Erro ao excluir equipe:', error);
       return {
         statusCode: 500,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, DELETE',
-        },
         body: JSON.stringify('Erro ao excluir equipe.')
       };
     }
