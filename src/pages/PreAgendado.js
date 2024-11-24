@@ -55,7 +55,7 @@ export default function PreAgendado() {
       console.log('ID da equipe:', equipe.equipe_id);
       
       // Puxar todos os jogadores de uma vez
-      const response = await axios.get('./.netlify/functions/api-jogadores'); // Altere para a URL correta que retorna todos os jogadores
+      const response = await axios.get('./.netlify/functions/api-jogador'); // Altere para a URL correta que retorna todos os jogadores
       console.log('Jogadores recebidos:', response.data);
       
       // Filtrar jogadores que pertencem à equipe selecionada
