@@ -4,6 +4,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
 import { FaTrashAlt } from "react-icons/fa";
+import NavBar from './Componentes/Navbar';
 
 export default function PreAgendado() {
   const [equipes, setEquipes] = useState([]); 
@@ -52,13 +53,19 @@ export default function PreAgendado() {
     setLoadingEquipe(true);
     try {
       console.log('ID da equipe:', equipe.equipe_id);
-      const response = await axios.get(`./.netlify/functions/api-equipes/${equipe.equipe_id}/jogadores`);
+      
+      // Puxar todos os jogadores de uma vez
+      const response = await axios.get('./.netlify/functions/api-jogadores'); // Altere para a URL correta que retorna todos os jogadores
       console.log('Jogadores recebidos:', response.data);
-      setJogadores(response.data);
+      
+      // Filtrar jogadores que pertencem à equipe selecionada
+      const jogadoresDaEquipe = response.data.filter(jogador => jogador.team_id === equipe.equipe_id);
+      
+      setJogadores(jogadoresDaEquipe);
       setSelectedEquipe(equipe);
       setShowModal(true);
       
-      if (response.data.length === 0) {
+      if (jogadoresDaEquipe.length === 0) {
         toast.info('Nenhum jogador encontrado nesta equipe', {
           position: "top-right",
           autoClose: 3000,
@@ -87,6 +94,7 @@ export default function PreAgendado() {
   return (
     <section className="bg-black text-white p-4 w-full h-screen flex flex-col items-center">
       <ToastContainer />
+      <NavBar />
       <div className="gap-2 flex flex-col lg:flex-row justify-center items-center w-auto">
         <h1 className="text-white text-3xl text-center m-5">Jogos Pré-Agendados</h1> 
       </div>
@@ -158,7 +166,7 @@ export default function PreAgendado() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-primary w-full max-w-4xl rounded-sm flex flex-col p-5 items-center justify-center">
-            <h2 className="text-black font-bold mb-5">
+            <h2 className="text-black font-bold mb-5" id="modal-title">
               Equipe: {selectedEquipe && selectedEquipe.nomeEquipe}
             </h2>
             <div className="w-full flex flex-col">
@@ -178,12 +186,13 @@ export default function PreAgendado() {
                   </div>
                 ))
               ) : (
-                <p className="text-black text-center"></p>
+                <p className="text-black text-center">Nenhum jogador encontrado nesta equipe.</p>
               )}
             </div>
             <button
               className="mt-5 p-2 bg-red-600 text-white rounded-md"
               onClick={() => setShowModal(false)}
+              aria-label="Fechar modal"
             >
               Fechar
             </button>
