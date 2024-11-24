@@ -191,10 +191,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/cadjog" element={<PrivateRoute role={['admin', 'usuario', 'operador']}><CadJog /></PrivateRoute>} />
-        <Route path="/loginjog" element={<PrivateRoute role={['admin', 'usuario', 'operador']}><Loginjog /></PrivateRoute>} />
+        <Route path="/cadjog" element={<CadJog />} />
+        <Route path="/loginjog" element={<Loginjog />} />
         <Route path="/Navbar" element={<NavBar />} />
-        <Route path="/mudarsenhajog" element={<PrivateRoute role={['admin', 'usuario', 'operador']}><ForgotPassword /></PrivateRoute>} />
+        <Route path="/mudarsenhajog" element={<ForgotPassword />} />
         <Route path="/mudarsenhaadm" element={<Changepass />} />
         <Route path="/estoque" element={<PrivateRoute role="admin"><Estoque /></PrivateRoute>}/>
         <Route path="/addjogo" element={<PrivateRoute role={['admin', 'operador']}><AddJogo /></PrivateRoute>} />
