@@ -110,11 +110,6 @@ function Login() {
             <li>
               <Link to="/loginjog" className="text-white hover:text-primary duration-150">Administradores</Link>
             </li>
-            <li>
-              <button onClick={handleLogout} className="text-white hover:text-primary duration-150">
-                Sair do sistema
-              </button>
-            </li>
           </ul>
         </div>
       </div>
