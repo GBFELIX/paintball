@@ -52,11 +52,7 @@ export default function PreAgendado() {
   const handleMostrarEquipe = async (equipe) => {
     setLoadingEquipe(true);
     try {
-      console.log('ID da equipe:', equipe.equipe_id);
-      
-      // Puxar jogadores com base no team_id
-      const response = await axios.get(`./.netlify/functions/api-jogador?team_id=${equipe.equipe_id}`); // Passa o team_id como parâmetro
-      console.log('Jogadores recebidos:', response.data);
+      const response = await axios.get(`./.netlify/functions/api-jogador?team_id=${equipe.equipe_id}`); 
       
       setJogadores(response.data);
       setSelectedEquipe(equipe);
@@ -87,6 +83,7 @@ export default function PreAgendado() {
       setLoadingEquipe(false);
     }
   };
+
   const removePartida = async (equipeId) => {
     if (window.confirm('Tem certeza que deseja remover esta partida?')) {
       try {
@@ -118,6 +115,7 @@ export default function PreAgendado() {
       }
     }
   };
+
   return (
     <section className="bg-black text-white p-4 w-full h-screen flex flex-col items-center">
       <ToastContainer />
@@ -182,6 +180,12 @@ export default function PreAgendado() {
                     }}
                   >
                     Entrar em contato
+                  </button>
+                  <button 
+                    className="bg-red-500 text-white hover:bg-red-600 duration-300 flex items-center justify-center p-2 rounded-md"
+                    onClick={() => removePartida(equipe.equipe_id)}
+                  >
+                    <FaTrashAlt className="text-black" />
                   </button>
                 </td>
               </tr>
