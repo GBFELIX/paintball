@@ -175,10 +175,10 @@ export default function PreAgendado() {
                 jogadores.map((jogador, index) => (
                   <div key={index} className="w-full flex justify-between items-center px-3 py-2 border-t border-gray-300">
                     <div className="w-1/2 text-center">
-                      <p className="text-black font-semibold">{jogador.nomeJogador}</p>
+                      <p className="text-black font-semibold">{jogador.username}</p>
                     </div>
                     <div className="w-1/2 text-center">
-                      <p className="text-black font-semibold">{jogador.contato}</p>
+                      <p className="text-black font-semibold">{jogador.telefone}</p>
                     </div>
                   </div>
                 ))
