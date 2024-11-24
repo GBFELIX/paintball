@@ -87,7 +87,37 @@ export default function PreAgendado() {
       setLoadingEquipe(false);
     }
   };
+  const removePartida = async (equipeId) => {
+    if (window.confirm('Tem certeza que deseja remover esta partida?')) {
+      try {
+        // Faz a requisição para remover a partida
+        await axios.delete(`./.netlify/functions/api-equipes/${equipeId}`); // Altere para o endpoint correto
 
+        // Atualiza o estado para remover a equipe da lista
+        setEquipes((prevEquipes) => prevEquipes.filter(equipe => equipe.equipe_id !== equipeId));
+
+        toast.success('Partida removida com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      } catch (error) {
+        toast.error('Erro ao remover a partida. Tente novamente.', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      }
+    }
+  };
   return (
     <section className="bg-black text-white p-4 w-full h-screen flex flex-col items-center">
       <ToastContainer />
