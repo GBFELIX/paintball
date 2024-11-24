@@ -39,6 +39,25 @@ exports.handler = async (event, context) => {
     }
   }
 
+  // GET /jogador
+  if (event.httpMethod === 'GET') {
+    try {
+      const query = 'SELECT * FROM jogadores'; // Consulta para buscar todos os jogadores
+      const [results] = await connection.query(query);
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify(results) // Retorna todos os jogadores
+      };
+    } catch (err) {
+      console.error('Erro ao buscar jogadores:', err);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Erro ao buscar jogadores' })
+      };
+    }
+  }
+
   return {
     statusCode: 405,
     body: JSON.stringify({ error: 'Método não permitido' })
