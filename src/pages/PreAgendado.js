@@ -87,8 +87,7 @@ export default function PreAgendado() {
   const removePartida = async (equipeId) => {
     if (window.confirm('Tem certeza que deseja remover esta partida?')) {
       try {
-        // Faz a requisição para remover a partida
-        await axios.delete(`./.netlify/functions/api-equipes/${equipeId}`); // Altere para o endpoint correto
+        await axios.delete(`./.netlify/functions/api-equipes/${equipeId}`);
 
         // Atualiza o estado para remover a equipe da lista
         setEquipes((prevEquipes) => prevEquipes.filter(equipe => equipe.equipe_id !== equipeId));
@@ -113,6 +112,14 @@ export default function PreAgendado() {
           theme: "light",
         });
       }
+    }
+  };
+
+  const imprimirNomesJogadores = () => {
+    if (jogadores.length > 0) {
+      const nomes = jogadores.map(jogador => jogador.username).join(', ');
+    } else {
+      console.log('Nenhum jogador encontrado para imprimir.');
     }
   };
 
@@ -220,13 +227,22 @@ export default function PreAgendado() {
                 <p className="text-black text-center">Nenhum jogador encontrado nesta equipe.</p>
               )}
             </div>
-            <button
-              className="mt-5 p-2 bg-red-600 text-white rounded-md"
-              onClick={() => setShowModal(false)}
-              aria-label="Fechar modal"
-            >
-              Fechar
-            </button>
+            <div className="flex gap-2 mt-5">
+              <button
+                className="p-2 bg-red-600 text-white rounded-md"
+                onClick={() => setShowModal(false)}
+                aria-label="Fechar modal"
+              >
+                Fechar
+              </button>
+              <button
+                className="p-2 bg-blue-600 text-white rounded-md"
+                onClick={imprimirNomesJogadores}
+                aria-label="Imprimir nomes dos jogadores"
+              >
+                Imprimir Equipes
+              </button>
+            </div>
           </div>
         </div>
       )}
