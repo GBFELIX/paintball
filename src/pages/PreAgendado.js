@@ -54,18 +54,15 @@ export default function PreAgendado() {
     try {
       console.log('ID da equipe:', equipe.equipe_id);
       
-      // Puxar todos os jogadores de uma vez
-      const response = await axios.get('./.netlify/functions/api-jogador'); // Altere para a URL correta que retorna todos os jogadores
+      // Puxar jogadores com base no team_id
+      const response = await axios.get(`./.netlify/functions/api-jogador?team_id=${equipe.equipe_id}`); // Passa o team_id como parâmetro
       console.log('Jogadores recebidos:', response.data);
       
-      // Filtrar jogadores que pertencem à equipe selecionada
-      const jogadoresDaEquipe = response.data.filter(jogador => jogador.team_id === equipe.equipe_id);
-      
-      setJogadores(jogadoresDaEquipe);
+      setJogadores(response.data);
       setSelectedEquipe(equipe);
       setShowModal(true);
       
-      if (jogadoresDaEquipe.length === 0) {
+      if (response.data.length === 0) {
         toast.info('Nenhum jogador encontrado nesta equipe', {
           position: "top-right",
           autoClose: 3000,
