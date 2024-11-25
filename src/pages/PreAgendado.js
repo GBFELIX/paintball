@@ -13,7 +13,6 @@ export default function PreAgendado() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingEquipe, setLoadingEquipe] = useState(false);
-  const [headerStatus, setHeaderStatus] = useState('pendente');
   
   useEffect(() => {
     const fetchEquipes = async () => {
@@ -89,7 +88,11 @@ export default function PreAgendado() {
     setEquipes((prevEquipes) =>
       prevEquipes.map((equipe) =>
         equipe.equipe_id === equipeId
-          ? { ...equipe, status: equipe.status === 'Pendente' ? 'Confirmado' : 'Pendente' }
+          ? { ...equipe, status: equipe.status === equipe.status === 'Pendente'
+              ? 'Confirmado'
+              : equipe.status === 'Confirmado'
+              ? 'Cancelado'
+              : 'Pendente', }
           : equipe
       )
     );
