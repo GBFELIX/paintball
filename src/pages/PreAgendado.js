@@ -84,36 +84,12 @@ export default function PreAgendado() {
     }
   };
 
-  const removePartida = async (equipeId) => {
-    console.log(equipeId);
-    if (window.confirm('Tem certeza que deseja remover esta partida?')) {
-      try {
-        await axios.delete(`./.netlify/functions/api-equipes/${equipeId}`);
-
-        // Atualiza o estado para remover a equipe da lista
-        setEquipes((prevEquipes) => prevEquipes.filter(equipe => equipe.equipe_id !== equipeId));
-
-        toast.success('Partida removida com sucesso!', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "light",
-        });
-      } catch (error) {
-        toast.error('Erro ao remover a partida. Tente novamente.', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "light",
-        });
-      }
-    }
+  const fecharPartida = (equipeId) => {
+    setEquipes((prevEquipes) =>
+      prevEquipes.map((equipe) =>
+        equipe.equipe_id === equipeId ? { ...equipe, isClosed: true } : equipe
+      )
+    );
   };
 
   const imprimirNomesJogadores = () => {
@@ -213,7 +189,7 @@ export default function PreAgendado() {
                   </button>
                   <button 
                     className="bg-red-500 text-white hover:bg-red-600 duration-300 flex items-center justify-center p-2 rounded-md"
-                    onClick={() => removePartida(equipe.equipe_id)}
+                    onClick={() => fecharPartida(equipe.equipe_id)}
                   >
                     <FaTrashAlt className="text-black" />
                   </button>
