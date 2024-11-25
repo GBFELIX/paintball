@@ -88,11 +88,7 @@ export default function PreAgendado() {
     setEquipes((prevEquipes) =>
       prevEquipes.map((equipe) =>
         equipe.equipe_id === equipeId
-          ? { ...equipe, status: equipe.status === equipe.status === 'Pendente'
-              ? 'Confirmado'
-              : equipe.status === 'Confirmado'
-              ? 'Cancelado'
-              : 'Pendente', }
+          ? { ...equipe, status: equipe.status === 'Confirmado' ? 'Cancelado' : 'Confirmado' }
           : equipe
       )
     );
