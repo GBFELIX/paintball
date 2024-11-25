@@ -116,10 +116,32 @@ export default function PreAgendado() {
   };
 
   const imprimirNomesJogadores = () => {
-    if (jogadores.length > 0) {
-      const nomes = jogadores.map(jogador => jogador.username).join(', ');
+    if (jogadores.length > 0 && selectedEquipe) {
+      // Cria uma nova janela
+      const printWindow = window.open('', '_blank');
+      
+      // Adiciona conteúdo à nova janela
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Nomes dos Jogadores da Equipe: ${selectedEquipe.nomeEquipe}</title>
+            <style>
+              body { font-family: Arial, sans-serif; }
+              h1 { text-align: center; }
+              .player { margin: 10px 0; }
+            </style>
+          </head>
+          <body>
+            <h1>Nomes dos Jogadores da Equipe: ${selectedEquipe.nomeEquipe}</h1>
+            ${jogadores.map(jogador => `<div class="player">${jogador.username}</div>`).join('')}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      printWindow.print();
     } else {
-      console.log('Nenhum jogador encontrado para imprimir.');
+      alert('Nenhum jogador encontrado para imprimir ou equipe não selecionada.');
     }
   };
 
