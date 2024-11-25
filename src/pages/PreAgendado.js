@@ -88,11 +88,11 @@ export default function PreAgendado() {
   const fecharPartida = (equipeId) => {
     setEquipes((prevEquipes) =>
       prevEquipes.map((equipe) =>
-        equipe.equipe_id === equipeId ? { ...equipe, isClosed: !equipe.isClosed } : equipe
+        equipe.equipe_id === equipeId
+          ? { ...equipe, status: equipe.status === 'pendente' ? 'tudo certo' : 'pendente' }
+          : equipe
       )
     );
-
-    setHeaderStatus((prevStatus) => (prevStatus === 'pendente' ? 'tudo certo' : 'pendente'));
   };
 
   const imprimirNomesJogadores = () => {
@@ -161,7 +161,7 @@ export default function PreAgendado() {
                 <td className="w-full">{equipe.nomeEquipe}</td>
                 <td className="w-full">{equipe.nomeJogador}</td>
                 <td className="w-full">{equipe.contato}</td>
-                <td className="w-full">{headerStatus}</td>
+                <td className="w-full">{equipe.status}</td>
                 <td className="w-full flex gap-2">
                   <button
                     className="rounded-md bg-primary p-2 text-black hover:bg-black duration-300 hover:text-white flex items-center justify-center min-w-[120px]"
