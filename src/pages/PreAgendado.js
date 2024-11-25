@@ -88,11 +88,11 @@ export default function PreAgendado() {
   const fecharPartida = (equipeId) => {
     setEquipes((prevEquipes) =>
       prevEquipes.map((equipe) =>
-        equipe.equipe_id === equipeId ? { ...equipe, isClosed: true } : equipe
+        equipe.equipe_id === equipeId ? { ...equipe, isClosed: !equipe.isClosed } : equipe
       )
     );
 
-    setHeaderStatus('tudo certo');
+    setHeaderStatus((prevStatus) => (prevStatus === 'pendente' ? 'tudo certo' : 'pendente'));
   };
 
   const imprimirNomesJogadores = () => {
@@ -151,7 +151,7 @@ export default function PreAgendado() {
               <th className="w-full flex justify-start">Nome da Equipe</th>
               <th className="w-full flex justify-start">Nome do Jogador</th>
               <th className="w-full flex justify-start">Contato</th>
-              <th className="w-full flex justify-start">{headerStatus}</th>
+              <th className="w-full flex justify-start">Status</th>
               <th className="w-full flex justify-start">Ação</th>
             </tr>
           </thead>
@@ -161,6 +161,7 @@ export default function PreAgendado() {
                 <td className="w-full">{equipe.nomeEquipe}</td>
                 <td className="w-full">{equipe.nomeJogador}</td>
                 <td className="w-full">{equipe.contato}</td>
+                <td className="w-full">{headerStatus}</td>
                 <td className="w-full flex gap-2">
                   <button
                     className="rounded-md bg-primary p-2 text-black hover:bg-black duration-300 hover:text-white flex items-center justify-center min-w-[120px]"
