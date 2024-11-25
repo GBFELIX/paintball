@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt, FaExchangeAlt } from "react-icons/fa";
 import NavBar from './Componentes/Navbar';
 
 export default function PreAgendado() {
@@ -89,7 +89,7 @@ export default function PreAgendado() {
     setEquipes((prevEquipes) =>
       prevEquipes.map((equipe) =>
         equipe.equipe_id === equipeId
-          ? { ...equipe, status: equipe.status === 'pendente' ? 'tudo certo' : 'pendente' }
+          ? { ...equipe, status: equipe.status === 'Pendente' ? 'Confirmado' : 'pendente' }
           : equipe
       )
     );
@@ -196,7 +196,7 @@ export default function PreAgendado() {
                     className="bg-red-500 text-white hover:bg-red-600 duration-300 flex items-center justify-center p-2 rounded-md"
                     onClick={() => fecharPartida(equipe.equipe_id)}
                   >
-                    <FaTrashAlt className="text-black" />
+                    <FaExchangeAlt className="text-black" />
                   </button>
                 </td>
               </tr>
