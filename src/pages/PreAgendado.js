@@ -85,6 +85,7 @@ export default function PreAgendado() {
   };
 
   const removePartida = async (equipeId) => {
+    console.log(equipeId);
     if (window.confirm('Tem certeza que deseja remover esta partida?')) {
       try {
         await axios.delete(`./.netlify/functions/api-equipes/${equipeId}`);
