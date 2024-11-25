@@ -13,6 +13,7 @@ export default function PreAgendado() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingEquipe, setLoadingEquipe] = useState(false);
+  const [headerStatus, setHeaderStatus] = useState('pendente');
   
   useEffect(() => {
     const fetchEquipes = async () => {
@@ -90,6 +91,8 @@ export default function PreAgendado() {
         equipe.equipe_id === equipeId ? { ...equipe, isClosed: true } : equipe
       )
     );
+
+    setHeaderStatus('tudo certo');
   };
 
   const imprimirNomesJogadores = () => {
@@ -148,6 +151,7 @@ export default function PreAgendado() {
               <th className="w-full flex justify-start">Nome da Equipe</th>
               <th className="w-full flex justify-start">Nome do Jogador</th>
               <th className="w-full flex justify-start">Contato</th>
+              <th className="w-full flex justify-start">{headerStatus}</th>
               <th className="w-full flex justify-start">Ação</th>
             </tr>
           </thead>
