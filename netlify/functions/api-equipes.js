@@ -13,7 +13,7 @@ exports.handler = async (event, context) => {
   const connection = await db;
 
   // DELETE /equipes/:team_id
-  if (event.httpMethod === 'DELETE') {
+  if (event.httpMethod === 'DELETE' && event.path.includes('/equipes/')) {
     try {
       const team_id = event.path.split('/')[2];
       const sql = 'DELETE FROM equipes WHERE team_id = ?';
