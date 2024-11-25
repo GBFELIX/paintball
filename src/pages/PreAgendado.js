@@ -103,7 +103,6 @@ export default function PreAgendado() {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Nomes dos Jogadores da Equipe: ${selectedEquipe.nomeEquipe}</title>
             <style>
               body { font-family: Arial, sans-serif; }
               h1 { text-align: center; }
