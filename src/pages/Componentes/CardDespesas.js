@@ -81,6 +81,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
 
   const handleClosePedido = (index) => {
     const despesa = despesas[index];
+
     if (despesa.isClosed) {
         const updatedDespesas = [...despesas];
         updatedDespesas[index].isClosed = false;
@@ -241,7 +242,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                 formasSelecionadas.forEach(forma => {
                     pagamentosAnteriores.push({
                         valorTotal: valorPorForma, // Armazena o valor correspondente a cada forma
-                        formasPagamento: forma, // Armazena a forma de pagamento
+                        formaPagamento: forma, // Armazena a forma de pagamento
                     });
                 });
 

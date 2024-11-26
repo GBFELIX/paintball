@@ -184,7 +184,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
 
                 const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
                 await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
-                console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
             } catch (error) {
                 console.error('Erro ao obter quantidade atual do estoque:', error);
                 toast.error('Erro ao verificar estoque', {
@@ -238,7 +237,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 formasSelecionadas.forEach(forma => {
                     pagamentosAnteriores.push({
                         valorTotal: valorPorForma,
-                        formasPagamento: forma,
+                        formaPagamento: forma,
                     });
                 });
 
@@ -426,7 +425,13 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                         <div className="flex justify-between mt-4">
                             <button
                                 className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
-                                onClick={() => setShowPaymentModal(false)}
+                                onClick={() => {
+                                    setShowPaymentModal(false);
+                                    setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0 });
+                                    setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false });
+                                    setDescontoSelecionado('');
+                                    setValorComDesconto(0);
+                                }}
                             >
                                 Cancelar
                             </button>
