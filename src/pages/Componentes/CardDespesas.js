@@ -81,20 +81,6 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
 
   const handleClosePedido = (index) => {
     const despesa = despesas[index];
-
-    if (!despesa.nome || despesa.nome.trim() === '') {
-        toast.error('O nome da despesa é obrigatório antes de fechar o pedido.', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-        return;
-    }
-
     if (despesa.isClosed) {
         const updatedDespesas = [...despesas];
         updatedDespesas[index].isClosed = false;
