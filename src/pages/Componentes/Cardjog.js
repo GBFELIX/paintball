@@ -320,7 +320,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                     <div className="bg-white p-6 rounded-lg w-[500px]">
                         <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
                         <div className="mb-4">
-                            <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
+                            <p className="font-bold">Valor Total: R$ {jogadores[jogadorIndexForPayment] && jogadores[jogadorIndexForPayment].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0).toFixed(2)}</p>
                         </div>
                         <div className="mb-4">
                             <select
