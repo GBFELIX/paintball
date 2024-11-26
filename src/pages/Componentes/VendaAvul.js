@@ -184,6 +184,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
 
                 const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
                 await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
+                console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
             } catch (error) {
                 console.error('Erro ao obter quantidade atual do estoque:', error);
                 toast.error('Erro ao verificar estoque', {
