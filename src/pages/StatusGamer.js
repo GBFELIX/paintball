@@ -230,7 +230,9 @@ export default function StatusGame() {
                             <div className="flex flex-col items-start">
                                 <p className="font-semibold">Data da Partida</p>
                                 <p id="dataPartida" className="font-semibold text-3xl">
-                                    {(jogo && jogo.data) || 'Carregando...'}
+                                    {jogo && jogo.data 
+                                        ? new Date(jogo.data).toLocaleDateString('pt-BR') 
+                                        : 'Carregando...'}
                                 </p>
                             </div>
                             <div className="flex flex-col items-start">
