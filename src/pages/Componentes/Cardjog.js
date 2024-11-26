@@ -161,7 +161,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
             return;
         }
-
+        
         // Se todas as validações passarem, feche o pedido
         const updatedJogadores = [...jogadores];
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
@@ -177,7 +177,60 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             draggable: true,
             theme: "light",
         });
+        const itemCountMap = itemsToUpdate.reduce((acc, item) => {
+            acc[item.nome] = (acc[item.nome] || 0) + 1;
+            return acc;
+        }, {});
 
+        let podeFechar = true;
+
+        const promises = Object.keys(itemCountMap).map(async (nome) => {
+            const quantidadeParaSubtrair = itemCountMap[nome];
+            try {
+                const selectedItem = estoque.find(item => item.nome === nome);
+                
+                if (!selectedItem) {
+                    throw new Error(`Item ${nome} não encontrado no estoque`);
+                }
+
+                const quantidadeAtual = selectedItem.quantidade;
+
+                if (quantidadeAtual === undefined) {
+                    throw new Error(`Quantidade não encontrada para o item ${nome}`);
+                }
+
+                if (isNaN(quantidadeAtual) || quantidadeAtual < quantidadeParaSubtrair) {
+                    toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
+                    podeFechar = false;
+                    return; // Retorna para não continuar com a atualização
+                }
+
+                const novaQuantidade = quantidadeAtual - quantidadeParaSubtrair;
+                await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
+            } catch (error) {
+                console.error('Erro ao obter quantidade atual do estoque:', error);
+                toast.error('Erro ao verificar estoque', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+            }
+        });
+
+        await Promise.all(promises);
         // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
