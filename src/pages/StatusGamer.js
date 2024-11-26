@@ -231,7 +231,7 @@ export default function StatusGame() {
                                 <p className="font-semibold">Data da Partida</p>
                                 <p id="dataPartida" className="font-semibold text-3xl">
                                     {jogo && jogo.data 
-                                        ? new Date(jogo.data).toLocaleDateString('pt-BR') 
+                                        ? new Date(new Date(jogo.data).getTime() + (24 * 60 * 60 * 1000)).toLocaleDateString('pt-BR') 
                                         : 'Carregando...'}
                                 </p>
                             </div>
