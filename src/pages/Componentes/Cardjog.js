@@ -178,6 +178,49 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             theme: "light",
         });
 
+        // Lógica para reduzir os itens do estoque
+        const itemCountMap = jogador.items.reduce((acc, item) => {
+            acc[item.nome] = (acc[item.nome] || 0) + 1;
+            return acc;
+        }, {});
+
+        const promises = Object.keys(itemCountMap).map(async (nome) => {
+            const selectedItem = estoque.find(item => item.nome === nome);
+            
+            if (!selectedItem) {
+                toast.error(`Item ${nome} não encontrado no estoque`, {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return;
+            }
+
+            const quantidadeAtual = selectedItem.quantidade;
+
+            if (quantidadeAtual < itemCountMap[nome]) {
+                toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return;
+            }
+
+            const novaQuantidade = quantidadeAtual - itemCountMap[nome];
+            await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
+        });
+
+        await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
+
         // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
