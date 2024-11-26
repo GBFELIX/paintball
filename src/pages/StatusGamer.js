@@ -40,6 +40,9 @@ export default function StatusGame() {
         const storedData = localStorage.getItem('dataJogo');
         const storedHora = localStorage.getItem('horaJogo');
 
+        console.log('Data do Jogo:', storedData);
+        console.log('Hora do Jogo:', storedHora);
+
         if (storedData) {
             setJogo({ data: storedData, hora: storedHora });
         } else {
