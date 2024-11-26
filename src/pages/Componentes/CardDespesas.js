@@ -236,8 +236,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                 const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
                 const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
 
-                // Calcular o valor a ser atribuído a cada forma de pagamento
-                const valorPorForma = valorTotalDespesa / formasSelecionadas.length; // Divide o total pelo número de formas selecionadas
+                const valorPorForma = formasSelecionadas.length > 0 ? valorTotalDespesa / formasSelecionadas.length : 0;
 
                 formasSelecionadas.forEach(forma => {
                     pagamentosAnteriores.push({
