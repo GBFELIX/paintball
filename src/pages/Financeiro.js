@@ -13,11 +13,14 @@ export default function Financeiro() {
   });
   const [financeiroData, setFinanceiroData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [jogos, setJogos] = useState([]);
+  const [jogosFiltrados, setJogosFiltrados] = useState([]);
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     setValue({ startDate: today, endDate: today });
     buscarDadosFinanceiros(today);
+    filtrarJogos();
   }, []);
 
   const buscarDadosFinanceiros = (data) => {
@@ -95,6 +98,21 @@ export default function Financeiro() {
     });
     
     window.print();
+  };
+
+  const filtrarJogos = () => {
+    const agora = new Date();
+    const primeiroDiaDoMesAtual = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const primeiroDiaDoMesPassado = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
+    const primeiroDiaDoProximoMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 1);
+
+    const jogosFiltrados = jogos.filter(jogo => {
+      const dataJogo = new Date(jogo.data);
+      return (dataJogo >= primeiroDiaDoMesAtual && dataJogo < primeiroDiaDoProximoMes) ||
+             (dataJogo >= primeiroDiaDoMesPassado && dataJogo < primeiroDiaDoAtual);
+    });
+
+    setJogosFiltrados(jogosFiltrados);
   };
 
   return (
