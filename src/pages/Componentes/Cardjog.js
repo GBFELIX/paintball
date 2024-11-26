@@ -216,7 +216,22 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             }
 
             const novaQuantidade = quantidadeAtual - itemCountMap[nome];
-            await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
+            return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
+                .then(() => {
+                    console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar estoque:', error);
+                    toast.error('Erro ao atualizar estoque', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                });
         });
 
         await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
