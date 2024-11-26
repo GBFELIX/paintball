@@ -189,7 +189,7 @@ export default function Financeiro() {
                 <tr key={index} className="p-1 text-white flex justify-around hover:bg-green-700 duration-300 border border-gray-500">
                   <td className="w-full">
                     {item && item.data_jogo 
-                      ? new Date(new Date(item.data_jogo).getTime() + (24 * 60 * 60 * 1000)).toLocaleDateString('pt-BR') 
+                      ? new Date(new Date(item.data_jogo).getTime() + (0)).toLocaleDateString('pt-BR') 
                       : ''}
                   </td>
                   <td className="w-full">{item && item.total_jogadores}</td>
