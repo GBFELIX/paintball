@@ -17,9 +17,11 @@ export default function Financeiro() {
   const [jogosFiltrados, setJogosFiltrados] = useState([]);
 
   useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    setValue({ startDate: today, endDate: today });
-    buscarDadosFinanceiros(today);
+    const today = new Date();
+    today.setDate(today.getDate() - 1);
+    const formattedDate = today.toISOString().split("T")[0];
+    setValue({ startDate: formattedDate, endDate: formattedDate });
+    buscarDadosFinanceiros(formattedDate);
     filtrarJogos();
   }, []);
 
@@ -138,8 +140,6 @@ export default function Financeiro() {
               shortcuts: {
                 today: "Hoje",
                 yesterday: "Ontem",
-                currentMonth: "Mês Atual",
-                pastMonth: "Mês Passado",
               },
               footer: {
                 cancel: "Cancelar",

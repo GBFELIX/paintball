@@ -3,16 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from './Componentes/Navbar';
 import logo from '../images/logo_la.png';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
+import 'react-toastify/dist/ReactToastify.css'; 
 
 function AddJogo() {
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
-  const navigate = useNavigate(); // Hook para redirecionar
-
-  // Função para obter a data e hora atual no formato correto
+  const navigate = useNavigate(); 
   useEffect(() => {
     const now = new Date();
+    now.setDate(now.getDate() - 1); // Subtrai um dia da data atual
 
     // Formatando a data no formato YYYY-MM-DD
     const dataAtual = now.toISOString().split('T')[0];
