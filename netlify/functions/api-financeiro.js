@@ -17,7 +17,33 @@ exports.handler = async (event, context) => {
     try {
       const params = new URLSearchParams(event.queryStringParameters);
       const data = params.get('data');
-      
+
+      // Se a data não for fornecida, busque jogos do mês atual e do mês passado
+      if (!data) {
+        const agora = new Date();
+        const primeiroDiaDoMesAtual = new Date(agora.getFullYear(), agora.getMonth(), 1);
+        const ultimoDiaDoMesAtual = new Date(agora.getFullYear(), agora.getMonth() + 1, 0);
+        const primeiroDiaDoMesPassado = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
+        const ultimoDiaDoMesPassado = new Date(agora.getFullYear(), agora.getMonth(), 0);
+
+        const query = `
+          SELECT * FROM financeiro 
+          WHERE (data_jogo BETWEEN ? AND ?) OR (data_jogo BETWEEN ? AND ?)
+        `;
+        const [results] = await connection.query(query, [
+          primeiroDiaDoMesAtual.toISOString().split('T')[0],
+          ultimoDiaDoMesAtual.toISOString().split('T')[0],
+          primeiroDiaDoMesPassado.toISOString().split('T')[0],
+          ultimoDiaDoMesPassado.toISOString().split('T')[0]
+        ]);
+
+        return {
+          statusCode: 200,
+          body: JSON.stringify(results)
+        };
+      }
+
+      // Se uma data específica for fornecida, busque apenas essa data
       const query = 'SELECT * FROM financeiro WHERE DATE(data_jogo) = ?';
       const [results] = await connection.query(query, [data]);
 
