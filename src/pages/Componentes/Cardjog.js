@@ -170,12 +170,15 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
         // Função para buscar a quantidade atual de um item no backend
         const promises = Object.keys(itemCountMap).map(async (nome) => {
-            const quantidadeParaSubtrair = itemCountMap[nome];
-            const selectedItem = estoque.find(item => item.nome === nome);
+            // Primeiro, busque a quantidade atual do item no banco de dados
+            const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
+            const selectedItem = response.data; // Supondo que a resposta contenha o item com a quantidade
 
             if (!selectedItem) {
                 throw new Error(`Item ${nome} não encontrado no estoque`);
             }
+
+            const quantidadeParaSubtrair = itemCountMap[nome];
 
             if (selectedItem.quantidade < quantidadeParaSubtrair) {
                 throw new Error(`Quantidade insuficiente no estoque para o item ${nome}`);
@@ -189,6 +192,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
         try {
             await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
+            console.log('Estoque atualizado com sucesso!');
         } catch (error) {
             console.error('Erro ao processar atualização do estoque:', error);
             toast.error('Erro ao atualizar o estoque', {
