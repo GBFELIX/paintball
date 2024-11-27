@@ -110,17 +110,15 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             updatedJogadores[index].items = [];
             updateJogadores(updatedJogadores);
         } else {
-            const valorTotal = updatedJogadores[index].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
             setJogadorIndexForPayment(index);
-            setValorTotalVendaAtual(valorTotal);
             setShowPaymentModal(true);
         }
     };
 
     const handleConfirmPayment = async () => {
         const jogador = jogadores[jogadorIndexForPayment];
-    
-        // Verifique se os items estão definidos
+
+        // Verifique se items estão definidos
         if (!jogador.items || jogador.items.length === 0) {
             toast.error('Nenhum item encontrado para o jogador', {
                 position: "top-right",
@@ -133,7 +131,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
             return;
         }
-    
+
         // Verifique se pelo menos uma forma de pagamento foi selecionada
         if (!Object.values(paymentMethods).some(method => method === true)) {
             toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
@@ -147,7 +145,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
             return;
         }
-    
+
         // Verifique se os valores foram inseridos
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
         const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
@@ -163,15 +161,15 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
             return;
         }
-    
+
         // Mapeie os itens do jogador para calcular as quantidades
         const itemCountMap = jogador.items.reduce((acc, item) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
             return acc;
         }, {});
-    
+
         // Função para buscar a quantidade atual de um item no backend
-        const estoqueAtualizado = await Promise.all(Object.keys(itemCountMap).map(async (nome) => {
+        const promises = Object.keys(itemCountMap).map(async (nome) => {
             const quantidadeParaSubtrair = itemCountMap[nome];
             const selectedItem = estoque.find(item => item.nome === nome);
 
@@ -187,18 +185,24 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
 
             return { nome, novaQuantidade };
-        }));
+        });
 
-        console.log('Estoque atualizado:', estoqueAtualizado);
-    
-    
         try {
             await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
         } catch (error) {
             console.error('Erro ao processar atualização do estoque:', error);
+            toast.error('Erro ao atualizar o estoque', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
             return; // Interrompe o processo em caso de falha
         }
-    
+
         // Atualize o jogador como fechado
         const updatedJogadores = [...jogadores];
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
@@ -214,12 +218,12 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             draggable: true,
             theme: "light",
         });
-    
+
         // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
         const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
-    
+
         try {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
@@ -228,15 +232,15 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 valorTotal: valorTotal,
                 dataJogo: dataHoraJogo,
             });
-    
+
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
             const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-            const valorPorForma = totalPagamento / formasSelecionadas.length;
-    
+            const valorPorForma = totalPagamento / formasSelecionadas.length; // Divide o total pelo número de formas selecionadas
+
             formasSelecionadas.forEach(forma => {
                 pagamentosAnteriores.push({
-                    valorTotal: valorPorForma,
-                    formaPagamento: forma,
+                    valorTotal: valorPorForma, // Armazena o valor correspondente a cada forma
+                    formaPagamento: forma, // Armazena a forma de pagamento
                 });
             });
             localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
@@ -253,7 +257,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
         }
     };
-    
 
     return (
         <div className="flex flex-wrap gap-4">

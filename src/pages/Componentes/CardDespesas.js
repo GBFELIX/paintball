@@ -180,9 +180,13 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         }
 
         const novaQuantidade = quantidadeAtual - itemCountMap[nome];
+        
+        console.log(`Atualizando item: ${nome}, Quantidade atual: ${quantidadeAtual}, Nova quantidade: ${novaQuantidade}`);
+
         return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
             .then(() => {
                 console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
+                return { nome, novaQuantidade };
             })
             .catch(error => {
                 console.error('Erro ao atualizar estoque:', error);
@@ -200,7 +204,8 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     });
 
     try {
-        await Promise.all(promises);
+        const resultados = await Promise.all(promises);
+        console.log('Resultados da atualização do estoque:', resultados);
     } catch (error) {
         console.error('Erro ao processar atualização do estoque:', error);
         return;
