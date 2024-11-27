@@ -168,6 +168,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         // Verifique se os valores foram inseridos
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
         const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+        setValorTotalVendaAtual(valorTotal);
         if (totalPagamento !== valorTotal) {
             toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
                 position: "top-right",
@@ -187,26 +188,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             return acc;
         }, {});
 
-        // Função para buscar a quantidade atual de um item no backend
-    
-
-        try {
-            await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
-        } catch (error) {
-            console.error('Erro ao processar atualização do estoque:', error);
-            toast.error('Erro ao atualizar o estoque', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            return; // Interrompe o processo em caso de falha
-        }
-
-        // Atualize o jogador como fechado
+     
         const updatedJogadores = [...jogadores];
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
         updateJogadores(updatedJogadores);
