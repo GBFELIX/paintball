@@ -117,8 +117,8 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
     const handleConfirmPayment = async () => {
         const jogador = jogadores[jogadorIndexForPayment];
-
-        // Verifique se items estão definidos
+    
+        // Verifique se os items estão definidos
         if (!jogador.items || jogador.items.length === 0) {
             toast.error('Nenhum item encontrado para o jogador', {
                 position: "top-right",
@@ -131,7 +131,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
             return;
         }
-
+    
         // Verifique se pelo menos uma forma de pagamento foi selecionada
         if (!Object.values(paymentMethods).some(method => method === true)) {
             toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
@@ -145,7 +145,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
             return;
         }
-
+    
         // Verifique se os valores foram inseridos
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
         const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
@@ -161,8 +161,77 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
             return;
         }
-
-        // Se todas as validações passarem, feche o pedido
+    
+        // Mapeie os itens do jogador para calcular as quantidades
+        const itemCountMap = jogador.items.reduce((acc, item) => {
+            acc[item.nome] = (acc[item.nome] || 0) + 1;
+            return acc;
+        }, {});
+    
+        // Função para buscar a quantidade atual de um item no backend
+        const verificarEstoque = async (nome) => {
+            try {
+                const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
+                return response.data.quantidade;
+            } catch (error) {
+                toast.error(`Erro ao verificar estoque para o item ${nome}: ${error.message}`, {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return null;
+            }
+        };
+    
+        // Processar cada item do jogador
+        const promises = Object.keys(itemCountMap).map(async (nome) => {
+            const quantidadeAtual = await verificarEstoque(nome); // Busca a quantidade atual no backend
+    
+            if (quantidadeAtual === null || quantidadeAtual < itemCountMap[nome]) {
+                toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                throw new Error(`Quantidade insuficiente para o item ${nome}`);
+            }
+    
+            const novaQuantidade = quantidadeAtual - itemCountMap[nome];
+            return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
+                .then(() => {
+                    console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar estoque:', error);
+                    toast.error(`Erro ao atualizar estoque do item ${nome}`, {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                    throw error;
+                });
+        });
+    
+        try {
+            await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
+        } catch (error) {
+            console.error('Erro ao processar atualização do estoque:', error);
+            return; // Interrompe o processo em caso de falha
+        }
+    
+        // Atualize o jogador como fechado
         const updatedJogadores = [...jogadores];
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
         updateJogadores(updatedJogadores);
@@ -177,70 +246,12 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             draggable: true,
             theme: "light",
         });
-
-        // Lógica para reduzir os itens do estoque
-        const itemCountMap = jogador.items.reduce((acc, item) => {
-            acc[item.nome] = (acc[item.nome] || 0) + 1;
-            return acc;
-        }, {});
-
-        const promises = Object.keys(itemCountMap).map(async (nome) => {
-            const selectedItem = estoque.find(item => item.nome === nome);
-            
-            if (!selectedItem) {
-                toast.error(`Item ${nome} não encontrado no estoque`, {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
-                return;
-            }
-
-            const quantidadeAtual = selectedItem.quantidade;
-
-            if (quantidadeAtual < itemCountMap[nome]) {
-                toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
-                return;
-            }
-
-            const novaQuantidade = quantidadeAtual - itemCountMap[nome];
-            return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
-                .then(() => {
-                    console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
-                })
-                .catch(error => {
-                    console.error('Erro ao atualizar estoque:', error);
-                    toast.error('Erro ao atualizar estoque', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                });
-        });
-
-        await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
-
+    
         // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
         const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
-
+    
         try {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
@@ -249,15 +260,15 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 valorTotal: valorTotal,
                 dataJogo: dataHoraJogo,
             });
-
+    
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
             const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-            const valorPorForma = totalPagamento / formasSelecionadas.length; // Divide o total pelo número de formas selecionadas
-
+            const valorPorForma = totalPagamento / formasSelecionadas.length;
+    
             formasSelecionadas.forEach(forma => {
                 pagamentosAnteriores.push({
-                    valorTotal: valorPorForma, // Armazena o valor correspondente a cada forma
-                    formaPagamento: forma, // Armazena a forma de pagamento
+                    valorTotal: valorPorForma,
+                    formaPagamento: forma,
                 });
             });
             localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
@@ -274,6 +285,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
         }
     };
+    
 
     return (
         <div className="flex flex-wrap gap-4">
