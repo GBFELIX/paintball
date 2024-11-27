@@ -7,6 +7,7 @@ import { FaPlus } from "react-icons/fa6";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
+import axios from 'axios';
 
 export default function StatusGame() {
     const [jogo, setJogo] = useState({});
@@ -131,12 +132,12 @@ export default function StatusGame() {
         setShowConfirmationModal(true);
     };
 
-    const confirmCloseGame = () => {
+    const confirmCloseGame = async () => {
         const jogadoresAbertos = jogadores.filter(jogador => !jogador.isClosed);
-        const vendasAbertos = vendasAvulsas.filter(venda => !venda.isClosed);
+        const vendasAbertas = vendasAvulsas.filter(venda => !venda.isClosed);
         const despesasAbertas = despesas.filter(despesa => !despesa.isClosed);
 
-        if (jogadoresAbertos.length > 0 || vendasAbertos.length > 0 || despesasAbertas.length > 0) {
+        if (jogadoresAbertos.length > 0 || vendasAbertas.length > 0 || despesasAbertas.length > 0) {
             toast.error('Não é possível fechar a partida com cards abertos!', {
                 position: "top-right",
                 autoClose: 3000,
@@ -152,7 +153,27 @@ export default function StatusGame() {
 
         setLoading(true);
         try {
-            // Aqui você pode adicionar lógica para salvar os dados finais
+            // Lógica para diminuir os valores no banco de dados
+            const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+            const promises = Object.keys(storedItems).map(async (itemName) => {
+                const quantidadeParaSubtrair = storedItems[itemName];
+                const response = await axios.get(`/.netlify/functions/api-estoque/${itemName}`);
+                const selectedItem = response.data;
+
+                if (!selectedItem) {
+                    throw new Error(`Item ${itemName} não encontrado no estoque`);
+                }
+
+                if (selectedItem.quantidade < quantidadeParaSubtrair) {
+                    throw new Error(`Quantidade insuficiente no estoque para o item ${itemName}`);
+                }
+
+                const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
+                await axios.put(`/.netlify/functions/api-estoque/${itemName}`, { quantidade: novaQuantidade });
+            });
+
+            await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
+
             setShowConfirmationModal(false);
             toast.success('Partida finalizada com sucesso!', {
                 position: "top-right",
@@ -167,6 +188,7 @@ export default function StatusGame() {
                 navigate('/resumogame');
             }, 1000);
         } catch (error) {
+            console.error('Erro ao finalizar partida:', error);
             toast.error('Erro ao finalizar partida', {
                 position: "top-right",
                 autoClose: 3000,
