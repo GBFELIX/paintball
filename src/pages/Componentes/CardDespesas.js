@@ -95,7 +95,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
 
   const handleConfirmPayment = async () => {
     const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-        const valorFinal = valorComDesconto || valorTotalVendaAtual;
+        const valorFinal = valorComDesconto;
     
         if (totalPagamento !== valorFinal) {
             showToast('O valor total do pagamento deve ser igual ao valor final', 'error');

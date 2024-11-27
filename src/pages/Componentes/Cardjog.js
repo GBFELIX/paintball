@@ -110,7 +110,9 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             updatedJogadores[index].items = [];
             updateJogadores(updatedJogadores);
         } else {
+            const valorTotal = updatedJogadores[index].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
             setJogadorIndexForPayment(index);
+            setValorTotalVendaAtual(valorTotal);
             setShowPaymentModal(true);
         }
     };
@@ -189,23 +191,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
         console.log('Estoque atualizado:', estoqueAtualizado);
     
-        // Processar cada item do jogador
-        const promises = Object.keys(itemCountMap).map(async (nome) => {
-            const quantidadeAtual = await verificarEstoque(nome); // Busca a quantidade atual no backend
-    
-            if (quantidadeAtual === null || quantidadeAtual < itemCountMap[nome]) {
-                toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
-                throw new Error(`Quantidade insuficiente para o item ${nome}`);
-            }
-        });
     
         try {
             await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
