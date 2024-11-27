@@ -90,122 +90,184 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     const handleClosePedido = (index) => {
         const jogador = jogadores[index];
 
-// Verifica se o nome do jogador está preenchido
-if (!jogador.nome || jogador.nome.trim() === '') {
-    showToast('O nome do jogador é obrigatório antes de fechar o pedido.', 'error');
-    return; // Impede o fechamento do pedido
-}
+        // Verifique se o nome do jogador está preenchido
+        if (!jogador.nome || jogador.nome.trim() === '') {
+            toast.error('O nome do jogador é obrigatório antes de fechar o pedido.', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            return; // Não fecha o pedido se o nome não estiver preenchido
+        }
 
-// Verifica se o pedido já foi fechado
-if (jogador.isClosed) {
-    const updatedJogadores = [...jogadores];
-    updatedJogadores[index].isClosed = false;
-    updatedJogadores[index].items = [];
-    updateJogadores(updatedJogadores);
-} else {
-    setJogadorIndexForPayment(index);
-    setShowPaymentModal(true);
-}
+        if (jogador.isClosed) {
+            const updatedJogadores = [...jogadores];
+            updatedJogadores[index].isClosed = false;
+            updatedJogadores[index].items = [];
+            updateJogadores(updatedJogadores);
+        } else {
+            setJogadorIndexForPayment(index);
+            setShowPaymentModal(true);
+        }
+    };
 
-// Função para confirmar pagamento com validações
-const handleConfirmPayment = async () => {
-    const jogador = jogadores[jogadorIndexForPayment];
-
-    // Valida se o jogador possui itens
-    if (!jogador.items || jogador.items.length === 0) {
-        showToast('Nenhum item encontrado para o jogador.', 'error');
-        return;
-    }
-
-    // Valida se ao menos uma forma de pagamento foi selecionada
-    if (!Object.values(paymentMethods).some(method => method === true)) {
-        showToast('Por favor, selecione pelo menos uma forma de pagamento.', 'error');
-        return;
-    }
-
-    // Calcula o total do pagamento e compara com o total dos itens
-    const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-    const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
-
-    if (totalPagamento !== valorTotal) {
-        showToast('O valor total do pagamento deve ser igual ao valor total dos itens.', 'error');
-        return;
-    }
-
-    // Mapeia os itens para calcular as quantidades necessárias
-    const itemCountMap = jogador.items.reduce((acc, item) => {
-        acc[item.nome] = (acc[item.nome] || 0) + 1;
-        return acc;
-    }, {});
-
-    try {
-        // Valida e atualiza o estoque
-        await Promise.all(Object.keys(itemCountMap).map(async (nome) => {
+    const handleConfirmPayment = async () => {
+        const jogador = jogadores[jogadorIndexForPayment];
+    
+        // Verifique se os items estão definidos
+        if (!jogador.items || jogador.items.length === 0) {
+            toast.error('Nenhum item encontrado para o jogador', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            return;
+        }
+    
+        // Verifique se pelo menos uma forma de pagamento foi selecionada
+        if (!Object.values(paymentMethods).some(method => method === true)) {
+            toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            return;
+        }
+    
+        // Verifique se os valores foram inseridos
+        const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+        if (totalPagamento !== valorTotal) {
+            toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            return;
+        }
+    
+        // Mapeie os itens do jogador para calcular as quantidades
+        const itemCountMap = jogador.items.reduce((acc, item) => {
+            acc[item.nome] = (acc[item.nome] || 0) + 1;
+            return acc;
+        }, {});
+    
+        // Função para buscar a quantidade atual de um item no backend
+        const estoqueAtualizado = await Promise.all(Object.keys(itemCountMap).map(async (nome) => {
+            const quantidadeParaSubtrair = itemCountMap[nome];
             const selectedItem = estoque.find(item => item.nome === nome);
 
             if (!selectedItem) {
-                throw new Error(`Item ${nome} não encontrado no estoque.`);
+                throw new Error(`Item ${nome} não encontrado no estoque`);
             }
 
-            if (selectedItem.quantidade < itemCountMap[nome]) {
-                throw new Error(`Quantidade insuficiente no estoque para o item ${nome}.`);
+            if (selectedItem.quantidade < quantidadeParaSubtrair) {
+                throw new Error(`Quantidade insuficiente no estoque para o item ${nome}`);
             }
 
-            const novaQuantidade = selectedItem.quantidade - itemCountMap[nome];
+            const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
             await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
+
+            return { nome, novaQuantidade };
         }));
 
-        // Atualiza estado do jogador como fechado
+        console.log('Estoque atualizado:', estoqueAtualizado);
+    
+        // Processar cada item do jogador
+        const promises = Object.keys(itemCountMap).map(async (nome) => {
+            const quantidadeAtual = await verificarEstoque(nome); // Busca a quantidade atual no backend
+    
+            if (quantidadeAtual === null || quantidadeAtual < itemCountMap[nome]) {
+                toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                throw new Error(`Quantidade insuficiente para o item ${nome}`);
+            }
+        });
+    
+        try {
+            await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
+        } catch (error) {
+            console.error('Erro ao processar atualização do estoque:', error);
+            return; // Interrompe o processo em caso de falha
+        }
+    
+        // Atualize o jogador como fechado
         const updatedJogadores = [...jogadores];
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
         updateJogadores(updatedJogadores);
         setShowPaymentModal(false);
-        showToast('Pagamento confirmado com sucesso!', 'success');
-
-        // Envia o pedido para a API
-        const dataJogo = `${localStorage.getItem('dataJogo')} ${localStorage.getItem('horaJogo')}:00`;
-        await axios.post('/.netlify/functions/api-pedidos', {
-            nomeJogador: jogador.nome,
-            items: jogador.items,
-            formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
-            valorTotal: totalPagamento,
-            dataJogo,
+        toast.dismiss();
+        toast.success('Pagamento confirmado com sucesso!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
         });
-
-        // Armazena os pagamentos no localStorage
-        const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-        const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-        const valorPorForma = totalPagamento / formasSelecionadas.length;
-
-        formasSelecionadas.forEach(forma => {
-            pagamentosAnteriores.push({
-                valorTotal: valorPorForma,
-                formaPagamento: forma,
+    
+        // Enviar o pedido para a API
+        const dataJogo = localStorage.getItem('dataJogo');
+        const horaJogo = localStorage.getItem('horaJogo');
+        const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
+    
+        try {
+            await axios.post('/.netlify/functions/api-pedidos', {
+                nomeJogador: jogador.nome,
+                items: jogador.items,
+                formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                valorTotal: valorTotal,
+                dataJogo: dataHoraJogo,
             });
-        });
-        localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
-    } catch (error) {
-        console.error(error.message);
-        showToast(error.message || 'Erro ao processar o pedido.', 'error');
-    }
-};
-
-// Função para exibir mensagens Toast centralizadas
-const showToast = (message, type = 'info') => {
-    const options = {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
+    
+            const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+            const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
+            const valorPorForma = totalPagamento / formasSelecionadas.length;
+    
+            formasSelecionadas.forEach(forma => {
+                pagamentosAnteriores.push({
+                    valorTotal: valorPorForma,
+                    formaPagamento: forma,
+                });
+            });
+            localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+        } catch (error) {
+            console.error('Erro ao cadastrar pedido:', error);
+            toast.error('Erro ao finalizar pedido', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+        }
     };
-    type === 'success' ? toast.success(message, options)
-        : type === 'error' ? toast.error(message, options)
-        : toast.info(message, options);
-};
-}
     
 
     return (

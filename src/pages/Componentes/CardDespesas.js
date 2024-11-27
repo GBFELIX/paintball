@@ -94,121 +94,99 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   };
 
   const handleConfirmPayment = async () => {
-    const despesa = despesas[despesaIndexForPayment];
-
-    // Valida se a despesa foi encontrada
-    if (!despesa) {
-        showToast('Despesa não encontrada', 'error');
-        return;
-    }
-
-    const itemsToUpdate = despesa.items;
-    const valorTotalDespesa = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
-    const valorFinal = valorComDesconto || valorTotalDespesa;
     const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-
-    // Valida se ao menos uma forma de pagamento foi selecionada
-    if (!Object.values(paymentMethods).some(method => method === true)) {
-        showToast('Por favor, selecione pelo menos uma forma de pagamento', 'error');
-        return;
-    }
-
-    // Valida se o total pago corresponde ao valor final
-    if (totalPagamento !== valorFinal) {
-        showToast('O valor total do pagamento deve ser igual ao valor final', 'error');
-        return;
-    }
-
-    // Mapeia as quantidades de itens a atualizar
-    const itemCountMap = itemsToUpdate.reduce((acc, item) => {
-        acc[item.nome] = (acc[item.nome] || 0) + 1;
-        return acc;
-    }, {});
-
-    const verificarEstoque = async (nome) => {
+        const valorFinal = valorComDesconto || valorTotalVendaAtual;
+    
+        if (totalPagamento !== valorFinal) {
+            showToast('O valor total do pagamento deve ser igual ao valor final', 'error');
+            return;
+        }
+    
+        if (!Object.values(paymentMethods).some(method => method === true)) {
+            showToast('Por favor, selecione pelo menos uma forma de pagamento', 'error');
+            return;
+        }
+    
+        const despesa = despesas[despesaIndexForPayment];
+        const itemsToUpdate = despesa.items;
+        const itemCountMap = itemsToUpdate.reduce((acc, item) => {
+            acc[item.nome] = (acc[item.nome] || 0) + 1;
+            return acc;
+        }, {});
+    
         try {
-            const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
-            return response.data.quantidade;
+            // Verifica e atualiza estoque
+            const estoqueAtualizado = await Promise.all(Object.keys(itemCountMap).map(async (nome) => {
+                const quantidadeParaSubtrair = itemCountMap[nome];
+                const selectedItem = estoque.find(item => item.nome === nome);
+    
+                if (!selectedItem) {
+                    throw new Error(`Item ${nome} não encontrado no estoque`);
+                }
+    
+                if (selectedItem.quantidade < quantidadeParaSubtrair) {
+                    throw new Error(`Quantidade insuficiente no estoque para o item ${nome}`);
+                }
+    
+                const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
+                await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
+    
+                return { nome, novaQuantidade };
+            }));
+    
+            console.log('Estoque atualizado:', estoqueAtualizado);
+    
+            // Finaliza pedido
+            const dataJogo = `${localStorage.getItem('dataJogo')} ${localStorage.getItem('horaJogo')}:00`;
+            await axios.post('/.netlify/functions/api-pedidos', {
+                nomeJogador: despesa.nome,
+                items: despesa.items,
+                formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                valorTotal: valorFinal,
+                dataJogo,
+            });
+    
+            // Atualiza estado e localStorage
+            const updatedDespesas = [...despesas];
+            updatedDespesas[despesaIndexForPayment].isClosed = true;
+            updatedespesas(updateddespesas);
+            setShowPaymentModal(false);
+    
+            const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+            const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
+            const valorPorForma = valorFinal / formasSelecionadas.length;
+    
+            formasSelecionadas.forEach(forma => {
+                pagamentosAnteriores.push({
+                    valorTotal: valorPorForma,
+                    formaPagamento: forma,
+                });
+            });
+    
+            localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+            showToast('Pedido finalizado com sucesso!', 'success');
+    
         } catch (error) {
-            showToast(`Erro ao verificar estoque para o item ${nome}: ${error.message}`, 'error');
-            return null;
+            console.error(error.message);
+            showToast(error.message || 'Erro ao processar pedido', 'error');
         }
     };
-
-    // Atualiza o estoque
-    try {
-        await Promise.all(Object.keys(itemCountMap).map(async (nome) => {
-            const quantidadeAtual = await verificarEstoque(nome);
-
-            if (quantidadeAtual === null || quantidadeAtual < itemCountMap[nome]) {
-                throw new Error(`Quantidade insuficiente no estoque para o item ${nome}`);
-            }
-
-            const novaQuantidade = quantidadeAtual - itemCountMap[nome];
-            await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
-        }));
-    } catch (error) {
-        console.error(error.message);
-        showToast(error.message || 'Erro ao atualizar estoque', 'error');
-        return;
-    }
-
-    // Atualiza o estado da despesa como fechada
-    const updatedDespesas = [...despesas];
-    updatedDespesas[despesaIndexForPayment].isClosed = true;
-    setDespesas(updatedDespesas);
-    setShowPaymentModal(false);
-    showToast('Pagamento confirmado com sucesso!', 'success');
-
-    // Envia o pedido para a API
-    const dataJogo = localStorage.getItem('dataJogo');
-    const horaJogo = localStorage.getItem('horaJogo');
-    const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
-
-    try {
-        await axios.post('/.netlify/functions/api-pedidos', {
-            nomeJogador: despesa.nome,
-            items: despesa.items,
-            formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
-            valorTotal: valorFinal,
-            dataJogo: dataHoraJogo,
-        });
-
-        // Salva os pagamentos no localStorage
-        const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-        const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-        const valorPorForma = formasSelecionadas.length > 0 ? valorFinal / formasSelecionadas.length : 0;
-
-        formasSelecionadas.forEach(forma => {
-            pagamentosAnteriores.push({
-                valorTotal: valorPorForma,
-                formaPagamento: forma,
-            });
-        });
-
-        localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
-    } catch (error) {
-        console.error('Erro ao cadastrar pedido:', error);
-        showToast('Erro ao finalizar pedido', 'error');
-    }
-};
-
-// Função para exibir mensagens Toast centralizadas
-const showToast = (message, type = 'info') => {
-    const options = {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
+    
+    // Função para centralizar mensagens toast
+    const showToast = (message, type = 'info') => {
+        const options = {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        };
+        type === 'success' ? toast.success(message, options)
+            : type === 'error' ? toast.error(message, options)
+            : toast.info(message, options);
     };
-    type === 'success' ? toast.success(message, options)
-        : type === 'error' ? toast.error(message, options)
-        : toast.info(message, options);
-};
-
 
   
   return (
