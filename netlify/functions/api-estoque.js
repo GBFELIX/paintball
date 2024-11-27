@@ -28,7 +28,31 @@ exports.handler = async (event, context) => {
       };
     }
   }
+  if (event.httpMethod === 'GET' && event.path.includes('/estoque/')) {
+    try {
+        const nome = event.path.split('/').pop();
+        const query = 'SELECT quantidade FROM estoque WHERE nome = ?';
+        const [results] = await connection.query(query, [nome]);
 
+        if (results.length === 0) {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ error: `Item ${nome} não encontrado no estoque` })
+            };
+        }
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ quantidade: results[0].quantidade })
+        };
+    } catch (err) {
+        console.error('Erro ao buscar quantidade do estoque:', err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Erro ao buscar quantidade do estoque' })
+        };
+    }
+}
   // POST /estoque
   if (event.httpMethod === 'POST') {
     try {
