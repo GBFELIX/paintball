@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 
 const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     const [estoque, setEstoque] = useState([]);
+    const [quantidadeLocal, setQuantidadeLocal] = useState({});
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [vendaIndexForPayment, setVendaIndexForPayment] = useState(null);
     const [paymentValues, setPaymentValues] = useState({ dinheiro: 0, credito: 0, debito: 0, pix: 0 });
@@ -37,13 +38,19 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
         fetchDescontos();
     }, []);
 
+    useEffect(() => {
+        // Recupera os itens do localStorage ao montar o componente
+        const storedItems = JSON.parse(localStorage.getItem('itensVenda')) || {};
+        setQuantidadeLocal(storedItems);
+    }, []);
+
     const updateVendas = (updatedVendas) => {
         setVendas(updatedVendas);
     };
 
     const handleRemoveVendaAvulsa = (index) => {
-            const updatedVendas = vendas.filter((_, i) => i !== index);
-            updateVendas(updatedVendas);
+        const updatedVendas = vendas.filter((_, i) => i !== index);
+        updateVendas(updatedVendas);
     };
 
     const handleNomeChange = (index, event) => {
@@ -93,15 +100,29 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
 
     const handleClosePedido = (index) => {
         const updatedVendas = [...vendas];
-        if (updatedVendas[index].isClosed) {
-            updatedVendas[index].isClosed = false;
-            updatedVendas[index].items = [];
+        const venda = updatedVendas[index];
+
+        if (venda.isClosed) {
+            venda.isClosed = false;
+            venda.items = [];
             updateVendas(updatedVendas);
         } else {
-            const valorTotal = updatedVendas[index].items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+            const valorTotal = venda.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
             setValorTotalVendaAtual(valorTotal);
             setVendaIndexForPayment(index);
             setShowPaymentModal(true);
+
+            venda.items.forEach(item => {
+                setQuantidadeLocal(prev => {
+                    const newQuantities = {
+                        ...prev,
+                        [item.nome]: (prev[item.nome] || 0) + 1
+                    };
+                    // Armazena as quantidades no localStorage
+                    localStorage.setItem('itensVenda', JSON.stringify(newQuantities));
+                    return newQuantities;
+                });
+            });
         }
     };
 
@@ -114,51 +135,27 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     const handleConfirmPayment = async () => {
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
         const valorFinal = valorComDesconto || valorTotalVendaAtual;
-    
+
         if (totalPagamento !== valorFinal) {
             showToast('O valor total do pagamento deve ser igual ao valor final', 'error');
             return;
         }
-    
+
         if (!Object.values(paymentMethods).some(method => method === true)) {
             showToast('Por favor, selecione pelo menos uma forma de pagamento', 'error');
             return;
         }
-    
+
         const venda = vendas[vendaIndexForPayment];
         const itemsToUpdate = venda.items;
-    
+
         // Contabiliza a quantidade total de cada item
         const itemCountMap = itemsToUpdate.reduce((acc, item) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
             return acc;
         }, {});
-    
+
         try {
-            // Verifica e atualiza estoque
-            const estoqueAtualizado = await Promise.all(Object.keys(itemCountMap).map(async (nome) => {
-                // Primeiro, busque a quantidade atual do item no banco de dados
-                const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
-                const selectedItem = response.data; // Supondo que a resposta contenha o item com a quantidade
-
-                if (!selectedItem) {
-                    throw new Error(`Item ${nome} não encontrado no estoque`);
-                }
-
-                const quantidadeParaSubtrair = itemCountMap[nome];
-
-                if (selectedItem.quantidade < quantidadeParaSubtrair) {
-                    throw new Error(`Quantidade insuficiente no estoque para o item ${nome}`);
-                }
-
-                const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
-                await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
-
-                return { nome, novaQuantidade };
-            }));
-    
-            console.log('Estoque atualizado:', estoqueAtualizado);
-    
             // Finaliza pedido
             const dataJogo = `${localStorage.getItem('dataJogo')} ${localStorage.getItem('horaJogo')}:00`;
             await axios.post('/.netlify/functions/api-pedidos', {
@@ -168,33 +165,33 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 valorTotal: valorFinal,
                 dataJogo,
             });
-    
+
             // Atualiza estado e localStorage
             const updatedVendas = [...vendas];
             updatedVendas[vendaIndexForPayment].isClosed = true;
             updateVendas(updatedVendas);
             setShowPaymentModal(false);
-    
+
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
             const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
             const valorPorForma = valorFinal / formasSelecionadas.length;
-    
+
             formasSelecionadas.forEach(forma => {
                 pagamentosAnteriores.push({
                     valorTotal: valorPorForma,
                     formaPagamento: forma,
                 });
             });
-    
+
             localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
             showToast('Pedido finalizado com sucesso!', 'success');
-    
+
         } catch (error) {
             console.error(error.message);
             showToast(error.message || 'Erro ao processar pedido', 'error');
         }
     };
-    
+
     // Função para centralizar mensagens toast
     const showToast = (message, type = 'info') => {
         const options = {
@@ -210,11 +207,9 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             : type === 'error' ? toast.error(message, options)
             : toast.info(message, options);
     };
-    
 
     return (
         <div className="flex flex-wrap gap-4">
-
             {vendas.map((venda, index) => {
                 const valorTotalVenda = venda.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
                 return (

@@ -25,17 +25,31 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   const [estoque, setEstoque] = useState([]);
 
   useEffect(() => {
-    axios.get('/.netlify/functions/api-estoque')
-      .then(response => setEstoque(response.data))
-      .catch(error => console.error('Erro ao buscar estoque:', error));
+    const fetchEstoque = async () => {
+      try {
+        const response = await axios.get('/.netlify/functions/api-estoque');
+        setEstoque(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar estoque:', error);
+      }
+    };
+    fetchEstoque();
   }, []);
+
   useEffect(() => {
     localStorage.setItem('totalAvulso', valorTotalGeral);
   }, [valorTotalGeral]);
+
   useEffect(() => {
-    axios.get('/.netlify/functions/api-descontos')
-        .then(response => setDescontos(response.data))
-        .catch(error => console.error('Erro ao buscar descontos:', error));
+    const fetchDescontos = async () => {
+      try {
+        const response = await axios.get('/.netlify/functions/api-descontos');
+        setDescontos(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar descontos:', error);
+      }
+    };
+    fetchDescontos();
   }, []);
 
   const handleRemoveDespesa = (index) => {
@@ -69,12 +83,31 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
       updatedDespesas[index].items.push(selectedItem);
       updatedDespesas[index].selectedItem = '';
+
+      // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
+      const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+      const itemName = selectedItem.nome;
+      storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+      localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
       setDespesas(updatedDespesas);
     }
   };
 
   const handleRemoveItem = (despesaIndex, itemIndex) => {
     const updatedDespesas = [...despesas];
+    const itemName = updatedDespesas[despesaIndex].items[itemIndex].nome;
+
+    // Atualiza o localStorage ao remover um item
+    const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+    if (storedItems[itemName]) {
+      storedItems[itemName] -= 1; // Decrementa a quantidade
+      if (storedItems[itemName] <= 0) {
+        delete storedItems[itemName]; // Remove o item se a quantidade for zero
+      }
+    }
+    localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
     updatedDespesas[despesaIndex].items.splice(itemIndex, 1);
     setDespesas(updatedDespesas);
   };
@@ -146,30 +179,6 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     }, {});
 
     try {
-        // Verifica e atualiza estoque
-        const estoqueAtualizado = await Promise.all(Object.keys(itemCountMap).map(async (nome) => {
-            // Primeiro, busque a quantidade atual do item no banco de dados
-            const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
-            const selectedItem = response.data; // Supondo que a resposta contenha o item com a quantidade
-
-            if (!selectedItem) {
-                throw new Error(`Item ${nome} não encontrado no estoque`);
-            }
-
-            const quantidadeParaSubtrair = itemCountMap[nome];
-
-            if (selectedItem.quantidade < quantidadeParaSubtrair) {
-                throw new Error(`Quantidade insuficiente no estoque para o item ${nome}`);
-            }
-
-            const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
-            await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
-
-            return { nome, novaQuantidade };
-        }));
-
-        console.log('Estoque atualizado:', estoqueAtualizado);
-
         // Finaliza pedido
         const dataJogo = `${localStorage.getItem('dataJogo')} ${localStorage.getItem('horaJogo')}:00`;
         await axios.post('/.netlify/functions/api-pedidos', {

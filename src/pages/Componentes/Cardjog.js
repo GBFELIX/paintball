@@ -77,12 +77,31 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
             updatedJogadores[index].items.push(selectedItem);
             updatedJogadores[index].selectedItem = '';
+
+            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
+            const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+            const itemName = selectedItem.nome;
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+            localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
             updateJogadores(updatedJogadores);
         }
     };
 
     const handleRemoveItem = (jogadorIndex, itemIndex) => {
         const updatedJogadores = [...jogadores];
+        const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
+
+        // Atualiza o localStorage ao remover um item
+        const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+        if (storedItems[itemName]) {
+            storedItems[itemName] -= 1; // Decrementa a quantidade
+            if (storedItems[itemName] <= 0) {
+                delete storedItems[itemName]; // Remove o item se a quantidade for zero
+            }
+        }
+        localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
         updatedJogadores[jogadorIndex].items.splice(itemIndex, 1);
         updateJogadores(updatedJogadores);
     };
@@ -169,30 +188,10 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }, {});
 
         // Função para buscar a quantidade atual de um item no backend
-        const promises = Object.keys(itemCountMap).map(async (nome) => {
-            // Primeiro, busque a quantidade atual do item no banco de dados
-            const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
-            const selectedItem = response.data; // Supondo que a resposta contenha o item com a quantidade
-
-            if (!selectedItem) {
-                throw new Error(`Item ${nome} não encontrado no estoque`);
-            }
-
-            const quantidadeParaSubtrair = itemCountMap[nome];
-
-            if (selectedItem.quantidade < quantidadeParaSubtrair) {
-                throw new Error(`Quantidade insuficiente no estoque para o item ${nome}`);
-            }
-
-            const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
-            await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
-
-            return { nome, novaQuantidade };
-        });
+    
 
         try {
             await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
-            console.log('Estoque atualizado com sucesso!');
         } catch (error) {
             console.error('Erro ao processar atualização do estoque:', error);
             toast.error('Erro ao atualizar o estoque', {
