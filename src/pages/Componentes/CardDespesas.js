@@ -114,8 +114,8 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     const valorFinal = valorComDesconto || valorTotalDespesa;
     const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
-    if (!Object.values(paymentMethods).some(method => method === true)) {
-        toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
+    if (totalPagamento !== valorFinal) {
+        toast.error('O valor total do pagamento deve ser igual ao valor final', {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -127,8 +127,8 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         return;
     }
 
-    if (totalPagamento !== valorFinal) {
-        toast.error('O valor total do pagamento deve ser igual ao valor final', {
+    if (!Object.values(paymentMethods).some(method => method === true)) {
+        toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -145,103 +145,47 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         return acc;
     }, {});
 
-    const verificarEstoque = async (nome) => {
-        try {
-            const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
-            return response.data.quantidade;
-        } catch (error) {
-            toast.error(`Erro ao verificar estoque para o item ${nome}: ${error.message}`, {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            return null;
-        }
-    };
-
-    const promises = Object.keys(itemCountMap).map(async (nome) => {
-        const quantidadeAtual = await verificarEstoque(nome);
-
-        if (quantidadeAtual === null || quantidadeAtual < itemCountMap[nome]) {
-            toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            throw new Error(`Quantidade insuficiente para o item ${nome}`);
-        }
-
-        const novaQuantidade = quantidadeAtual - itemCountMap[nome];
-        
-        console.log(`Atualizando item: ${nome}, Quantidade atual: ${quantidadeAtual}, Nova quantidade: ${novaQuantidade}`);
-
-        return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
-            .then(() => {
-                console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
-                return { nome, novaQuantidade };
-            })
-            .catch(error => {
-                console.error('Erro ao atualizar estoque:', error);
-                toast.error(`Erro ao atualizar estoque do item ${nome}`, {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
-                throw error;
-            });
-    });
-
     try {
-        const resultados = await Promise.all(promises);
-        console.log('Resultados da atualização do estoque:', resultados);
-    } catch (error) {
-        console.error('Erro ao processar atualização do estoque:', error);
-        return;
-    }
+        // Verifica e atualiza estoque
+        const estoqueAtualizado = await Promise.all(Object.keys(itemCountMap).map(async (nome) => {
+            const quantidadeParaSubtrair = itemCountMap[nome];
+            const selectedItem = estoque.find(item => item.nome === nome);
 
-    const updatedDespesas = [...despesas];
-    updatedDespesas[despesaIndexForPayment].isClosed = true;
-    setDespesas(updatedDespesas);
-    setShowPaymentModal(false);
-    toast.success('Pagamento confirmado com sucesso!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
-    });
+            if (!selectedItem) {
+                throw new Error(`Item ${nome} não encontrado no estoque`);
+            }
 
-    const dataJogo = localStorage.getItem('dataJogo');
-    const horaJogo = localStorage.getItem('horaJogo');
-    const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
+            if (selectedItem.quantidade < quantidadeParaSubtrair) {
+                throw new Error(`Quantidade insuficiente no estoque para o item ${nome}`);
+            }
 
-    try {
+            const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
+            await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
+
+            return { nome, novaQuantidade };
+        }));
+
+        console.log('Estoque atualizado:', estoqueAtualizado);
+
+        // Finaliza pedido
+        const dataJogo = `${localStorage.getItem('dataJogo')} ${localStorage.getItem('horaJogo')}:00`;
         await axios.post('/.netlify/functions/api-pedidos', {
             nomeJogador: despesa.nome,
             items: despesa.items,
             formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
             valorTotal: valorFinal,
-            dataJogo: dataHoraJogo,
+            dataJogo,
         });
+
+        // Atualiza estado e localStorage
+        const updatedDespesas = [...despesas];
+        updatedDespesas[despesaIndexForPayment].isClosed = true;
+        setDespesas(updatedDespesas);
+        setShowPaymentModal(false);
 
         const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
         const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-
-        const valorPorForma = formasSelecionadas.length > 0 ? valorFinal / formasSelecionadas.length : 0;
+        const valorPorForma = valorFinal / formasSelecionadas.length;
 
         formasSelecionadas.forEach(forma => {
             pagamentosAnteriores.push({
@@ -251,9 +195,19 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         });
 
         localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+        toast.success('Pedido finalizado com sucesso!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+
     } catch (error) {
-        console.error('Erro ao cadastrar pedido:', error);
-        toast.error('Erro ao finalizar pedido', {
+        console.error(error.message);
+        toast.error(error.message || 'Erro ao processar pedido', {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
