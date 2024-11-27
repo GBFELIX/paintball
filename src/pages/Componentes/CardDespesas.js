@@ -96,16 +96,9 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   const handleConfirmPayment = async () => {
     const despesa = despesas[despesaIndexForPayment];
 
+    // Valida se a despesa foi encontrada
     if (!despesa) {
-        toast.error('Despesa não encontrada', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
+        showToast('Despesa não encontrada', 'error');
         return;
     }
 
@@ -114,32 +107,19 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     const valorFinal = valorComDesconto || valorTotalDespesa;
     const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
+    // Valida se ao menos uma forma de pagamento foi selecionada
     if (!Object.values(paymentMethods).some(method => method === true)) {
-        toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
+        showToast('Por favor, selecione pelo menos uma forma de pagamento', 'error');
         return;
     }
 
+    // Valida se o total pago corresponde ao valor final
     if (totalPagamento !== valorFinal) {
-        toast.error('O valor total do pagamento deve ser igual ao valor final', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
+        showToast('O valor total do pagamento deve ser igual ao valor final', 'error');
         return;
     }
 
+    // Mapeia as quantidades de itens a atualizar
     const itemCountMap = itemsToUpdate.reduce((acc, item) => {
         acc[item.nome] = (acc[item.nome] || 0) + 1;
         return acc;
@@ -150,76 +130,37 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
             const response = await axios.get(`/.netlify/functions/api-estoque/${nome}`);
             return response.data.quantidade;
         } catch (error) {
-            toast.error(`Erro ao verificar estoque para o item ${nome}: ${error.message}`, {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
+            showToast(`Erro ao verificar estoque para o item ${nome}: ${error.message}`, 'error');
             return null;
         }
     };
 
-    const promises = Object.keys(itemCountMap).map(async (nome) => {
-        const quantidadeAtual = await verificarEstoque(nome);
-
-        if (quantidadeAtual === null || quantidadeAtual < itemCountMap[nome]) {
-            toast.error(`Quantidade insuficiente no estoque para o item ${nome}`, {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            throw new Error(`Quantidade insuficiente para o item ${nome}`);
-        }
-
-        const novaQuantidade = quantidadeAtual - itemCountMap[nome];
-        return axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade })
-            .then(() => {
-                console.log(`Estoque atualizado para o item ${nome} com nova quantidade ${novaQuantidade}`);
-            })
-            .catch(error => {
-                console.error('Erro ao atualizar estoque:', error);
-                toast.error(`Erro ao atualizar estoque do item ${nome}`, {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                });
-                throw error;
-            });
-    });
-
+    // Atualiza o estoque
     try {
-        await Promise.all(promises);
+        await Promise.all(Object.keys(itemCountMap).map(async (nome) => {
+            const quantidadeAtual = await verificarEstoque(nome);
+
+            if (quantidadeAtual === null || quantidadeAtual < itemCountMap[nome]) {
+                throw new Error(`Quantidade insuficiente no estoque para o item ${nome}`);
+            }
+
+            const novaQuantidade = quantidadeAtual - itemCountMap[nome];
+            await axios.put(`/.netlify/functions/api-estoque/${nome}`, { quantidade: novaQuantidade });
+        }));
     } catch (error) {
-        console.error('Erro ao processar atualização do estoque:', error);
+        console.error(error.message);
+        showToast(error.message || 'Erro ao atualizar estoque', 'error');
         return;
     }
 
+    // Atualiza o estado da despesa como fechada
     const updatedDespesas = [...despesas];
     updatedDespesas[despesaIndexForPayment].isClosed = true;
     setDespesas(updatedDespesas);
     setShowPaymentModal(false);
-    toast.success('Pagamento confirmado com sucesso!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
-    });
+    showToast('Pagamento confirmado com sucesso!', 'success');
 
+    // Envia o pedido para a API
     const dataJogo = localStorage.getItem('dataJogo');
     const horaJogo = localStorage.getItem('horaJogo');
     const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
@@ -233,9 +174,9 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
             dataJogo: dataHoraJogo,
         });
 
+        // Salva os pagamentos no localStorage
         const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
         const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-
         const valorPorForma = formasSelecionadas.length > 0 ? valorFinal / formasSelecionadas.length : 0;
 
         formasSelecionadas.forEach(forma => {
@@ -248,17 +189,26 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
     } catch (error) {
         console.error('Erro ao cadastrar pedido:', error);
-        toast.error('Erro ao finalizar pedido', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
+        showToast('Erro ao finalizar pedido', 'error');
     }
 };
+
+// Função para exibir mensagens Toast centralizadas
+const showToast = (message, type = 'info') => {
+    const options = {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+    };
+    type === 'success' ? toast.success(message, options)
+        : type === 'error' ? toast.error(message, options)
+        : toast.info(message, options);
+};
+
 
   
   return (
