@@ -159,6 +159,7 @@ export default function StatusGame() {
                 const quantidadeParaSubtrair = storedItems[itemName];
                 const response = await axios.get(`/.netlify/functions/api-estoque/${itemName}`);
                 const selectedItem = response.data;
+                console.log(response.data);
 
                 if (!selectedItem) {
                     throw new Error(`Item ${itemName} não encontrado no estoque`);
