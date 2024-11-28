@@ -169,7 +169,7 @@ export default function StatusGame() {
                 }
 
                 const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
-                await axios.put(`/.netlify/functions/api-estoque/${itemName}`, { quantidade: novaQuantidade });
+                await axios.put(`/.netlify/functions/api-estoque/${itemName}`, { nome: itemName, quantidade: novaQuantidade });
             });
 
             await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
