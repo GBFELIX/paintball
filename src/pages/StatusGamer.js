@@ -158,12 +158,14 @@ export default function StatusGame() {
             const promises = Object.keys(storedItems).map(async (itemName) => {
                 const quantidadeParaSubtrair = storedItems[itemName];
                 const response = await axios.get(`/.netlify/functions/api-estoque/${itemName}`);
-                const selectedItem = response.data;
-                console.log(response.data);
+                const selectedItems = response.data;
+                console.log(selectedItems);
 
-                if (!selectedItem) {
+                if (selectedItems.length === 0) {
                     throw new Error(`Item ${itemName} não encontrado no estoque`);
                 }
+
+                const selectedItem = selectedItems[0];
 
                 if (selectedItem.quantidade < quantidadeParaSubtrair) {
                     throw new Error(`Quantidade insuficiente no estoque para o item ${itemName}`);
