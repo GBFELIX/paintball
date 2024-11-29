@@ -79,10 +79,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
 
     const handleAddItem = (index) => {
         const updatedVendas = [...vendas];
-        const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
-        const itemName = selectedItem.nome;
-        storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
-        localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+        
         if (updatedVendas[index].selectedItem && updatedVendas[index].selectedItem.id) {
             const selectedItem = {
                 id: updatedVendas[index].selectedItem.id,
@@ -90,24 +87,32 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 valor: parseFloat(updatedVendas[index].selectedItem.valor || 0),
                 quantidade: updatedVendas[index].selectedItem.quantidade
             };
+
+            const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+            const itemName = selectedItem.nome;
+
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1;
+            localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
             updatedVendas[index].items.push(selectedItem);
             updatedVendas[index].selectedItem = '';
             updateVendas(updatedVendas);
         }
-        
     };
 
     const handleRemoveItem = (vendaIndex, itemIndex) => {
-        const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
-    if (storedItems[itemName]) {
-      storedItems[itemName] -= 1; // Decrementa a quantidade
-      if (storedItems[itemName] <= 0) {
-        delete storedItems[itemName]; // Remove o item se a quantidade for zero
-      }
-    }
-    localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
-
         const updatedVendas = [...vendas];
+        const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+        const itemName = updatedVendas[vendaIndex].items[itemIndex].nome;
+
+        if (storedItems[itemName]) {
+            storedItems[itemName] -= 1;
+            if (storedItems[itemName] <= 0) {
+                delete storedItems[itemName];
+            }
+        }
+        localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
         updatedVendas[vendaIndex].items.splice(itemIndex, 1);
         updateVendas(updatedVendas);
     };
