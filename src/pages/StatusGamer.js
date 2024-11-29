@@ -175,7 +175,9 @@ export default function StatusGame() {
                 await axios.put(`/.netlify/functions/api-estoque/${itemName}`, { nome: itemName, quantidade: novaQuantidade });
             });
 
-            await Promise.all(promises); // Aguarda todas as promessas serem resolvidas
+            await Promise.all(promises); 
+            
+            localStorage.removeItem('itensVendaAvul'); 
 
             setShowConfirmationModal(false);
             toast.success('Partida finalizada com sucesso!', {
