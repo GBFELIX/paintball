@@ -111,6 +111,7 @@ export default function ResumoGame() {
         localStorage.removeItem('totalAvulso');
         localStorage.removeItem('dataJogo');
         localStorage.removeItem('horaJogo');
+        localStorage.removeItem('itensVendaAvul'); 
         
         navigate('/addjogo');
     };
