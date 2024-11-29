@@ -134,8 +134,8 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }
 
         // Calcular o valor total após fechar o pedido
-        const total = calcularTotal(); // Função que calcula o total
-        setValorTotalVendaAtual(total); // Atualiza o estado com o novo total
+        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+        setValorTotalVendaAtual(valorTotal); // Atualiza o estado com o novo total
     };
 
     const handleConfirmPayment = async () => {
