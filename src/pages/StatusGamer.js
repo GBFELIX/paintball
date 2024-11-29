@@ -160,7 +160,7 @@ export default function StatusGame() {
                 const response = await axios.get(`/.netlify/functions/api-estoque/${itemName}`);
                 const selectedItems = response.data;
                 console.log(selectedItems);
-
+                console.log(itensVendaAvul);
                 if (selectedItems.length === 0) {
                     throw new Error(`Item ${itemName} não encontrado no estoque`);
                 }
@@ -176,7 +176,7 @@ export default function StatusGame() {
             });
 
             await Promise.all(promises); 
-            
+
             localStorage.removeItem('itensVendaAvul'); 
 
             setShowConfirmationModal(false);
