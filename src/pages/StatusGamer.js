@@ -159,8 +159,7 @@ export default function StatusGame() {
                 const quantidadeParaSubtrair = storedItems[itemName];
                 const response = await axios.get(`/.netlify/functions/api-estoque/${itemName}`);
                 const selectedItems = response.data;
-                console.log(selectedItems);
-                console.log(storedItems);
+
                 if (selectedItems.length === 0) {
                     throw new Error(`Item ${itemName} não encontrado no estoque`);
                 }
@@ -172,12 +171,25 @@ export default function StatusGame() {
                 }
 
                 const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
+
+                // Atualiza o estoque no banco de dados
                 await axios.put(`/.netlify/functions/api-estoque/${itemName}`, { nome: itemName, quantidade: novaQuantidade });
+
+                // Atualiza o localStorage após a subtração
+                storedItems[itemName] -= quantidadeParaSubtrair; // Decrementa a quantidade
+                if (storedItems[itemName] <= 0) {
+                    delete storedItems[itemName]; // Remove o item se a quantidade for zero
+                }
             });
 
+            // Aguarda todas as promessas serem resolvidas
             await Promise.all(promises); 
 
-            localStorage.removeItem('itensVendaAvul'); 
+            // Atualiza o localStorage com o novo estado
+            localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems)); 
+
+            // Limpa o localStorage da chave 'itensVendaAvul' após o processamento
+            localStorage.removeItem('itensVendaAvul'); // Remove o item do localStorage
 
             setShowConfirmationModal(false);
             toast.success('Partida finalizada com sucesso!', {
