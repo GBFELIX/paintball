@@ -18,7 +18,6 @@ export default function Financeiro() {
 
   useEffect(() => {
     const today = new Date();
-    today.setDate(today.getDate() - 1);
     const formattedDate = today.toISOString().split("T")[0];
     setValue({ startDate: formattedDate, endDate: formattedDate });
     buscarDadosFinanceiros(formattedDate);
@@ -175,7 +174,7 @@ export default function Financeiro() {
             <thead className="bg-primary text-black">
               <tr className="flex justify-around">
                 <th className="w-full flex justify-start">Data do Jogo</th>
-                <th className="w-full flex justify-start">Total de Jogadores</th>
+                <th className="w-full flex justify-start">Total de Pedidos</th> 
                 <th className="w-full flex justify-start">Crédito</th>
                 <th className="w-full flex justify-start">Débito</th>
                 <th className="w-full flex justify-start">Dinheiro</th>
@@ -189,7 +188,7 @@ export default function Financeiro() {
                 <tr key={index} className="p-1 text-white flex justify-around hover:bg-green-700 duration-300 border border-gray-500">
                   <td className="w-full">
                     {item && item.data_jogo 
-                      ? new Date(new Date(item.data_jogo).getTime()).toLocaleDateString('pt-BR') 
+                      ? new Date(item.data_jogo).toLocaleDateString('pt-BR')
                       : ''}
                   </td>
                   <td className="w-full">{item && item.total_jogadores}</td>
