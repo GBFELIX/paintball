@@ -1,33 +1,21 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Datepicker from "react-tailwindcss-datepicker";
 import NavBar from "./Componentes/Navbar";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
 
 export default function Financeiro() {
-  const [value, setValue] = useState({
-    startDate: null,
-    endDate: null,
-  });
   const [financeiroData, setFinanceiroData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [jogos, setJogos] = useState([]);
-  const [jogosFiltrados, setJogosFiltrados] = useState([]);
 
   useEffect(() => {
-    const today = new Date();
-    today.setDate(today.getDate());
-    const formattedDate = today.toISOString().split("T")[0];
-    setValue({ startDate: formattedDate, endDate: formattedDate });
-    buscarDadosFinanceiros(formattedDate);
-    filtrarJogos();
+    buscarDadosFinanceiros();
   }, []);
 
-  const buscarDadosFinanceiros = (data) => {
+  const buscarDadosFinanceiros = () => {
     setLoading(true);
-    axios.get(`./.netlify/functions/api-financeiro?data=${data}`)
+    axios.get(`./.netlify/functions/api-financeiro`)
       .then((response) => {
         setFinanceiroData(response.data);
         toast.success('Dados financeiros carregados com sucesso!', {
@@ -54,25 +42,6 @@ export default function Financeiro() {
       .finally(() => {
         setLoading(false);
       });
-  };
-
-  const handleDateChange = (newValue) => {
-    setValue(newValue);
-    
-    if (newValue.startDate) {
-      const dataFormatada = new Date(newValue.startDate).toISOString().split('T')[0]; 
-      buscarDadosFinanceiros(dataFormatada);
-    } else {
-      toast.error('Por favor, selecione uma data válida', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
-      });
-    }
   };
 
   const imprimirRelatorio = () => {
@@ -102,53 +71,12 @@ export default function Financeiro() {
     window.print();
   };
 
-  const filtrarJogos = () => {
-    const agora = new Date();
-    const primeiroDiaDoMesAtual = new Date(agora.getFullYear(), agora.getMonth(), 1);
-    const primeiroDiaDoMesPassado = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
-    const primeiroDiaDoProximoMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 1);
-
-    const jogosFiltrados = jogos.filter(jogo => {
-      const dataJogo = new Date(jogo.data);
-      return (dataJogo >= primeiroDiaDoMesAtual && dataJogo < primeiroDiaDoProximoMes) ||
-             (dataJogo >= primeiroDiaDoMesPassado && dataJogo < primeiroDiaDoAtual);
-    });
-
-    setJogosFiltrados(jogosFiltrados);
-  };
-
   return (
     <section className="bg-black p-4 w-full h-screen flex flex-col items-center overflow-auto"> 
       <ToastContainer />
       <NavBar />
       <div className="gap-2 flex flex-col lg:flex-row justify-center items-center w-auto">
         <h1 className="text-white text-3xl text-center m-5">Departamento Financeiro</h1>
-
-        <div className="w-auto">
-          <Datepicker
-            displayFormat="DD/MM/YYYY"
-            placeholder="Selecione a data"
-            separator="a"
-            value={value}
-            onChange={handleDateChange}
-            primaryColor={"yellow"}
-            useRange={false}
-            asSingle={true}
-            showFooter={true}
-            showShortcuts={true}
-            configs={{
-              shortcuts: {
-                today: "Hoje",
-                yesterday: "Ontem",
-              },
-              footer: {
-                cancel: "Cancelar",
-                apply: "Aplicar",
-              },
-            }}
-            inputClassName="w-[300px] p-2 bg-black rounded-md placeholder:text-white text-center m-3 border border-gray-400"
-          />
-        </div>
 
         <button 
           onClick={imprimirRelatorio} 
