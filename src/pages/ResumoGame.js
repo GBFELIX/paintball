@@ -51,11 +51,7 @@ export default function ResumoGame() {
             const valor = parseFloat(pagamento.valorTotal);
             const forma = normalizarFormaPagamento(pagamento.formaPagamento);
 
-            if (forma in acc) {
-                acc[forma] += valor;
-            } else {
-                acc[forma] = valor;
-            }
+            acc[forma] = (acc[forma] || 0) + valor;
             return acc;
         }, {
             credito: 0,
