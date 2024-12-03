@@ -2,70 +2,52 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306
 });
 
-exports.handler = async (event, context) => {
-  const connection = await db;
+exports.handler = async(event, context) => {
+    const connection = await db;
 
-  // GET /financeiro
-  if (event.httpMethod === 'GET') {
-    try {
-      const params = new URLSearchParams(event.queryStringParameters);
-      const data = params.get('data');
+    if (event.httpMethod === 'GET') {
+        try {
+            const params = new URLSearchParams(event.queryStringParameters);
+            const data = params.get('data');
 
-      // Se a data não for fornecida, busque jogos do mês atual e do mês passado
-      if (!data) {
-        const agora = new Date();
-        const primeiroDiaDoMesAtual = new Date(agora.getFullYear(), agora.getMonth(), 1);
-        const ultimoDiaDoMesAtual = new Date(agora.getFullYear(), agora.getMonth() + 1, 0);
-        const primeiroDiaDoMesPassado = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
-        const ultimoDiaDoMesPassado = new Date(agora.getFullYear(), agora.getMonth(), 0);
+            if (!data) {
+                const query = 'SELECT * FROM financeiro';
+                const [results] = await connection.query(query);
 
-        const query = `
-          SELECT * FROM financeiro 
-          WHERE (data_jogo BETWEEN ? AND ?) OR (data_jogo BETWEEN ? AND ?)
-        `;
-        const [results] = await connection.query(query, [
-          primeiroDiaDoMesAtual.toISOString().split('T')[0],
-          ultimoDiaDoMesAtual.toISOString().split('T')[0],
-          primeiroDiaDoMesPassado.toISOString().split('T')[0],
-          ultimoDiaDoMesPassado.toISOString().split('T')[0]
-        ]);
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(results)
+                };
+            }
 
-        return {
-          statusCode: 200,
-          body: JSON.stringify(results)
-        };
-      }
+            const query = 'SELECT * FROM financeiro WHERE DATE(data_jogo) = ?';
+            const [results] = await connection.query(query, [data]);
 
-      // Se uma data específica for fornecida, busque apenas essa data
-      const query = 'SELECT * FROM financeiro WHERE DATE(data_jogo) = ?';
-      const [results] = await connection.query(query, [data]);
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify(results)
-      };
-    } catch (err) {
-      console.error("Erro ao consultar dados financeiros:", err);
-      return {
-        statusCode: 500,
-        body: JSON.stringify(err)
-      };
+            return {
+                statusCode: 200,
+                body: JSON.stringify(results)
+            };
+        } catch (err) {
+            console.error("Erro ao consultar dados financeiros:", err);
+            return {
+                statusCode: 500,
+                body: JSON.stringify(err)
+            };
+        }
     }
-  }
 
-  // POST /financeiro
-  if (event.httpMethod === 'POST') {
-    try {
-      const { dataJogo, totalJogadores, formasPagamento, totalAvulso, totalArrecadado } = JSON.parse(event.body);
+    if (event.httpMethod === 'POST') {
+        try {
+            const { dataJogo, totalJogadores, formasPagamento, totalAvulso, totalArrecadado } = JSON.parse(event.body);
 
-      const query = `
+            const query = `
         INSERT INTO financeiro (
           data_jogo, 
           total_jogadores, 
@@ -78,32 +60,32 @@ exports.handler = async (event, context) => {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
-      await connection.query(query, [
-        dataJogo,
-        totalJogadores,
-        formasPagamento.credito,
-        formasPagamento.debito,
-        formasPagamento.dinheiro,
-        formasPagamento.pix,
-        totalAvulso,
-        totalArrecadado
-      ]);
+            await connection.query(query, [
+                dataJogo,
+                totalJogadores,
+                formasPagamento.credito,
+                formasPagamento.debito,
+                formasPagamento.dinheiro,
+                formasPagamento.pix,
+                totalAvulso,
+                totalArrecadado
+            ]);
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify('Dados financeiros inseridos com sucesso')
-      };
-    } catch (err) {
-      console.error('Erro ao inserir dados financeiros:', err);
-      return {
-        statusCode: 500,
-        body: JSON.stringify('Erro no servidor')
-      };
+            return {
+                statusCode: 200,
+                body: JSON.stringify('Dados financeiros inseridos com sucesso')
+            };
+        } catch (err) {
+            console.error('Erro ao inserir dados financeiros:', err);
+            return {
+                statusCode: 500,
+                body: JSON.stringify('Erro no servidor')
+            };
+        }
     }
-  }
 
-  return {
-    statusCode: 405,
-    body: JSON.stringify({ error: 'Método não permitido' })
-  };
-}; 
+    return {
+        statusCode: 405,
+        body: JSON.stringify({ error: 'Método não permitido' })
+    };
+};
