@@ -196,15 +196,15 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         setShowPaymentModal(false);
 
         const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-        const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-        const valorPorForma = valorFinal / formasSelecionadas.length;
+            const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
 
-        formasSelecionadas.forEach(forma => {
-            pagamentosAnteriores.push({
-                valorTotal: valorPorForma,
-                formaPagamento: forma,
+            formasSelecionadas.forEach(forma => {
+                const valorForma = paymentValues[forma]; 
+                pagamentosAnteriores.push({
+                    valorTotal: valorForma, 
+                    formaPagamento: forma,
+                });
             });
-        });
 
         localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
         toast.success('Pedido finalizado com sucesso!', {
