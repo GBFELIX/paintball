@@ -224,12 +224,12 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
             const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-            const valorPorForma = totalPagamento / formasSelecionadas.length; // Divide o total pelo número de formas selecionadas
 
             formasSelecionadas.forEach(forma => {
+                const valorForma = paymentValues[forma]; 
                 pagamentosAnteriores.push({
-                    valorTotal: valorPorForma, // Armazena o valor correspondente a cada forma
-                    formaPagamento: forma, // Armazena a forma de pagamento
+                    valorTotal: valorForma, 
+                    formaPagamento: forma,
                 });
             });
             localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
