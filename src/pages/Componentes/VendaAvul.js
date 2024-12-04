@@ -193,11 +193,11 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
 
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
             const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-            const valorPorForma = valorFinal / formasSelecionadas.length;
 
             formasSelecionadas.forEach(forma => {
+                const valorForma = paymentValues[forma]; 
                 pagamentosAnteriores.push({
-                    valorTotal: valorPorForma,
+                    valorTotal: valorForma, 
                     formaPagamento: forma,
                 });
             });
