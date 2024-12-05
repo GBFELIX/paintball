@@ -14,22 +14,7 @@ export default function ResumoGame() {
         pix: 0,
     });
     const [totalAvulso, setTotalAvulso] = useState(0);
-
-    const normalizarFormaPagamento = (forma) => {
-        if (typeof forma !== 'string') {
-            return '';
-        }
-    
-        const mapaFormas = {
-            credito: 'credito',
-            debito: 'debito',
-            dinheiro: 'dinheiro',
-            dinehrio: 'dinheiro', // Corrige erro de digitação
-            pix: 'pix',
-            avulso: 'avulso',
-        };
-        return mapaFormas[forma.toLowerCase()] || forma.toLowerCase();
-    };
+    const [despesas, setDespesas] = useState([]);
 
     useEffect(() => {
         const storedData = localStorage.getItem('dataJogo');
@@ -49,9 +34,8 @@ export default function ResumoGame() {
 
         const totais = pagamentosArmazenados.reduce((acc, pagamento) => {
             const valor = parseFloat(pagamento.valorTotal);
-            const forma = normalizarFormaPagamento(pagamento.formaPagamento);
 
-            acc[forma] = (acc[forma] || 0) + valor;
+            acc[pagamento.formaPagamento] = (acc[pagamento.formaPagamento] || 0) + valor;
             return acc;
         }, {
             credito: 0,
@@ -62,6 +46,9 @@ export default function ResumoGame() {
         });
 
         setFormasPagamento(totais);
+
+        const despesasArmazenadas = JSON.parse(localStorage.getItem('despesas')) || [];
+        setDespesas(despesasArmazenadas);
     }, []);
 
     const imprimirResumo = () => {
@@ -108,6 +95,7 @@ export default function ResumoGame() {
         localStorage.removeItem('dataJogo');
         localStorage.removeItem('horaJogo');
         localStorage.removeItem('itensVendaAvul'); 
+        localStorage.removeItem('despesas'); 
         
         navigate('/addjogo');
     };
@@ -144,6 +132,10 @@ export default function ResumoGame() {
                         <div className="flex flex-row justify-around items-start">
                             <p className="text-xl font-semibold">Pix</p>
                             <p id="pix">R${formasPagamento.pix.toFixed(2)}</p>
+                        </div>
+                        <div className="flex flex-row justify-around items-start">
+                            <p className="text-xl font-semibold">Despesas</p>
+                            <p id="despesas">R${formasPagamento.despesas.toFixed(2)}</p>
                         </div>
                     </div>
                 </div>
