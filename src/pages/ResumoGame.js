@@ -12,6 +12,7 @@ export default function ResumoGame() {
         dinheiro: 0,
         avulso: 0,
         pix: 0,
+        despesas: 0,
     });
     const [totalAvulso, setTotalAvulso] = useState(0);
     const [despesas, setDespesas] = useState([]);
@@ -43,6 +44,7 @@ export default function ResumoGame() {
             dinheiro: 0,
             avulso: 0,
             pix: 0,
+            despesas: 0,
         });
 
         setFormasPagamento(totais);
