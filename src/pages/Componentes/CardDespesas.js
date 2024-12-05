@@ -300,28 +300,6 @@ const handleAddDespesaValor = (index, event) => {
               >
                 Adicionar Item
               </button>
-
-              <input
-                type="text"
-                className="text-center w-44 rounded-sm px-2 py-1"
-                placeholder="Descrição"
-                value={despesa.descricao || ''}
-                onChange={(e) => {
-                  const updatedDespesas = [...despesas];
-                  updatedDespesas[index].descricao = e.target.value;
-                  setDespesas(updatedDespesas);
-                }}
-                disabled={despesa.isClosed}
-              />
-              
-              <input
-                type="text"
-                className="text-center w-44 rounded-sm px-2 py-1"
-                placeholder="Valor"
-                value={despesa.valor}
-                onChange={(e) => handleAddDespesaValor(index, e)}
-                disabled={despesa.isClosed}
-              />
               {despesa.items.map((item, itemIndex) => (
                 <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
                   <div className="inline-flex">
