@@ -50,7 +50,6 @@ export default function ResumoGame() {
         setFormasPagamento(totais);
 
         const despesasArmazenadas = JSON.parse(localStorage.getItem('despesas')) || [];
-        console.log(despesasArmazenadas);
         setDespesas(despesasArmazenadas);
     }, []);
 
@@ -138,7 +137,7 @@ export default function ResumoGame() {
                         </div>
                         <div className="flex flex-row justify-around items-start">
                             <p className="text-xl font-semibold">Despesas</p>
-                            <p id="despesas">R${despesas.reduce((acc, despesa) => acc + parseFloat(despesa.valor), 0).toFixed(2)}</p>
+                            <p id="despesas">R${despesas.reduce((acc, despesa) => acc + parseFloat(despesa.valorTotal), 0).toFixed(2)}</p>
                         </div>
                     </div>
                 </div>
