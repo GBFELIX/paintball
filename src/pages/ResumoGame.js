@@ -50,6 +50,7 @@ export default function ResumoGame() {
         setFormasPagamento(totais);
 
         const despesasArmazenadas = JSON.parse(localStorage.getItem('despesas')) || [];
+        console.log(despesasArmazenadas);
         setDespesas(despesasArmazenadas);
     }, []);
 
