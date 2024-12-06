@@ -12,7 +12,6 @@ export default function ResumoGame() {
         dinheiro: 0,
         avulso: 0,
         pix: 0,
-        despesas: 0,
     });
     const [totalAvulso, setTotalAvulso] = useState(0);
     const [despesas, setDespesas] = useState([]);
@@ -44,7 +43,6 @@ export default function ResumoGame() {
             dinheiro: 0,
             avulso: 0,
             pix: 0,
-            despesas: 0,
         });
 
         setFormasPagamento(totais);
@@ -76,12 +74,15 @@ export default function ResumoGame() {
 
     const fecharPartida = () => {
         const totalArrecadado = Object.values(formasPagamento).reduce((acc, val) => acc + val, 0) + totalAvulso;
+        const totalDespesas = despesas.reduce((acc, despesa) => acc + parseFloat(despesa.valorTotal), 0);
+        
         const dataFinanceira = {
             dataJogo: jogo.data,
             totalJogadores: pagamentos.length,
             formasPagamento,
             totalAvulso,
-            totalArrecadado
+            totalArrecadado,
+            totalDespesas
         };
 
         axios.post('./.netlify/functions/api-financeiro', dataFinanceira)
