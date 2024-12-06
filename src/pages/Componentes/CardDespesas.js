@@ -134,7 +134,6 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         await axios.post('/.netlify/functions/api-pedidos', {
             nomeJogador: despesa.nome,
             items: despesa.items,
-            formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
             valorTotal: valorFinal,
             dataJogo,
         });
@@ -142,6 +141,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         // Atualiza estado e localStorage
         const updatedDespesas = [...despesas];
         updatedDespesas[despesaIndexForPayment].isClosed = true;
+        updatedDespesas[despesaIndexForPayment].valorTotal = valorFinal;
         setDespesas(updatedDespesas);
         setShowPaymentModal(false);
 
