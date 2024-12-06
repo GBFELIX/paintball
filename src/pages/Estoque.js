@@ -487,6 +487,7 @@ export default function Estoque() {
               <h2 className="text-black font-bold mb-5">Estoque Atual</h2>
               <div className="w-full flex flex-col">
                 <div className="w-full flex justify-between px-3">
+                  <p className="text-black font-semibold w-1/6 text-center">Editar</p>
                   <p className="text-black font-semibold w-1/4 text-center">Item</p>
                   <p className="text-black font-semibold w-1/4 text-center">Tipo</p>
                   <p className="text-black font-semibold w-1/4 text-center">Quantidade</p>
@@ -496,6 +497,14 @@ export default function Estoque() {
                 </div>
                 {estoque.map((item, index) => (
                   <div key={index} className="w-full flex justify-between items-center px-3 py-2 border-t border-gray-300">
+                    <div className="w-1/6 text-center">
+                      <button 
+                        className="text-blue-500 hover:text-blue-700"
+                        onClick={() => toggleEditMode(item.nome)}
+                      >
+                        {editMode[item.nome] ? 'Cancelar' : 'Editar'}
+                      </button>
+                    </div>
                     <div className="w-1/4 text-center">
                       <p className="text-black font-semibold">{item.nome}</p>
                     </div>
@@ -540,12 +549,6 @@ export default function Estoque() {
                             }}
                           />
                         )}
-                        <button 
-                          className="ml-6 text-blue-500 hover:text-blue-700"
-                          onClick={() => toggleEditMode(item.nome)}
-                        >
-                          {editMode[item.nome] ? 'Cancelar' : 'Editar'}
-                        </button>
                       </div>
                     </div>
                     <div className="w-1/4 text-center">
