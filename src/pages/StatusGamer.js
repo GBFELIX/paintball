@@ -41,9 +41,6 @@ export default function StatusGame() {
         const storedData = localStorage.getItem('dataJogo');
         const storedHora = localStorage.getItem('horaJogo');
 
-        console.log('Data do Jogo:', storedData);
-        console.log('Hora do Jogo:', storedHora);
-
         if (storedData) {
             setJogo({ data: storedData, hora: storedHora });
         } else {
@@ -159,7 +156,6 @@ export default function StatusGame() {
                 const quantidadeParaSubtrair = storedItems[itemName];
                 const response = await axios.get(`/.netlify/functions/api-estoque/${itemName}`);
                 const selectedItems = response.data;
-                console.log(storedItems);
                 if (selectedItems.length === 0) {
                     throw new Error(`Item ${itemName} não encontrado no estoque`);
                 }
@@ -234,12 +230,17 @@ export default function StatusGame() {
     };
 
     const calcularTotalDespesas = () => {
-        return despesas.reduce((total, despesa) => {
+        const totalDespesas = despesas.reduce((total, despesa) => {
             if (!despesa || !despesa.items) return total;
             return total + despesa.items.reduce((subtotal, item) => {
                 return subtotal + (Number(item && item.valor) || 0);
             }, 0);
         }, 0);
+        
+        // Armazena o total de despesas no localStorage
+        localStorage.setItem('totdespesas', totalDespesas.toFixed(2)); // Armazena com duas casas decimais
+
+        return totalDespesas;
     };
 
     const calcularTotalJogadores = () => {
