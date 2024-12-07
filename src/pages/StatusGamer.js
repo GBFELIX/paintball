@@ -8,6 +8,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
 import axios from 'axios';
+import { IoMdClose } from "react-icons/io";
 
 export default function StatusGame() {
     const [jogo, setJogo] = useState({});
@@ -331,26 +332,26 @@ export default function StatusGame() {
                     <div className="flex justify-end mt-auto">
                         <button
                             onClick={handleAddJogador}
-                            className="bg-primary hover:bg-white duration-300 m-2 w-20 h-20 rounded-full flex justify-center items-center"
+                            className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                             title="Adicionar Jogador"
                         >
                             <FaPlus size={30} />
                         </button>
                         <button
                             onClick={handleAddVendaAvulsa}
-                            className="bg-blue-600 hover:bg-white duration-300 m-2 w-20 h-20 rounded-full flex justify-center items-center"
+                            className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                         >
                             <FaPlus size={30} />
                         </button>
                         <button 
                             onClick={handleAddDespesa}
-                            className="bg-red-600 hover:bg-white duration-300 m-2 w-20 h-20 rounded-full flex justify-center items-center"
+                            className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                         >
                             <FaPlus size={30} />
                         </button>
                         <button 
                             onClick={handleFecharPartida}
-                            className="mt-4 mb-4 rounded-md w-[150px] h-[40px] bg-primary flex justify-center items-center hover:bg-red-500 transition-colors"
+                            className="bg-white hover:bg-red-600 duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                             disabled={loading}
                         >
                             {loading ? (
@@ -362,7 +363,7 @@ export default function StatusGame() {
                                     data-testid="loader"
                                 />
                             ) : (
-                                <p>Fechar Partida</p>
+                                <IoMdClose size={30}/>
                             )}
                         </button>
                     </div>
