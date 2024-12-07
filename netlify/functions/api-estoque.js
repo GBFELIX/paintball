@@ -108,10 +108,10 @@ exports.handler = async(event, context) => {
                 };
             }
 
-            if (nome === 'marcador especial' && quantidade !== undefined) {
+            if (tipo === 'Aluguel' && quantidade !== undefined) {
                 return {
                     statusCode: 400,
-                    body: JSON.stringify("A quantidade do 'marcador especial' não pode ser alterada.")
+                   
                 };
             }
 
