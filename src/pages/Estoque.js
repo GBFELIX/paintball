@@ -565,7 +565,7 @@ export default function Estoque() {
                         {editMode[item.nome] && (
                           <input
                             type="number"
-                            value={inputs[item.nome]?.valor || ''}
+                            value={inputs[item.nome]?.custo || ''}
                             onChange={(e) => handleInputChange(item.nome, 'custo', e.target.value)}
                             className="w-24 p-1 m-1 rounded-md text-center"
                             placeholder="Novo custo"
