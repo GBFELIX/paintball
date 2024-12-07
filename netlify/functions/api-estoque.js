@@ -97,7 +97,7 @@ exports.handler = async(event, context) => {
     if (event.httpMethod === 'PUT') {
         try {
             const nome = event.path.split('/').pop();
-            const { quantidade, valor, tipo } = JSON.parse(event.body);
+            const { quantidade, valor, tipo, custo } = JSON.parse(event.body);
 
             // Verifica se o item existe antes de atualizar
             const [itemExists] = await connection.query('SELECT * FROM estoque WHERE nome = ?', [nome]);
@@ -115,7 +115,7 @@ exports.handler = async(event, context) => {
                 };
             }
 
-            if (quantidade === undefined && valor === undefined) {
+            if (quantidade === undefined && valor === undefined && custo === undefined) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify("Nenhum valor para atualizar fornecido")
