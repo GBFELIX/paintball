@@ -108,10 +108,11 @@ exports.handler = async(event, context) => {
                 };
             }
 
-            if (tipo === 'Aluguel' && quantidade !== undefined) {
+            // Verifica se o tipo é "Aluguel" e a quantidade está sendo diminuída
+            if (tipo === 'Aluguel' && quantidade !== undefined && quantidade < itemExists[0].quantidade) {
                 return {
                     statusCode: 400,
-                   
+                    body: JSON.stringify("A quantidade não pode ser diminuída para itens do tipo 'Aluguel'.")
                 };
             }
 
@@ -125,15 +126,7 @@ exports.handler = async(event, context) => {
             let query = 'UPDATE estoque SET ';
             const values = [];
 
-            if (tipo === 'aluguel' && quantidade !== undefined) {
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify("A quantidade não pode ser alterada para itens do tipo 'aluguel'.")
-                };
-            }
-
             if (quantidade !== undefined) {
-               
                 query += 'quantidade = ? ';
                 values.push(quantidade);
             }
