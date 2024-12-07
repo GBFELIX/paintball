@@ -47,7 +47,6 @@ function AddJogo() {
         'totdespesas', 'valortot', 'totalJogadores', 'totalAvulso', 
         'totalDespesas', 'totalJogadores', 'totalArrecadado', 'formasPagamento'
       ];
-      ];
       
       // Limpar localStorage de forma mais segura
       keysToRemove.forEach(key => {
