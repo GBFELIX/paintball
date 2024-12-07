@@ -4,11 +4,13 @@ import { useNavigate, Link } from 'react-router-dom';
 //import NavBar from '../Componentes/Navbar';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
+// inputmask
+import { InputMask } from '@react-input/mask';
 
 function CadJog() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [cpf, setCpf] = useState('');
+  //const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
   const [senha, setSenha] = useState('');
   const navigate = useNavigate();
@@ -36,8 +38,7 @@ function CadJog() {
         },
         body: JSON.stringify({ 
           username, 
-          email, 
-          cpf: cpf || null, 
+          email,  
           telefone, 
           senha 
         })
@@ -96,21 +97,15 @@ function CadJog() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <input
-            id="cpf"
-            type='text'
-            className='border border-white p-1 rounded-sm text-center mt-2 w-[250px]'
-            placeholder='Digite seu CPF (opcional)'
-            value={cpf}
-            onChange={(e) => setCpf(e.target.value)}
-          />
-          <input
+          
+          <InputMask
             id="telefone"
             type='text'
             className='border border-white p-1 rounded-sm text-center mt-2 w-[250px]'
-            placeholder='Digite seu Telefone'
+            placeholder='(xx) x xxxx-xxxx'
             value={telefone}
             onChange={(e) => setTelefone(e.target.value)}
+            mask="(__) _ ____-____" replacement={{ _: /\d/ }}
           />
           <input
             id="senha"
