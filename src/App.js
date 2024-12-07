@@ -102,7 +102,7 @@ function Login() {
 
   return (
     <div className='w-full h-screen flex flex-col items-center justify-center bg-black'>
-    <nav className="bg-black fixed top-0 left-0 w-full z-10">
+    <nav className="bg-black dark:bg-black bg-gray-800 fixed top-0 left-0 w-full z-10">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
         <img src={logo} className="h-8" alt="LA PaintBall" />
         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
