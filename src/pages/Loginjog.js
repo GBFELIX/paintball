@@ -85,7 +85,7 @@ function Loginjog() {
     <div className='w-full h-screen flex flex-col items-center justify-center bg-black'>
       <nav className="bg-black dark:bg-black bg-gray-800">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-          <img src={logo} className="h-8" alt="LA PaintBall" />
+          
           <div className="hidden w-full md:block md:w-auto" id="navbar-default">
             <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-black md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-black">
               <li>
