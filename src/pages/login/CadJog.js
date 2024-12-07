@@ -105,7 +105,8 @@ function CadJog() {
             placeholder='(xx) x xxxx-xxxx'
             value={telefone}
             onChange={(e) => setTelefone(e.target.value)}
-            mask="(__) _ ____-____" replacement={{ _: /\d/ }}
+            mask="(xx) x xxxx-xxxx"
+            replacement={{ x: /\d/ }}
           />
           <input
             id="senha"
