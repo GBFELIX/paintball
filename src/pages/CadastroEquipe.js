@@ -274,25 +274,22 @@ export default function CadEquipe() {
       </button>
 
       <button onClick={() => setIsModalOpen(true)} className="text-white hover:text-primary duration-150">
-                  Sair do sistema
+        Sair do sistema
       </button>
-    </section>
 
-    
+      {isModalOpen && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-black text-2xl font-semibold mb-4">
+              Realmente deseja sair?
+            </h2>
+            <div className="flex justify-between mt-4">
+              <button onClick={confirmLogout} className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg">Sim</button>
+              <button onClick={() => setIsModalOpen(false)} className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white">Não</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
-
-{isModalOpen && (
-  <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-    <div className="bg-white p-6 rounded-lg w-96">
-    <h2 className="text-black text-2xl font-semibold mb-4">
-          Realmente deseja sair?
-      </h2>
-      <div className="flex justify-between mt-4">
-        <button onClick={confirmLogout} className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg">Sim</button>
-        <button onClick={() => setIsModalOpen(false)} className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white">Não</button>
-      </div>
-      
-    </div>
-  </div>
-)}
