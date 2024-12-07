@@ -569,10 +569,22 @@ export default function Estoque() {
                             onChange={(e) => handleInputChange(item.nome, 'custo', e.target.value)}
                             className="w-24 p-1 m-1 rounded-md text-center"
                             placeholder="Novo custo"
-                            onBlur={() => {
+                            onBlur={async () => {
                               if (inputs[item.nome]?.custo) {
-                                updateCusto(item.nome, inputs[item.nome].custo);
-                                toggleEditMode(item.nome); 
+                                try {
+                                  await updateCusto(item.nome, inputs[item.nome].custo);
+                                  toggleEditMode(item.nome); 
+                                } catch (error) {
+                                  toast.error('Erro ao atualizar custo: ' + error.message, {
+                                    position: "top-right",
+                                    autoClose: 3000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                    theme: "light",
+                                  });
+                                }
                               }
                             }}
                           />
@@ -589,10 +601,22 @@ export default function Estoque() {
                             onChange={(e) => handleInputChange(item.nome, 'valor', e.target.value)}
                             className="w-24 p-1 m-1 rounded-md text-center"
                             placeholder="Novo valor"
-                            onBlur={() => {
+                            onBlur={async () => {
                               if (inputs[item.nome]?.valor) {
-                                updateValor(item.nome, inputs[item.nome].valor);
-                                toggleEditMode(item.nome); 
+                                try {
+                                  await updateValor(item.nome, inputs[item.nome].valor);
+                                  toggleEditMode(item.nome); 
+                                } catch (error) {
+                                  toast.error('Erro ao atualizar valor: ' + error.message, {
+                                    position: "top-right",
+                                    autoClose: 3000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                    theme: "light",
+                                  });
+                                }
                               }
                             }}
                           />
