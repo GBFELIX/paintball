@@ -273,6 +273,33 @@ export default function Estoque() {
         });
       });
   };
+  const updateCusto = (nome, novoCusto) => {
+    axios.put(`/.netlify/functions/api-estoque/${nome}`, { custo: novoCusto })
+      .then(response => {
+        toast.success('Quantidade atualizada com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+        fetchEstoque();
+        setInputs(prev => ({ ...prev, [nome]: { ...prev[nome], custo: '' } }));
+      })
+      .catch(error => {
+        toast.error('Erro ao atualizar quantidade', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      });
+  };
 
   const updateValor = (nome, novoValor) => {
     axios.put(`/.netlify/functions/api-estoque/${nome}`, { valor: novoValor })
@@ -525,6 +552,26 @@ export default function Estoque() {
                               if (inputs[item.nome]?.quantidade) {
                                 updateQuantidade(item.nome, inputs[item.nome].quantidade);
                                 toggleEditMode(item.nome);
+                              }
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                    <div className="w-1/4 text-center">
+                      <div className="flex items-center justify-between">
+                        <p className="text-black font-semibold w-full">{item.custo}</p>
+                        {editMode[item.nome] && (
+                          <input
+                            type="number"
+                            value={inputs[item.nome]?.valor || ''}
+                            onChange={(e) => handleInputChange(item.nome, 'custo', e.target.value)}
+                            className="w-24 p-1 m-1 rounded-md text-center"
+                            placeholder="Novo custo"
+                            onBlur={() => {
+                              if (inputs[item.nome]?.custo) {
+                                updateCusto(item.nome, inputs[item.nome].custo);
+                                toggleEditMode(item.nome); 
                               }
                             }}
                           />
