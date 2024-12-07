@@ -140,17 +140,21 @@ export default function ResumoGame() {
                             <p className="text-xl font-semibold">Despesas</p>
                             <p id="despesas">R${despesas.reduce((acc, despesa) => acc + parseFloat(despesa.valorTotal), 0).toFixed(2)}</p>
                         </div>
+                        <div className="flex flex-row justify-around items-start">
+                            <p className="text-xl font-semibold">Despesas</p>
+                            <p id="Avulso">R${totalAvulso.toFixed(2)}</p>
+                        </div>
                     </div>
                 </div>
                 <div className="grid grid-flow-row md:grid-cols-2 gap-2 mt-3">
                     <div className="bg-[#1D0C82] rounded-md w-full h-30 flex flex-col justify-center items-center py-14">
-                        <h1 className="text-white text-2xl font-bold">Avulso</h1>
-                        <h2 id="avulsoTotal" className="text-primary text-3xl font-semibold">R${totalAvulso.toFixed(2)}</h2>
+                        <h1 className="text-white text-2xl font-bold">Valor Total</h1>
+                        <h2 id="valorPartida" className="text-primary text-3xl font-semibold">R${Object.values(formasPagamento).reduce((acc, val) => acc + val, 0).toFixed(2)}</h2>
                     </div>
                     <div className="bg-[#1D0C82] rounded-md w-full h-30 flex flex-col justify-center items-center py-14">
-                        <h1 className="text-white text-2xl font-bold">Valor da Partida</h1>
-                        <h2 id="valorPartida" className="text-primary text-3xl font-semibold">
-                            R${Object.values(formasPagamento).reduce((acc, val) => acc + val, 0).toFixed(2)}
+                        <h1 className="text-white text-2xl font-bold">Total Arrecadado</h1>
+                        <h2 id="valortot" className="text-primary text-3xl font-semibold">
+                            R${(Object.values(formasPagamento).reduce((acc, val) => acc + val, 0) - despesas.reduce((acc, despesa) => acc + parseFloat(despesa.valorTotal), 0)).toFixed(2)}
                         </h2>
                     </div>
                 </div>
