@@ -125,7 +125,15 @@ exports.handler = async(event, context) => {
             let query = 'UPDATE estoque SET ';
             const values = [];
 
+            if (tipo === 'aluguel' && quantidade !== undefined) {
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify("A quantidade não pode ser alterada para itens do tipo 'aluguel'.")
+                };
+            }
+
             if (quantidade !== undefined) {
+               
                 query += 'quantidade = ? ';
                 values.push(quantidade);
             }
@@ -136,6 +144,13 @@ exports.handler = async(event, context) => {
                 }
                 query += 'valor = ? ';
                 values.push(valor);
+            }
+            if (custo !== undefined) {
+                if (values.length > 0) {
+                    query += ', ';
+                }
+                query += 'custo = ? ';
+                values.push(custo);
             }
 
             if (tipo !== undefined) {
