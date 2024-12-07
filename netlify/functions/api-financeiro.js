@@ -45,7 +45,7 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'POST') {
         try {
-            const { dataJogo, totalJogadores, formasPagamento, totalAvulso, totalArrecadado, despesas } = JSON.parse(event.body);
+            const { dataJogo, totalJogadores, formasPagamento, totalAvulso, totalArrecadado, totalDespesas } = JSON.parse(event.body);
 
             const query = `
         INSERT INTO financeiro (
@@ -70,7 +70,7 @@ exports.handler = async(event, context) => {
                 formasPagamento.pix,
                 totalAvulso,
                 totalArrecadado,
-                despesas
+                totalDespesas
             ]);
 
             return {
