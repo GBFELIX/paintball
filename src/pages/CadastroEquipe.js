@@ -174,6 +174,18 @@ export default function CadEquipe() {
     }
   };
 
+ // logout 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleLogout = () => {
+    localStorage.removeItem('auth'); 
+    navigate('/'); 
+  };
+
+  const confirmLogout = () => {
+    handleLogout();
+    setIsModalOpen(false);
+  };
+
   return (
     <section className="bg-black w-full h-screen flex flex-col items-center p-5">
       <ToastContainer />
@@ -256,10 +268,31 @@ export default function CadEquipe() {
       <button 
         onClick={handleSubmit}
         className="mt-4 rounded-sm bg-green-600 text-white px-4 py-2 hover:bg-green-700 duration-300"
-        disabled={isSubmitting} // Desabilita o botão se isSubmitting for true
+        disabled={isSubmitting} 
       >
-        {isSubmitting ? 'Cadastrando...' : 'Finalizar Cadastro'} {/* Muda o texto do botão */}
+        {isSubmitting ? 'Cadastrando...' : 'Finalizar Cadastro'} 
+      </button>
+
+      <button onClick={() => setIsModalOpen(true)} className="text-white hover:text-primary duration-150">
+                  Sair do sistema
       </button>
     </section>
+
+    
   );
 }
+
+{isModalOpen && (
+  <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white p-6 rounded-lg w-96">
+    <h2 className="text-black text-2xl font-semibold mb-4">
+          Realmente deseja sair?
+      </h2>
+      <div className="flex justify-between mt-4">
+        <button onClick={confirmLogout} className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg">Sim</button>
+        <button onClick={() => setIsModalOpen(false)} className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white">Não</button>
+      </div>
+      
+    </div>
+  </div>
+)}
