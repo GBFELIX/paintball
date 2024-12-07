@@ -345,6 +345,7 @@ export default function Estoque() {
 
   const totalQuantidade = estoque.reduce((total, item) => total + item.quantidade, 0);
   const totalValor = estoque.reduce((total, item) => total + item.valor * item.quantidade, 0);
+  const totalValorCusto = estoque.reduce((total, item) => total + item.custo * item.quantidade, 0);
 
   
   const formatEstoqueToText = () => {
@@ -610,8 +611,12 @@ export default function Estoque() {
                   <p className="text-red-500 text-lg font-bold">{totalQuantidade}</p>
                 </div>
                 <div className="w-1/3 text-center">
-                  <p className="text-black text-lg font-semibold">Valor Total:</p>
+                  <p className="text-black text-lg font-semibold">Valor Total de Venda:</p>
                   <p className="text-red-500 text-lg font-bold">R${totalValor.toFixed(2)}</p>
+                </div>
+                <div className="w-1/3 text-center">
+                  <p className="text-black text-lg font-semibold">Valor Total de Custo:</p>
+                  <p className="text-red-500 text-lg font-bold">R${totalValorCusto.toFixed(2)}</p>
                 </div>
               </div>
             </div>
