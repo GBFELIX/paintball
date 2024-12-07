@@ -56,7 +56,7 @@ function CadJog() {
           draggable: true,
           theme: "light",
         });
-        navigate("/loginjog");
+        navigate("/");
       } else {
         throw new Error(data.message || 'Erro ao realizar o cadastro.');
       }
