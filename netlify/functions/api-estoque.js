@@ -109,7 +109,7 @@ exports.handler = async(event, context) => {
             }
 
             // Verifica se o tipo é "Aluguel" e a quantidade está sendo diminuída
-            if (tipo === 'Aluguel' && quantidade !== undefined && quantidade < itemExists[0].quantidade) {
+            if (tipo === 'Aluguel' || quantidade !== undefined) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify("A quantidade não pode ser diminuída para itens do tipo 'Aluguel'.")
