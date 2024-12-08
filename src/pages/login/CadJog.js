@@ -126,7 +126,7 @@ function CadJog() {
           <p className='text-primary mt-10'>
           <span className='text-white'>Já cadastro!!</span>{' '}
           <Link 
-            to="/loginjog" 
+            to="/" 
             className="hover:underline"
           >
             Clique aqui
