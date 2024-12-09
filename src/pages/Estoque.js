@@ -343,9 +343,9 @@ export default function Estoque() {
     setEditMode(prev => ({ ...prev, [nome]: !prev[nome] }));
   };
 
-  const totalQuantidade = estoque.reduce((total, item) => total + item.quantidade, 0);
-  const totalValor = estoque.reduce((total, item) => total + item.valor * item.quantidade, 0);
-  const totalValorCusto = estoque.reduce((total, item) => total + item.custo * item.quantidade, 0);
+  const totalQuantidade = estoque.filter(item => item.tipo === 'Venda').reduce((total, item) => total + item.quantidade, 0);
+  const totalValor = estoque.filter(item => item.tipo === 'Venda').reduce((total, item) => total + item.valor * item.quantidade, 0);
+  const totalValorCusto = estoque.filter(item => item.tipo === 'Venda').reduce((total, item) => total + item.custo * item.quantidade, 0);
 
   
   const formatEstoqueToText = () => {
@@ -644,6 +644,7 @@ export default function Estoque() {
                 <p className="text-red-500 text-lg font-bold">R${totalValorCusto.toFixed(2)}</p>
               </div>
             </div>
+            
             <div className="bg-primary w-full max-w-4xl rounded-sm flex flex-col p-5 items-center justify-center">
               <h2 className="text-black font-bold mb-5">Estoque Atual - Aluguel</h2>
               <div className="w-full flex flex-col">
