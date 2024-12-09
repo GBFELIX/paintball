@@ -523,7 +523,7 @@ export default function Estoque() {
                   <p className="text-black font-semibold w-1/4 text-center">Valor Venda</p>
                   <p className="text-black font-semibold w-1/4 text-center">Valor Total</p>
                 </div>
-                {estoque.filter(item => item.tipo === 'venda').map((item, index) => (
+                {estoque.filter(item => item.tipo === 'Venda').map((item, index) => (
                   <div key={index} className="w-full flex justify-between items-center px-3 py-2 border-t border-gray-300">
                     <div className="w-1/6 text-center">
                       <button 
@@ -630,7 +630,20 @@ export default function Estoque() {
                 ))}
               </div>
             </div>
-
+            <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300">
+              <div className="w-1/3 text-center">
+                <p className="text-black text-lg font-semibold">Qtd Total de itens:</p>
+                <p className="text-red-500 text-lg font-bold">{totalQuantidade}</p>
+              </div>
+              <div className="w-1/3 text-center">
+                <p className="text-black text-lg font-semibold">Valor Total de Venda:</p>
+                <p className="text-red-500 text-lg font-bold">R${totalValor.toFixed(2)}</p>
+              </div>
+              <div className="w-1/3 text-center">
+                <p className="text-black text-lg font-semibold">Valor Total de Custo:</p>
+                <p className="text-red-500 text-lg font-bold">R${totalValorCusto.toFixed(2)}</p>
+              </div>
+            </div>
             <div className="bg-primary w-full max-w-4xl rounded-sm flex flex-col p-5 items-center justify-center">
               <h2 className="text-black font-bold mb-5">Estoque Atual - Aluguel</h2>
               <div className="w-full flex flex-col">
@@ -639,9 +652,8 @@ export default function Estoque() {
                   <p className="text-black font-semibold w-1/4 text-center">Item</p>
                   <p className="text-black font-semibold w-1/4 text-center">Tipo</p>
                   <p className="text-black font-semibold w-1/4 text-center">Valor Venda</p>
-                  <p className="text-black font-semibold w-1/4 text-center">Valor Total</p>
                 </div>
-                {estoque.filter(item => item.tipo === 'aluguel').map((item, index) => (
+                {estoque.filter(item => item.tipo === 'Aluguel').map((item, index) => (
                   <div key={index} className="w-full flex justify-between items-center px-3 py-2 border-t border-gray-300">
                     <div className="w-1/6 text-center">
                       <button 
@@ -689,28 +701,12 @@ export default function Estoque() {
                         )}
                       </div>
                     </div>
-                    <div className="w-1/4 text-center">
-                      <p className="text-black font-semibold">R${(item.valor * item.quantidade).toFixed(2)}</p>
-                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300">
-              <div className="w-1/3 text-center">
-                <p className="text-black text-lg font-semibold">Qtd Total de itens:</p>
-                <p className="text-red-500 text-lg font-bold">{totalQuantidade}</p>
-              </div>
-              <div className="w-1/3 text-center">
-                <p className="text-black text-lg font-semibold">Valor Total de Venda:</p>
-                <p className="text-red-500 text-lg font-bold">R${totalValor.toFixed(2)}</p>
-              </div>
-              <div className="w-1/3 text-center">
-                <p className="text-black text-lg font-semibold">Valor Total de Custo:</p>
-                <p className="text-red-500 text-lg font-bold">R${totalValorCusto.toFixed(2)}</p>
-              </div>
-            </div>
+            
 
             <div className="w-full h-24 bg-third rounded-md flex justify-center md:justify-end items-center gap-3 px-2 mt-5">
               <button 
