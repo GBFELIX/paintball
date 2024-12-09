@@ -629,8 +629,7 @@ export default function Estoque() {
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300">
+              <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300">
               <div className="w-1/3 text-center">
                 <p className="text-black text-lg font-semibold">Qtd Total de itens:</p>
                 <p className="text-red-500 text-lg font-bold">{totalQuantidade}</p>
@@ -643,6 +642,8 @@ export default function Estoque() {
                 <p className="text-black text-lg font-semibold">Valor Total de Custo:</p>
                 <p className="text-red-500 text-lg font-bold">R${totalValorCusto.toFixed(2)}</p>
               </div>
+            </div>
+            
             </div>
             
             <div className="bg-primary w-full max-w-4xl rounded-sm flex flex-col p-5 items-center justify-center">
