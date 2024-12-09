@@ -652,7 +652,6 @@ export default function Estoque() {
                   <p className="text-black font-semibold w-1/4 text-center">Item</p>
                   <p className="text-black font-semibold w-1/4 text-center">Tipo</p>
                   <p className="text-black font-semibold w-1/4 text-center">Valor Venda</p>
-                  <p className="text-black font-semibold w-1/4 text-center">Valor Total</p>
                 </div>
                 {estoque.filter(item => item.tipo === 'aluguel').map((item, index) => (
                   <div key={index} className="w-full flex justify-between items-center px-3 py-2 border-t border-gray-300">
@@ -701,9 +700,6 @@ export default function Estoque() {
                           />
                         )}
                       </div>
-                    </div>
-                    <div className="w-1/4 text-center">
-                      <p className="text-black font-semibold">R${(item.valor * item.quantidade).toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
