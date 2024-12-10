@@ -7,8 +7,8 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     const [estoque, setEstoque] = useState([]);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [jogadorIndexForPayment, setJogadorIndexForPayment] = useState(null);
-    const [paymentValues, setPaymentValues] = useState({ dinheiro: 0, credito: 0, debito: 0, pix: 0 });
-    const [paymentMethods, setPaymentMethods] = useState({ dinheiro: false, credito: false, debito: false, pix: false });
+    const [paymentValues, setPaymentValues] = useState({ dinheiro: 0, credito: 0, debito: 0, pix: 0, deposito: 0 });
+    const [paymentMethods, setPaymentMethods] = useState({ dinheiro: false, credito: false, debito: false, pix: false, deposito: false });
     const [descontos, setDescontos] = useState({});
     const [descontoSelecionado, setDescontoSelecionado] = useState('');
     const [valorComDesconto, setValorComDesconto] = useState(0);
@@ -383,7 +383,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                             </select>
                         </div>
                         <div className="flex flex-col gap-4 mb-4">
-                            {['dinheiro', 'credito', 'debito', 'pix'].map((method) => (
+                            {['dinheiro', 'credito', 'debito', 'pix', 'deposito'].map((method) => (
                                 <div key={method} className="flex items-center space-x-2">
                                     <input
                                         type="checkbox"
@@ -426,8 +426,8 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                 className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
                                 onClick={() => {
                                     setShowPaymentModal(false);
-                                    setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0 });
-                                    setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false });
+                                    setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0, deposito: 0 });
+                                    setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false, deposito: false });
                                     setDescontoSelecionado('');
                                     setValorComDesconto(0);
                                 }}
