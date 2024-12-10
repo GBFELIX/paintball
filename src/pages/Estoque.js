@@ -350,11 +350,11 @@ export default function Estoque() {
   
   const formatEstoqueToText = () => {
     return estoque.map(item => 
-      `Produto: ${item.nome}, Quantidade: ${item.quantidade}, Valor: R$${item.valor}, Valor Total: R$${(item.valor * item.quantidade).toFixed(2)}`
+      `Produto: ${item.nome}, Quantidade: ${item.quantidade}, Valor: R$${item.valor}, Valor Total: R$${(item.valor * item.quantidade).toFixed(2)}, Custo: R$${item.custo}, Custo Total: R$${(item.custo * item.quantidade).toFixed(2)}`
     ).join('\n');
   };
 
-  
+  {/*
   const saveEstoqueToFile = () => {
     const estoqueText = formatEstoqueToText();
     const blob = new Blob([estoqueText], { type: 'text/plain' });
@@ -365,7 +365,7 @@ export default function Estoque() {
     a.click();
     window.URL.revokeObjectURL(url);
   };
-
+*/}
   const printEstoque = () => {
     const estoqueText = formatEstoqueToText();
     const printWindow = window.open('', '', 'width=600,height=400');
@@ -717,12 +717,14 @@ export default function Estoque() {
               >
                 Imprimir ESTOQUE ATUAL
               </button>
+              {/*
               <button 
                 className="bg-red-500 text-white p-2 rounded-sm"
                 onClick={saveEstoqueToFile}
               >
                 Salvar ESTOQUE EM ARQUIVO
               </button>
+              */}
             </div>
           </>
         )}
