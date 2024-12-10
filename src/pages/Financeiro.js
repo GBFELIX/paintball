@@ -108,6 +108,7 @@ export default function Financeiro() {
                 <th className="w-full flex justify-start">Débito</th>
                 <th className="w-full flex justify-start">Dinheiro</th>
                 <th className="w-full flex justify-start">Pix</th>
+                <th className="w-full flex justify-start">Depósito</th>
                 <th className="w-full flex justify-start">Avulso</th>
                 <th className="w-full flex justify-start">Despesas</th>
                 <th className="w-full flex justify-start">Total</th>
@@ -129,6 +130,7 @@ export default function Financeiro() {
                     <td className="w-full">R${item && item.debito}</td>
                     <td className="w-full">R${item && item.dinheiro}</td>
                     <td className="w-full">R${item && item.pix}</td>
+                    <td className="w-full">R${item && item.deposito}</td>
                     <td className="w-full">R${item && item.avulso}</td>
                     <td className="w-full">R${item && item.despesas}</td>
                     <td className="w-full">R${item && item.total_arrecadado}</td>
@@ -142,4 +144,3 @@ export default function Financeiro() {
     </section>
   );
 }
-125436
