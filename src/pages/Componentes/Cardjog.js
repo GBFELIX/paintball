@@ -337,6 +337,13 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                         >
                                             -
                                         </button>
+                                        <button
+                                            className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                            onClick={() => handleAddItem(index)}
+                                            disabled={jogador.isClosed}
+                                        >
+                                            +
+                                        </button>
                                     </div>
                                     <p>{item.nome}</p>
                                     <p>R${parseFloat(item.valor).toFixed(2)}</p>
