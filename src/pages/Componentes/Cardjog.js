@@ -43,7 +43,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     };
 
     const handleRemoveJogador = (index) => {
-        if (jogadores.length > 1) {
+        if (jogadores.length >= 0) {
             const updatedJogadores = jogadores.filter((_, i) => i !== index);
             updateJogadores(updatedJogadores);
         } else {
