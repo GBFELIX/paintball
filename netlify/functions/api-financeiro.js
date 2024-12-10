@@ -61,7 +61,7 @@ exports.handler = async(event, context) => {
           total_arrecadado,
           despesas,
           valortot
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
             await connection.query(query, [
