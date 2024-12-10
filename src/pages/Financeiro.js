@@ -13,6 +13,7 @@ export default function Financeiro() {
   });
   const [financeiroData, setFinanceiroData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [jogosFiltrados, setJogosFiltrados] = useState([]);
 
   useEffect(() => {
     const today = new Date();
@@ -20,6 +21,7 @@ export default function Financeiro() {
     const formattedDate = today.toISOString().split("T")[0];
     setValue({ startDate: formattedDate, endDate: formattedDate });
     buscarDadosFinanceiros(formattedDate);
+    filtrarJogos();
   }, []);
 
   const buscarDadosFinanceiros = () => {
