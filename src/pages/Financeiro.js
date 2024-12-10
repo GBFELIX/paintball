@@ -14,6 +14,7 @@ export default function Financeiro() {
   const [financeiroData, setFinanceiroData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [jogosFiltrados, setJogosFiltrados] = useState([]);
+  const [jogos, setJogos] = useState([]);
 
   useEffect(() => {
     const today = new Date();
@@ -102,6 +103,8 @@ export default function Financeiro() {
     window.print();
   };
   const filtrarJogos = () => {
+    if (jogos.length === 0) return;
+
     const agora = new Date();
     const primeiroDiaDoMesAtual = new Date(agora.getFullYear(), agora.getMonth(), 1);
     const primeiroDiaDoMesPassado = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
