@@ -4,16 +4,27 @@ import NavBar from "./Componentes/Navbar";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
+import Datepicker from "react-tailwindcss-datepicker";
 
 export default function Financeiro() {
+  const [value, setValue] = useState({
+    startDate: null,
+    endDate: null,
+  });
   const [financeiroData, setFinanceiroData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    buscarDadosFinanceiros();
+    const today = new Date();
+    today.setDate(today.getDate() - 1);
+    const formattedDate = today.toISOString().split("T")[0];
+    setValue({ startDate: formattedDate, endDate: formattedDate });
+    buscarDadosFinanceiros(formattedDate);
+    filtrarJogos();
   }, []);
 
   const buscarDadosFinanceiros = () => {
+    
     setLoading(true);
     axios.get(`./.netlify/functions/api-financeiro`)
       .then((response) => {
@@ -44,6 +55,25 @@ export default function Financeiro() {
       });
   };
 
+  const handleDateChange = (newValue) => {
+    setValue(newValue);
+
+    if (newValue.startDate && newValue.endDate) {
+      const dataFormatada = new Date(newValue.startDate).toISOString().split('T')[0]; 
+      buscarDadosFinanceiros(dataFormatada);
+    } else {
+      toast.error('Por favor, selecione uma data válida', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+    }
+  };
+
   const imprimirRelatorio = () => {
     if (financeiroData.length === 0) {
       toast.error('Não há dados para imprimir', {
@@ -70,6 +100,20 @@ export default function Financeiro() {
     
     window.print();
   };
+  const filtrarJogos = () => {
+    const agora = new Date();
+    const primeiroDiaDoMesAtual = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const primeiroDiaDoMesPassado = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
+    const primeiroDiaDoProximoMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 1);
+
+    const jogosFiltrados = jogos.filter(jogo => {
+      const dataJogo = new Date(jogo.data);
+      return (dataJogo >= primeiroDiaDoMesAtual && dataJogo < primeiroDiaDoProximoMes) ||
+             (dataJogo >= primeiroDiaDoMesPassado && dataJogo < agora);
+    });
+
+    setJogosFiltrados(jogosFiltrados);
+  };
 
   return (
     <section className="bg-black p-4 w-full h-screen flex flex-col items-center overflow-auto"> 
@@ -77,7 +121,50 @@ export default function Financeiro() {
       <NavBar />
       <div className="gap-2 flex flex-col lg:flex-row justify-center items-center w-auto">
         <h1 className="text-white text-3xl text-center m-5">Departamento Financeiro</h1>
-
+        <div className="w-auto">
+        <Datepicker
+            showShortcuts={true}
+            configs={{
+                shortcuts: {
+                  yesterday: "Ontem",
+                    customToday: {
+                        text: "Ontem",
+                        period: {
+                            start: new Date(),
+                            end: new Date()
+                        }
+                    },
+                    last7Days: {
+                        text: "Ultimos 7 dias",
+                        period: {
+                            start: new Date(new Date().setDate(new Date().getDate() - 7)),
+                            end: new Date(new Date().setDate(new Date().getDate() - 1))
+                        }
+                    },  
+                    last15Days: {
+                        text: "Ultimos 15 dias",
+                        period: {
+                            start: new Date(new Date().setDate(new Date().getDate() - 15)),
+                            end: new Date(new Date().setDate(new Date().getDate() - 1))
+                        }
+                    },  
+                    last30Days: {
+                        text: "Ultimos 30 dias",
+                        period: {
+                            start: new Date(new Date().setDate(new Date().getDate() - 30)),
+                            end: new Date(new Date().setDate(new Date().getDate() - 1))
+                        }
+                    },  
+                },
+                footer: {
+                    cancel: "CText",
+                    apply: "AText"
+                }
+            }}
+            value={value} 
+            onChange={newValue => setValue(newValue)}
+        /> 
+        </div>
         <button 
           onClick={imprimirRelatorio} 
           className="bg-white hover:bg-secondary duration-300 w-[300px] p-2 rounded-sm"
