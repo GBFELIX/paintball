@@ -45,16 +45,18 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'POST') {
         try {
-            const { dataJogo, totalJogadores, formasPagamento, totalAvulso, totalArrecadado, totalDespesas, valortot } = JSON.parse(event.body);
+            const { dataJogo, horaJogo, totalJogadores, formasPagamento, totalAvulso, totalArrecadado, totalDespesas, valortot } = JSON.parse(event.body);
 
             const query = `
         INSERT INTO financeiro (
           data_jogo, 
+          hora_jogo,
           total_jogadores, 
           credito, 
           debito, 
           dinheiro, 
           pix, 
+          deposito,
           avulso, 
           total_arrecadado,
           despesas,
@@ -64,11 +66,13 @@ exports.handler = async(event, context) => {
 
             await connection.query(query, [
                 dataJogo,
+                horaJogo,
                 totalJogadores,
                 formasPagamento.credito,
                 formasPagamento.debito,
                 formasPagamento.dinheiro,
                 formasPagamento.pix,
+                formasPagamento.deposito,
                 totalAvulso,
                 totalArrecadado,
                 totalDespesas,
