@@ -80,6 +80,7 @@ export default function ResumoGame() {
         const valortot = totalArrecadado - totalDespesas;
         const dataFinanceira = {
             dataJogo: jogo.data,
+            horaJogo: jogo.hora,
             totalJogadores: pagamentos.length,
             formasPagamento,
             totalAvulso,
