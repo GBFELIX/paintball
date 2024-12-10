@@ -12,6 +12,7 @@ export default function ResumoGame() {
         dinheiro: 0,
         avulso: 0,
         pix: 0,
+        deposito: 0,
     });
     const [totalAvulso, setTotalAvulso] = useState(0);
     const [despesas, setDespesas] = useState([]);
@@ -42,7 +43,8 @@ export default function ResumoGame() {
             debito: 0,
             dinheiro: 0,
             avulso: 0,
-            pix: 0,
+            pix: 0, 
+            deposito: 0,
         });
 
         setFormasPagamento(totais);
@@ -136,6 +138,10 @@ export default function ResumoGame() {
                         <div className="flex flex-row justify-around items-start">
                             <p className="text-xl font-semibold">Pix</p>
                             <p id="pix">R${formasPagamento.pix.toFixed(2)}</p>
+                        </div>
+                        <div className="flex flex-row justify-around items-start">
+                            <p className="text-xl font-semibold">Depósito</p>
+                            <p id="deposito">R${formasPagamento.deposito.toFixed(2)}</p>
                         </div>
                         <div className="flex flex-row justify-around items-start">
                             <p className="text-xl font-semibold">Avulso</p>
