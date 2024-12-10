@@ -103,6 +103,7 @@ export default function Financeiro() {
             <thead className="bg-primary text-black">
               <tr className="flex justify-around">
                 <th className="w-full flex justify-start">Data do Jogo</th>
+                <th className="w-full flex justify-start">Hora do Jogo</th>
                 <th className="w-full flex justify-start">Total de Pedidos</th> 
                 <th className="w-full flex justify-start">Crédito</th>
                 <th className="w-full flex justify-start">Débito</th>
@@ -125,6 +126,7 @@ export default function Financeiro() {
                         ? new Date(new Date(item.data_jogo).getTime() + (24 * 60 * 60 * 1000)).toLocaleDateString('pt-BR') 
                         : ''}
                     </td>
+                    <td className="w-full">{item && item.hora_jogo}</td>
                     <td className="w-full">{item && item.total_jogadores}</td>
                     <td className="w-full">R${item && item.credito}</td>
                     <td className="w-full">R${item && item.debito}</td>
