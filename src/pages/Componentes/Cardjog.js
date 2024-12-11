@@ -75,7 +75,15 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         if (updatedJogadores[index].selectedItem) {
             const selectedItem = { ...updatedJogadores[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-            updatedJogadores[index].items.push(selectedItem);
+
+            // Verifica se o item já existe na lista de itens do jogador
+            const existingItem = updatedJogadores[index].items.find(item => item.nome === selectedItem.nome);
+            if (existingItem) {
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+            } else {
+                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                updatedJogadores[index].items.push(selectedItem);
+            }
             updatedJogadores[index].selectedItem = '';
 
             // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
@@ -345,8 +353,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                             +
                                         </button>
                                     </div>
-                                    <p>{item.nome}</p>
-                                    <p>R${parseFloat(item.valor).toFixed(2)}</p>
+                                    <p>{item.nome} - {item.quantidade || 1} R${parseFloat(item.valor).toFixed(2)}</p>
                                 </div>
                             ))}
                         </div>
