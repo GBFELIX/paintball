@@ -25,10 +25,10 @@ export default function Financeiro() {
     filtrarJogos();
   }, []);
 
-  const buscarDadosFinanceiros = () => {
+  const buscarDadosFinanceiros = (data) => {
     
     setLoading(true);
-    axios.get(`./.netlify/functions/api-financeiro`)
+    axios.get(`./.netlify/functions/api-financeiro?data=${data}`)
       .then((response) => {
         setFinanceiroData(response.data);
         toast.success('Dados financeiros carregados com sucesso!', {
