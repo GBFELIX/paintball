@@ -353,7 +353,8 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                             +
                                         </button>
                                     </div>
-                                    <p>{item.nome} - {item.quantidade || 1} R${parseFloat(item.valor).toFixed(2)}</p>
+                                    <p>{item.nome} - {item.quantidade || 1}</p>
+                                    <p>R${parseFloat(item.valor).toFixed(2)}</p>
                                 </div>
                             ))}
                         </div>
