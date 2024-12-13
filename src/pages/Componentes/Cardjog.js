@@ -98,14 +98,14 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }
     };
 
-    const handleAddItemNovo = (index) => {
+    const handleAddItemNovo = (index, item) => {
         const updatedJogadores = [...jogadores];
-        if (updatedJogadores[index].selectedItem) {
-            const selectedItem = { ...updatedJogadores[index].selectedItem };
+        if (item) {
+            const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
             // Verifica se o item já existe na lista de itens do jogador
-            const existingItem = updatedJogadores[index].items.find(item => item.nome === selectedItem.nome);
+            const existingItem = updatedJogadores[index].items.find(i => i.nome === selectedItem.nome);
             if (existingItem) {
                 existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
             } else {
@@ -377,7 +377,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                         </button>
                                         <button
                                             className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                            onClick={() => handleAddItemNovo(itemIndex)}
+                                            onClick={() => handleAddItemNovo(index, item)}
                                             disabled={jogador.isClosed}
                                         >
                                             +
