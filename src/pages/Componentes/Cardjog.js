@@ -98,6 +98,34 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }
     };
 
+    const handleAddItemNovo = (index) => {
+        const updatedJogadores = [...jogadores];
+        if (updatedJogadores[index].selectedItem) {
+            const selectedItem = { ...updatedJogadores[index].selectedItem };
+            selectedItem.valor = parseFloat(selectedItem.valor) || 0;
+
+            // Verifica se o item já existe na lista de itens do jogador
+            const existingItem = updatedJogadores[index].items.find(item => item.nome === selectedItem.nome);
+            if (existingItem) {
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+            } else {
+                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                updatedJogadores[index].items.push(selectedItem);
+            }
+            updatedJogadores[index].selectedItem = '';
+
+            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
+            const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+            const itemName = selectedItem.nome;
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+            localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
+            updateJogadores(updatedJogadores);
+        } else {
+            toast.error('Por favor, selecione um item antes de adicionar.');
+        }
+    };
+
     const handleRemoveItem = (jogadorIndex, itemIndex) => {
         const updatedJogadores = [...jogadores];
         const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
@@ -349,7 +377,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                         </button>
                                         <button
                                             className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                            onClick={() => handleAddItem(index)}
+                                            onClick={() => handleAddItemNovo(index)}
                                             disabled={jogador.isClosed}
                                         >
                                             +
