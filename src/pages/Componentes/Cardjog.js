@@ -103,22 +103,20 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         if (item) {
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-
-            const existingItem = updatedJogadores[index].items.find(i => i.nome === selectedItem.nome);
+            // Verifica se o item já existe na lista de itens do jogador
+            const existingItem = updatedJogadores[index].items.find(i => i.nome === selectedItem.nome)
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1; 
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
             } else {
                 selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
                 updatedJogadores[index].items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
-
             // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
             storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
-
             updateJogadores(updatedJogadores);
         } else {
             toast.error('Por favor, selecione um item antes de adicionar.');
@@ -382,7 +380,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                         </button>
                                         <button
                                             className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                            onClick={() => handleAddItemNovo(index, itemIndex)}
+                                            onClick={() => handleAddItemNovo(index, item)}
                                             disabled={jogador.isClosed}
                                         >
                                             +
