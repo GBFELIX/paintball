@@ -130,17 +130,22 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         const updatedJogadores = [...jogadores];
         const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
 
-        // Atualiza o localStorage ao remover um item
         const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
         if (storedItems[itemName]) {
-            storedItems[itemName] -= 1; // Decrementa a quantidade
+            storedItems[itemName] -= 1; 
             if (storedItems[itemName] <= 0) {
-                delete storedItems[itemName]; // Remove o item se a quantidade for zero
+                delete storedItems[itemName]; 
             }
         }
         localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
-        updatedJogadores[jogadorIndex].items.splice(itemIndex, 1);
+        
+        if (updatedJogadores[jogadorIndex].items[itemIndex].quantidade > 1) {
+            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; 
+        } else {
+            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); 
+        }
+        
         updateJogadores(updatedJogadores);
     };
 
@@ -377,7 +382,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                         </button>
                                         <button
                                             className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                            onClick={() => handleAddItemNovo(index, item)}
+                                            onClick={() => handleAddItemNovo(index)}
                                             disabled={jogador.isClosed}
                                         >
                                             +
