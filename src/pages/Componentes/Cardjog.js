@@ -104,10 +104,9 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
-            // Verifica se o item já existe na lista de itens do jogador
             const existingItem = updatedJogadores[index].items.find(i => i.nome === selectedItem.nome);
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; 
             } else {
                 selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
                 updatedJogadores[index].items.push(selectedItem);
@@ -130,20 +129,21 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         const updatedJogadores = [...jogadores];
         const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
 
+        // Atualiza o localStorage ao remover um item
         const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
         if (storedItems[itemName]) {
-            storedItems[itemName] -= 1; 
+            storedItems[itemName] -= 1; // Decrementa a quantidade
             if (storedItems[itemName] <= 0) {
-                delete storedItems[itemName]; 
+                delete storedItems[itemName]; // Remove o item se a quantidade for zero
             }
         }
         localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
-        
+        // Reduz a quantidade do item ou remove o item se a quantidade for zero
         if (updatedJogadores[jogadorIndex].items[itemIndex].quantidade > 1) {
-            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; 
+            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; // Decrementa a quantidade
         } else {
-            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); 
+            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
         }
         
         updateJogadores(updatedJogadores);
@@ -382,7 +382,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                         </button>
                                         <button
                                             className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                            onClick={() => handleAddItemNovo(index)}
+                                            onClick={() => handleAddItemNovo(index, itemIndex)}
                                             disabled={jogador.isClosed}
                                         >
                                             +
