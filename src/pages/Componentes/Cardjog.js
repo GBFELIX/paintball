@@ -377,7 +377,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                         </button>
                                         <button
                                             className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                            onClick={() => handleAddItemNovo(index)}
+                                            onClick={() => handleAddItemNovo(itemIndex)}
                                             disabled={jogador.isClosed}
                                         >
                                             +
