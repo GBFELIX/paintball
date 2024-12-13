@@ -93,6 +93,8 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
             updateJogadores(updatedJogadores);
+        } else {
+            toast.error('Por favor, selecione um item antes de adicionar.');
         }
     };
 
