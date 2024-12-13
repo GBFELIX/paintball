@@ -112,7 +112,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 updatedJogadores[index].items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
-            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
+            // Armazenar a quantidade e o nome dos itens no localStorage da p��gina VendaAvul
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
             storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
@@ -305,7 +305,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         <div className="flex flex-wrap gap-4">
 
             {jogadores.map((jogador, index) => {
-                const valorTotalVenda = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+                const valorTotalVenda = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
                 return (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className="bg-primary w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
