@@ -96,7 +96,7 @@ export default function ResumoGame() {
         .catch(error => {
             console.error('Erro ao enviar dados financeiros:', error);
         });
-
+        console.log(localstorage.getItem('itensVendaAvul'));
         localStorage.removeItem('pagamentos');
         localStorage.removeItem('totalAvulso');
         localStorage.removeItem('dataJogo');
