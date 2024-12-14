@@ -175,7 +175,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }
 
         // Calcular o valor total após fechar o pedido
-        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);;
         setValorTotalVendaAtual(valorTotal); // Atualiza o estado com o novo total
     };
 
@@ -212,7 +212,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
         // Verifique se os valores foram inseridos
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);;
         setValorTotalVendaAtual(valorTotal);
         if (totalPagamento !== valorTotal) {
             toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
