@@ -338,7 +338,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                                         <button
                                             className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
                                             onClick={() => handleAddItemNovo(index, item)}
-                                            disabled={jogador.isClosed}
+                                            disabled={venda.isClosed}
                                         >
                                             +
                                         </button>
