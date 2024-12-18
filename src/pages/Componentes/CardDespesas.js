@@ -63,7 +63,15 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     if (updatedDespesas[index].selectedItem) {
       const selectedItem = { ...updatedDespesas[index].selectedItem };
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-      updatedDespesas[index].items.push(selectedItem);
+
+      // Verifica se o item já existe na lista de itens do jogador
+      const existingItem = updatedDespesas[index].items.find(item => item.nome === selectedItem.nome);
+      if (existingItem) {
+          existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+      } else {
+          selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+          updatedDespesas[index].items.push(selectedItem);
+      }
       updatedDespesas[index].selectedItem = '';
 
       // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
