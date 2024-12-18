@@ -31,7 +31,9 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     localStorage.setItem('totalAvulso', valorTotalGeral);
   }, [valorTotalGeral]);
 
-
+  const updateDespesas = (updatedDespesas) => {
+    setDespesas(updatedDespesas);
+};
   const handleRemoveDespesa = (index) => {
       const updatedDespesas = despesas.filter((_, i) => i !== index);
       setDespesas(updatedDespesas);
@@ -123,7 +125,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     }
 
     const itemsToUpdate = despesa.items;
-    const valorTotalDespesa = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+    const valorTotalDespesa = itemsToUpdate.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
     const valorFinal = valorTotalDespesa;
     const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
@@ -176,7 +178,30 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     }
 };
 
-
+const handleAddItemNovo = (index, item) => {
+  const updatedDespesas = [...despesas];
+  if (item) {
+      const selectedItem = { ...item };
+      selectedItem.valor = parseFloat(selectedItem.valor) || 0;
+      // Verifica se o item já existe na lista de itens do jogador
+      const existingItem = updatedDespesas[index].items.find(i => i.nome === selectedItem.nome)
+      if (existingItem) {
+          existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+      } else {
+          selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+          updatedDespesas[index].items.push(selectedItem);
+      }
+      updatedDespesas[index].selectedItem = '';
+      // Armazenar a quantidade e o nome dos itens no localStorage da p��gina VendaAvul
+      const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+      const itemName = selectedItem.nome;
+      storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+      localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+      updateDespesas(updatedDespesas);
+  } else {
+      toast.error('Por favor, selecione um item antes de adicionar.');
+  }
+};
 const handleAddDespesaValor = (index, event) => {
     const updatedDespesas = [...despesas];
     updatedDespesas[index].valor = parseFloat(event.target.value) || 0; // Corrigido para armazenar o valor
@@ -189,7 +214,7 @@ const handleAddDespesaValor = (index, event) => {
     <div className="flex flex-wrap gap-4">
 
       {despesas.map((despesa, index) => {
-        const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+        const valorTotalDespesa = despesa.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
         return (
           <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${despesa.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
             <header className="bg-secondary w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
@@ -305,9 +330,16 @@ const handleAddDespesaValor = (index, event) => {
                     >
                       -
                     </button>
-                  </div>
-                  <p>{item.nome}</p>
-                  <p>R${parseFloat(item.valor).toFixed(2)}</p>
+                    <button
+                        className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                        onClick={() => handleAddItemNovo(index, item)}
+                        disabled={despesa.isClosed}
+                    >
+                        +
+                    </button>
+                </div>
+                <p>{item.nome} - {item.quantidade || 1}</p>
+                <p>R${parseFloat(item.valor).toFixed(2)}</p>
                 </div>
               ))}
             </div>
