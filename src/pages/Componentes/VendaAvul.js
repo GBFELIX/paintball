@@ -100,8 +100,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             storedItems[itemName] = (storedItems[itemName] || 0) + 1;
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
-            updatedVendas[index].items.push(selectedItem);
-            updatedVendas[index].selectedItem = '';
             updateVendas(updatedVendas);
         }  else {
             toast.error('Por favor, selecione um item antes de adicionar.');
