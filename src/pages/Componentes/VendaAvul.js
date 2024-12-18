@@ -80,13 +80,19 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     const handleAddItem = (index) => {
         const updatedVendas = [...vendas];
         
-        if (updatedVendas[index].selectedItem && updatedVendas[index].selectedItem.id) {
-            const selectedItem = {
-                id: updatedVendas[index].selectedItem.id,
-                nome: updatedVendas[index].selectedItem.nome,
-                valor: parseFloat(updatedVendas[index].selectedItem.valor || 0),
-                quantidade: updatedVendas[index].selectedItem.quantidade
-            };
+        if (updatedVendas[index].selectedItem) {
+            const selectedItem = { ...updatedVendas[index].selectedItem };
+            selectedItem.valor = parseFloat(selectedItem.valor) || 0;
+
+            // Verifica se o item já existe na lista de itens do jogador
+            const existingItem = updatedVendas[index].items.find(item => item.nome === selectedItem.nome);
+            if (existingItem) {
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+            } else {
+                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                updatedVendas[index].items.push(selectedItem);
+            }
+            updatedVendas[index].selectedItem = '';
 
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
