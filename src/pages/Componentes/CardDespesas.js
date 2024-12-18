@@ -90,7 +90,11 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     }
     localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
-    updatedDespesas[despesaIndex].items.splice(itemIndex, 1);
+    if (updatedDespesas[despesaIndex].items[itemIndex].quantidade > 1) {
+            updatedDespesas[despesaIndex].items[itemIndex].quantidade -= 1; // Decrementa a quantidade
+        } else {
+            updatedDespesas[despesaIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
+        }
     setDespesas(updatedDespesas);
   };
 
