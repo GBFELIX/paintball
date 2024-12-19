@@ -28,6 +28,21 @@ export default function Financeiro() {
   const buscarDadosFinanceiros = (startDate, endDate) => {
     setLoading(true);
     
+    if (!startDate || !endDate) {
+        console.error("Datas inválidas:", { startDate, endDate });
+        toast.error('Datas inválidas. Por favor, selecione datas válidas.', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+        setLoading(false);
+        return;
+    }
+
     const formattedStartDate = new Date(startDate).toISOString().split("T")[0];
     const formattedEndDate = new Date(endDate).toISOString().split("T")[0];
 
