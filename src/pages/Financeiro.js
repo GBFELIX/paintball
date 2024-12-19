@@ -26,8 +26,13 @@ export default function Financeiro() {
   }, []);
 
   const buscarDadosFinanceiros = (startDate, endDate) => {
-    
     setLoading(true);
+    
+    console.log("Buscando dados financeiros com as seguintes datas:", {
+        startDate,
+        endDate
+    });
+
     axios.get(`./.netlify/functions/api-financeiro?startDate=${startDate}&endDate=${endDate}`)
       .then((response) => {
         setFinanceiroData(response.data);
