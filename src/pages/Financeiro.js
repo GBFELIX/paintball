@@ -30,7 +30,7 @@ export default function Financeiro() {
     
     if (!startDate || !endDate) {
         console.error("Datas inválidas:", { startDate, endDate });
-        toast.alert('Por favor, selecione datas válidas.', {
+        toast.error('Datas inválidas. Por favor, selecione datas válidas.', {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
