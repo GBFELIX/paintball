@@ -156,7 +156,6 @@ export default function Financeiro() {
                 shortcuts: {
                   yesterday: "Ontem",
                     customToday: {
-                        text: "Onten",
                         period: {
                             start: new Date(),
                             end: new Date()
