@@ -16,6 +16,18 @@ exports.handler = async(event, context) => {
         try {
             const params = new URLSearchParams(event.queryStringParameters);
             const data = params.get('data');
+            const startDate = params.get('startDate');
+            const endDate = params.get('endDate');
+
+            if (startDate && endDate) {
+                const query = 'SELECT * FROM financeiro WHERE DATE(data_jogo) BETWEEN ? AND ?';
+                const [results] = await connection.query(query, [startDate, endDate]);
+
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(results)
+                };
+            }
 
             if (!data) {
                 const query = 'SELECT * FROM financeiro';
