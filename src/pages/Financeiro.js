@@ -59,9 +59,11 @@ export default function Financeiro() {
 
   const handleDateChange = (newValue) => {
     setValue(newValue);
+  };
 
-    if (newValue.startDate && newValue.endDate) {
-      buscarDadosFinanceiros(newValue.startDate, newValue.endDate);
+  const buscarDados = () => {
+    if (value.startDate && value.endDate) {
+      buscarDadosFinanceiros(value.startDate, value.endDate);
     } else {
       toast.error('Por favor, selecione uma data válida', {
         position: "top-right",
@@ -131,7 +133,7 @@ export default function Financeiro() {
                 shortcuts: {
                   yesterday: "Ontem",
                     customToday: {
-                        text: "Ontem",
+                        text: "Onten",
                         period: {
                             start: new Date(),
                             end: new Date()
@@ -165,9 +167,15 @@ export default function Financeiro() {
                 }
             }}
             value={value} 
-            onChange={newValue => setValue(newValue)}
+            onChange={handleDateChange}
         /> 
         </div>
+        <button 
+          onClick={buscarDados}
+          className="bg-blue-500 hover:bg-blue-700 duration-300 w-[100px] p-2 rounded-sm"
+        >
+          <span className="text-white">OK</span>
+        </button>
         <button 
           onClick={imprimirRelatorio} 
           className="bg-white hover:bg-secondary duration-300 w-[300px] p-2 rounded-sm"
