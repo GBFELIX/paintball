@@ -25,10 +25,10 @@ export default function Financeiro() {
     filtrarJogos();
   }, []);
 
-  const buscarDadosFinanceiros = (data) => {
+  const buscarDadosFinanceiros = (startDate, endDate) => {
     
     setLoading(true);
-    axios.get(`./.netlify/functions/api-financeiro?data=${data}`)
+    axios.get(`./.netlify/functions/api-financeiro?startDate=${startDate}&endDate=${endDate}`)
       .then((response) => {
         setFinanceiroData(response.data);
         toast.success('Dados financeiros carregados com sucesso!', {
@@ -61,8 +61,7 @@ export default function Financeiro() {
     setValue(newValue);
 
     if (newValue.startDate && newValue.endDate) {
-      const dataFormatada = new Date(newValue.startDate).toISOString().split('T')[0]; 
-      buscarDadosFinanceiros(dataFormatada);
+      buscarDadosFinanceiros(newValue.startDate, newValue.endDate);
     } else {
       toast.error('Por favor, selecione uma data válida', {
         position: "top-right",
