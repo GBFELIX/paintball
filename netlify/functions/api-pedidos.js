@@ -47,8 +47,8 @@ async function handlePost(event) {
     const { nomeJogador, items, formaPagamento, valorTotal, dataPedido } = JSON.parse(event.body);
 
     // Inserir pedido
-    const queryPedido = 'INSERT INTO pedidos (nome_jogador, forma_pagamento, valor_total, data_pedido) VALUES (?, ?, ?, ?)';
-    const [resultPedido] = await db.promise().query(queryPedido, [nomeJogador, formaPagamento, valorTotal, dataPedido]);
+    const queryPedido = 'INSERT INTO pedidos (nome_jogador, items, forma_pagamento, valor_total, data_pedido) VALUES (?, ?, ?, ?, ?)';
+    const [resultPedido] = await db.promise().query(queryPedido, [nomeJogador, items, formaPagamento, valorTotal, dataPedido]);
     
     const pedidoId = resultPedido.insertId;
 
