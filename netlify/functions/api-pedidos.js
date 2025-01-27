@@ -44,11 +44,11 @@ async function handleGet(event) {
 
 async function handlePost(event) {
   try {
-    const { nomeJogador, items, formaPagamento, valorTotal, dataPedido } = JSON.parse(event.body);
+    const { nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido } = JSON.parse(event.body);
 
     // Inserir pedido
-    const queryPedido = 'INSERT INTO pedidos (nome_jogador, items, forma_pagamento, valor_total, data_pedido) VALUES (?, ?, ?, ?, ?)';
-    const [resultPedido] = await db.promise().query(queryPedido, [nomeJogador, items, formaPagamento, valorTotal, dataPedido]);
+    const queryPedido = 'INSERT INTO pedidos (nome_jogador, items, forma_pagamento, valor_total, data_pedido, hora_pedido) VALUES (?, ?, ?, ?, ?, ?)';
+    const [resultPedido] = await db.promise().query(queryPedido, [nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido]);
     
     const pedidoId = resultPedido.insertId;
 

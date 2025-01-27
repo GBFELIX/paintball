@@ -260,7 +260,8 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 items: jogador.items,
                 formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
                 valorTotal: valorTotal,
-                dataPedido: dataHoraJogo,
+                dataPedido: dataJogo,
+                horaPedido: horaJogo,
             });
 
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
