@@ -253,11 +253,11 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
         const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
-        console.log(jogador.nome, jogador.items, dataJogo, horaJogo, valorTotal);
+        console.log(jogador.nome, jogador.items.map(item => item.nome), dataJogo, horaJogo, valorTotal);
         try {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
-                items: jogador.items,
+                items: jogador.items.map(item => item.nome),
                 formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
                 valorTotal: valorTotal,
                 dataPedido: dataJogo,
