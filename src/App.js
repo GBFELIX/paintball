@@ -18,6 +18,7 @@ import CadEquipe from './pages/CadastroEquipe.js';
 import Financeiro from './pages/Financeiro.js';
 import PreAgendado from './pages/PreAgendado.js';
 import CardDespesas from './pages/Componentes/CardDespesas.js';
+import Game from './pages/Game.js';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
@@ -197,6 +198,7 @@ function App() {
         <Route path="/statusgame" element={<PrivateRoute role={['admin', 'operador']}><StatusGame /></PrivateRoute>} />
         <Route path="/resumogame" element={<PrivateRoute role={['admin', 'operador']}><ResumoGame/></PrivateRoute>}/>
         <Route path="/cadequipe" element={<CadEquipe/>}/>
+        <Route path="/game" element={<Game/>}/>
         <Route path="/financeiro" element={<PrivateRoute role={['admin']}><Financeiro/></PrivateRoute>}/>
         <Route path="/preagenda" element={<PrivateRoute role={['admin']}><PreAgendado/></PrivateRoute>}/>
       </Routes>
