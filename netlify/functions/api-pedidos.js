@@ -26,9 +26,10 @@ async function handleGet(event) {
     try {
         const params = new URLSearchParams(event.queryStringParameters);
         const data = params.get('data');
+        const hora = params.get('hora');
 
-        const query = 'SELECT * FROM pedidos WHERE DATE(data_pedido) = ?';
-        const [results] = await db.promise().query(query, [data]);
+        const query = 'SELECT * FROM pedidos WHERE DATE(data_pedido) = ? AND hora_pedido = ?';
+        const [results] = await db.promise().query(query, [data, hora]);
 
         return {
             statusCode: 200,

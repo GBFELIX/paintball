@@ -15,6 +15,7 @@ export default function Financeiro() {
   const [loading, setLoading] = useState(false);
   const [jogosFiltrados, setJogosFiltrados] = useState([]);
   const [jogos, setJogos] = useState([]);
+  const [loadingEquipe, setLoadingEquipe] = useState(false);
 
   useEffect(() => {
     const today = new Date();
@@ -143,6 +144,28 @@ export default function Financeiro() {
     setJogosFiltrados(jogosFiltrados);
   };
 
+  const handleMostrarJogo = async (dataJogo, horaJogo) => {
+    setLoadingEquipe(true);
+    try {
+        const response = await axios.get(`./.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`); 
+        
+        console.log(response.data);
+        
+    } catch (error) {
+        toast.error('Erro ao carregar dados do jogo', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+    } finally {
+        setLoadingEquipe(false);
+    }
+  };
+
   return (
     <section className="bg-black p-4 w-full h-screen flex flex-col items-center overflow-auto"> 
       <ToastContainer />
@@ -255,6 +278,25 @@ export default function Financeiro() {
                     <td className="w-full">R${item && item.despesas}</td>
                     <td className="w-full">R${item && item.total_arrecadado}</td>
                     <td className="w-full">R${item && item.valortot}</td>
+                    <td className="w-full flex gap-2">
+                      <button
+                        className="rounded-md bg-primary p-2 text-black hover:bg-black duration-300 hover:text-white flex items-center justify-center min-w-[120px]"
+                        onClick={() => handleMostrarJogo(item.data_jogo, item.hora_jogo)}
+                        disabled={loadingEquipe}
+                      >
+                        {loadingEquipe ? (
+                          <ClipLoader
+                            color="#000000"
+                            loading={loadingEquipe}
+                            size={20}
+                            aria-label="Loading Spinner"
+                            data-testid="loader"
+                          />
+                        ) : (
+                          'Mostrar Jogo'
+                        )}
+                      </button>
+                    </td>
                   </tr>
                 ))}
             </tbody>
