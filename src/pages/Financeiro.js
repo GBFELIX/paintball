@@ -5,7 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
 import Datepicker from "react-tailwindcss-datepicker";
-import Game from "./Componentes/Game";
+import Game from "./Game";
 
 export default function Financeiro() {
   const [value, setValue] = useState({
