@@ -77,7 +77,7 @@ async function handlePost(event) {
     } catch (error) {
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Erro ao cadastrar pedido' })
+            body: JSON.stringify({ error: 'Erro ao cadastrar pedidosss' })
         };
     }
 }
