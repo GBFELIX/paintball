@@ -60,13 +60,13 @@ async function handlePost(event) {
         }, {});
 
         // Inserir itens do pedido
-        const queryItens = 'INSERT INTO itens_pedidos (pedido_id, nome_item, quantidade, valor) VALUES ?';
-        const values = Object.keys(itemCountMap).map(nomeItem => [
-            pedidoId,
-            nomeItem,
-            itemCountMap[nomeItem],
-            items.find(item => item.nome === nomeItem).valor
-        ]);
+        //const queryItens = 'INSERT INTO itens_pedidos (pedido_id, nome_item, quantidade, valor) VALUES ?';
+        //const values = Object.keys(itemCountMap).map(nomeItem => [
+        //    pedidoId,
+        //    nomeItem,
+        //    itemCountMap[nomeItem],
+        //    items.find(item => item.nome === nomeItem).valor
+        //]);
 
         await db.promise().query(queryItens, [values]);
 
