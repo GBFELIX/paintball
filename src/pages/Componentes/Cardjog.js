@@ -112,7 +112,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 updatedJogadores[index].items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
-            // Armazenar a quantidade e o nome dos itens no localStorage da p��gina VendaAvul
+            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
             storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
