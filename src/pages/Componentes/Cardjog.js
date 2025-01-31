@@ -264,17 +264,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 horaPedido: horaJogo,
             });
             
-            const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-            const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-
-            formasSelecionadas.forEach(forma => {
-                const valorForma = paymentValues[forma]; 
-                pagamentosAnteriores.push({
-                    valorTotal: valorForma, 
-                    formaPagamento: forma,
-                });
-            });
-            localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+            
         } catch (error) {
             console.error('Erro ao cadastrar pedido:', error);
             toast.error('Erro ao finalizar pedido', {
@@ -287,6 +277,17 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 theme: "light",
             });
         }
+        const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+            const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
+
+            formasSelecionadas.forEach(forma => {
+                const valorForma = paymentValues[forma]; 
+                pagamentosAnteriores.push({
+                    valorTotal: valorForma, 
+                    formaPagamento: forma,
+                });
+            });
+            localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
     };
 
     const calcularTotal = () => {
