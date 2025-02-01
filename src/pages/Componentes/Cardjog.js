@@ -253,7 +253,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
         const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
-        console.log(jogador);
         try {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
