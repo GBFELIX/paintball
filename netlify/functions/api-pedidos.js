@@ -47,13 +47,6 @@ async function handlePost(event) {
     try {
         const { nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido } = JSON.parse(event.body);
 
-        // Validação dos dados recebidos
-        if (!nomeJogador || !items || !formaPagamento || !valorTotal || !dataPedido || !horaPedido) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Todos os campos são obrigatórios' })
-            };
-        }
 
         // Tenta converter os itens para JSON
         let itemsString;
