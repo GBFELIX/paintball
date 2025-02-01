@@ -143,13 +143,14 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
 
 
     try {
-        // Finaliza pedido
-        const dataJogo = `${localStorage.getItem('dataJogo')} ${localStorage.getItem('horaJogo')}:00`;
+      const dataJogo = localStorage.getItem('dataJogo');
+      const horaJogo = localStorage.getItem('horaJogo');
         await axios.post('/.netlify/functions/api-pedidos', {
             nomeJogador: despesa.nome,
             items: despesa.items.map(item => item.nome),
             valorTotal: valorFinal,
-            dataJogo,
+            dataPedido: dataJogo,
+            horaPedido: horaJogo,
         });
 
         // Atualiza estado e localStorage
