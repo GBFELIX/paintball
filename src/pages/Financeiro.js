@@ -6,6 +6,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
 import Datepicker from "react-tailwindcss-datepicker";
 import Game from "./Componentes/Game";
+import { useGameContext } from '../context/GameContext';
+import { useHistory } from 'react-router-dom';
 
 export default function Financeiro() {
   const [value, setValue] = useState({
@@ -19,6 +21,8 @@ export default function Financeiro() {
   const [loadingEquipe, setLoadingEquipe] = useState(false);
   const [dadosPedido, setDadosPedido] = useState(null);
   const [showStatusGamer, setShowStatusGamer] = useState(false);
+  const history = useHistory();
+  const { setGameData } = useGameContext();
 
   useEffect(() => {
     const today = new Date();
@@ -147,26 +151,9 @@ export default function Financeiro() {
     setJogosFiltrados(jogosFiltrados);
   };
 
-  const handleMostrarJogo = async (dataJogo, horaJogo) => {
-    setLoadingEquipe(true);
-    try {
-        history.push('/game', { dataJogo, horaJogo });
-        // Armazenar os dados do pedido no estado
-        setDadosPedido(response.data);
-        setShowStatusGamer(true); // Mostrar o componente StatusGamer
-    } catch (error) {
-        toast.error('Erro ao carregar dados do pedido', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-    } finally {
-        setLoadingEquipe(false);
-    }
+  const handleMostrarJogo = (dataJogo, horaJogo) => {
+    setGameData({ dataJogo, horaJogo });
+    history.push('/game');
   };
 
   return (

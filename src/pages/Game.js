@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { useGameContext } from '../context/GameContext';
 
 const Game = () => {
-    const location = useLocation();
+
     const { dataJogo, horaJogo } = location.state || {}; // Recebe os dados passados
     const [jogadores, setJogadores] = useState([]); // Estado para armazenar os jogadores
+    const { gameData, setGameData } = useGameContext();
 
     useEffect(() => {
         // Função para buscar os dados dos jogadores
