@@ -21,7 +21,6 @@ export default function Financeiro() {
   const [loadingEquipe, setLoadingEquipe] = useState(false);
   const [dadosPedido, setDadosPedido] = useState(null);
   const [showStatusGamer, setShowStatusGamer] = useState(false);
-  const { setGameData } = useGameContext();
 
   useEffect(() => {
     const today = new Date();
