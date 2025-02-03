@@ -7,7 +7,7 @@ import { ClipLoader } from "react-spinners";
 import Datepicker from "react-tailwindcss-datepicker";
 import Game from "./Game";
 import { useGameContext } from '../context/GameContext';
-import { useHistory } from 'react-router-dom';
+
 
 export default function Financeiro() {
   const [value, setValue] = useState({
@@ -21,7 +21,6 @@ export default function Financeiro() {
   const [loadingEquipe, setLoadingEquipe] = useState(false);
   const [dadosPedido, setDadosPedido] = useState(null);
   const [showStatusGamer, setShowStatusGamer] = useState(false);
-  const history = useHistory();
   const { setGameData } = useGameContext();
 
   useEffect(() => {
@@ -153,7 +152,7 @@ export default function Financeiro() {
 
   const handleMostrarJogo = (dataJogo, horaJogo) => {
     setGameData({ dataJogo, horaJogo });
-    history.push('/game');
+    navigate('/game');
   };
 
   return (
