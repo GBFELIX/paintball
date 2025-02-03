@@ -1,7 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import axios from 'axios';
 
-export default function Game({ dadosPedido, onClose, onUpdate }) {
-    const [jogadores, setJogadores] = useState(dadosPedido); // Inicializa com os dados do pedido
+const Game = () => {
+    const location = useLocation();
+    const { dataJogo, horaJogo } = location.state || {}; // Recebe os dados passados
+    const [jogadores, setJogadores] = useState([]); // Estado para armazenar os jogadores
+
+    useEffect(() => {
+        // Função para buscar os dados dos jogadores
+        const fetchJogadores = async () => {
+            try {
+                const response = await axios.get(`./.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
+                setJogadores(response.data.jogadores); // Supondo que a resposta tenha uma propriedade 'jogadores'
+            } catch (error) {
+                console.error('Erro ao buscar jogadores:', error);
+            }
+        };
+
+        if (dataJogo && horaJogo) {
+            fetchJogadores();
+        }
+    }, [dataJogo, horaJogo]);
 
     const handleAddJogador = () => {
         const newNumero = (jogadores.length + 1).toString();
@@ -49,17 +69,13 @@ export default function Game({ dadosPedido, onClose, onUpdate }) {
         const updatedJogadores = [...jogadores];
         updatedJogadores[index].isClosed = !updatedJogadores[index].isClosed;
         setJogadores(updatedJogadores);
-        onUpdate(updatedJogadores); // Chama a função de callback para atualizar os jogadores
     };
 
     return (
-        <div className="modal">
-            <button 
-                onClick={onClose} 
-                className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg mb-4"
-            >
-                Fechar
-            </button>
+        <div>
+            <h1>Detalhes do Jogo</h1>
+            <p>Data do Jogo: {dataJogo}</p>
+            <p>Hora do Jogo: {horaJogo}</p>
             <div className="flex flex-wrap gap-4">
                 {jogadores.map((jogador, index) => (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
@@ -67,26 +83,12 @@ export default function Game({ dadosPedido, onClose, onUpdate }) {
                             <h3 className="text-lg font-semibold">{jogador.nome || 'Jogador'}</h3>
                         </header>
                         <div className="p-2">
-                            <input
-                                type="text"
-                                className="text-center w-10 rounded-sm px-2 py-1"
-                                placeholder="N°"
-                                value={jogador.numero}
-                                onChange={(e) => handleNumeroChange(index, e)}
-                                disabled={jogador.isClosed}
-                            />
-                            <input
-                                type="text"
-                                className="text-center w-44 rounded-sm px-2 py-1"
-                                placeholder="Cliente"
-                                value={jogador.nome}
-                                onChange={(e) => handleNomeChange(index, e)}
-                                disabled={jogador.isClosed}
-                            />
+                            <p><strong>Forma de Pagamento:</strong> {jogador.formaPagamento || 'N/A'}</p>
+                            <p><strong>Valor Total:</strong> {jogador.valorTotal || '0'}</p>
                             <div className="inline-flex">
                                 <button
                                     className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
-                                    onClick={handleAddJogador}
+                                    onClick={() => handleAddJogador()}
                                 >
                                     +
                                 </button>
@@ -100,41 +102,20 @@ export default function Game({ dadosPedido, onClose, onUpdate }) {
                         </div>
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center gap-2">
-                                <select
-                                    className="w-full border border-slate-400 rounded px-2 p-1 text-center"
-                                    value={jogador.selectedItem || ''}
-                                    onChange={(e) => {
-                                        const updatedJogadores = [...jogadores];
-                                        updatedJogadores[index].selectedItem = e.target.value;
-                                        setJogadores(updatedJogadores);
-                                    }}
-                                    disabled={jogador.isClosed}
-                                >
-                                    <option value="">Selecione o item</option>
-                                    {/* Exemplo de itens, substitua pelo seu estoque */}
-                                    <option value="Item 1">Item 1</option>
-                                    <option value="Item 2">Item 2</option>
-                                </select>
-                                <button
-                                    className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                    onClick={() => handleAddItem(index)}
-                                    disabled={jogador.isClosed}
-                                >
-                                    Adicionar Item
-                                </button>
+                                <h4>Itens:</h4>
+                                {jogador.items.map((item, itemIndex) => (
+                                    <div key={itemIndex} className="p-2 flex flex-col justify-center items-center">
+                                        <p>{item.nome} - {item.quantidade || 1}</p>
+                                        <button
+                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
+                                            onClick={() => handleRemoveItem(index, itemIndex)}
+                                            disabled={jogador.isClosed}
+                                        >
+                                            Remover Item
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
-                            {jogador.items.map((item, itemIndex) => (
-                                <div key={itemIndex} className="p-2 flex flex-col justify-center items-center">
-                                    <p>{item.nome} - {item.quantidade || 1}</p>
-                                    <button
-                                        className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                        onClick={() => handleRemoveItem(index, itemIndex)}
-                                        disabled={jogador.isClosed}
-                                    >
-                                        Remover Item
-                                    </button>
-                                </div>
-                            ))}
                         </div>
                         <div className="flex justify-center items-center mt-2">
                             <button
@@ -149,4 +130,6 @@ export default function Game({ dadosPedido, onClose, onUpdate }) {
             </div>
         </div>
     );
-}
+};
+
+export default Game;

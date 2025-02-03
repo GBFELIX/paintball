@@ -5,7 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
 import Datepicker from "react-tailwindcss-datepicker";
-import Game from "./Game";
+import Game from "./Componentes/Game";
 
 export default function Financeiro() {
   const [value, setValue] = useState({
@@ -150,8 +150,7 @@ export default function Financeiro() {
   const handleMostrarJogo = async (dataJogo, horaJogo) => {
     setLoadingEquipe(true);
     try {
-        const response = await axios.get(`./.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
-        
+        history.push('/game', { dataJogo, horaJogo });
         // Armazenar os dados do pedido no estado
         setDadosPedido(response.data);
         setShowStatusGamer(true); // Mostrar o componente StatusGamer
@@ -168,10 +167,6 @@ export default function Financeiro() {
     } finally {
         setLoadingEquipe(false);
     }
-  };
-
-  const handleUpdateJogadores = (updatedJogadores) => {
-    // Atualiza o estado ou faz algo com os jogadores editados
   };
 
   return (
@@ -314,7 +309,7 @@ export default function Financeiro() {
 
       {/* Renderizar o componente StatusGamer se showStatusGamer for true */}
       {showStatusGamer && dadosPedido && (
-        <Game dadosPedido={dadosPedido} onUpdate={handleUpdateJogadores} onClose={() => setShowStatusGamer(false)} />
+        <Game dadosPedido={dadosPedido} onClose={() => setShowStatusGamer(false)} />
       )}
     </section>
   );
