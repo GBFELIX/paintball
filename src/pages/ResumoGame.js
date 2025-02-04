@@ -91,10 +91,27 @@ export default function ResumoGame() {
         console.log(dataFinanceira);
         axios.post('./.netlify/functions/api-financeiro', dataFinanceira)
         .then(() => {
-            console.log('Dados financeiros enviados com sucesso');
+            toast.success('Partida fechada com sucesso!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
         })
         .catch(error => {
             console.error('Erro ao enviar dados financeiros:', error);
+            toast.error('Erro ao finalizar partida', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
         });
         
         localStorage.removeItem('pagamentos');
