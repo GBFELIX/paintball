@@ -88,7 +88,7 @@ export default function ResumoGame() {
             totalDespesas,
             valortot
         };
-
+        console.log(dataFinanceira);
         axios.post('./.netlify/functions/api-financeiro', dataFinanceira)
         .then(() => {
             console.log('Dados financeiros enviados com sucesso');
