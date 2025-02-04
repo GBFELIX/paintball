@@ -150,7 +150,6 @@ export default function Financeiro() {
   };
 
   const handleMostrarJogo = (dataJogo, horaJogo) => {
-    setGameData({ dataJogo, horaJogo });
     navigate('/game', { state: { dataJogo, horaJogo } });
   };
 
