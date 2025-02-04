@@ -9,7 +9,6 @@ const Game = () => {
     const { dataJogo, horaJogo } = location.state || {}; // Recebe os dados passados
     
     const [jogadores, setJogadores] = useState([]); // Estado para armazenar os jogadores
-    const { gameData, setGameData } = useGameContext();
 
     useEffect(() => {
         // Função para buscar os dados dos jogadores
