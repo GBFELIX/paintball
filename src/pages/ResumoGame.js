@@ -89,7 +89,6 @@ export default function ResumoGame() {
             totalDespesas,
             valortot
         };
-        console.log(dataFinanceira);
         axios.post('./.netlify/functions/api-financeiro', dataFinanceira)
         .then(() => {
             toast.success('Partida fechada com sucesso!', {
