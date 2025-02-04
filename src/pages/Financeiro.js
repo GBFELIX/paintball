@@ -6,8 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
 import Datepicker from "react-tailwindcss-datepicker";
 import Game from "./Game";
-import { useGameContext } from '../context/GameContext';
-
+import useNavigate from 'react-router-dom';
 
 export default function Financeiro() {
   const [value, setValue] = useState({
@@ -21,6 +20,7 @@ export default function Financeiro() {
   const [loadingEquipe, setLoadingEquipe] = useState(false);
   const [dadosPedido, setDadosPedido] = useState(null);
   const [showStatusGamer, setShowStatusGamer] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const today = new Date();
