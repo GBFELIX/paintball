@@ -151,7 +151,7 @@ export default function Financeiro() {
 
   const handleMostrarJogo = (dataJogo, horaJogo) => {
     setGameData({ dataJogo, horaJogo });
-    navigate('/game');
+    navigate('/game', { state: { dataJogo, horaJogo } });
   };
 
   return (
@@ -244,6 +244,7 @@ export default function Financeiro() {
                 <th className="w-full flex justify-start">Despesas</th>
                 <th className="w-full flex justify-start">Total</th>
                 <th className="w-full flex justify-start">Total Arrecadado</th>
+                <th className="w-full flex justify-start">Visualizar</th>
               </tr>
             </thead>
             <tbody>
