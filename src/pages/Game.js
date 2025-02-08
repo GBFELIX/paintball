@@ -15,8 +15,7 @@ const Game = () => {
         const fetchJogadores = async () => {
             try {
                 const response = await axios.get(`./.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
-                setJogadores(response.data.jogadores); // Supondo que a resposta tenha uma propriedade 'jogadores'
-                console.log(response.data.jogadores); //
+                setJogadores(response.data.jogadores || []); // Certifique-se de que é um array
             } catch (error) {
                 console.error('Erro ao buscar jogadores:', error);
             }
@@ -81,7 +80,7 @@ const Game = () => {
             <p>Data do Jogo: {dataJogo}</p>
             <p>Hora do Jogo: {horaJogo}</p>
             <div className="flex flex-wrap gap-4">
-                {jogadores.map((jogador, index) => (
+                {jogadores && jogadores.map((jogador, index) => (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal">
                             <h3 className="text-lg font-semibold">{jogador.nome || 'Jogador'}</h3>
