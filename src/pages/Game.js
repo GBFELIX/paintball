@@ -16,6 +16,8 @@ const Game = () => {
             try {
                 const response = await axios.get(`./.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
                 setJogadores(response.data.jogadores || []); // Certifique-se de que é um array
+                console.log(response.data);
+                console.log(response.data.jogadors);
             } catch (error) {
                 console.error('Erro ao buscar jogadores:', error);
             }
