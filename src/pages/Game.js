@@ -77,9 +77,6 @@ const Game = () => {
 
     return (
         <div>
-            <h1>Detalhes do Jogo</h1>
-            <p>Data do Jogo: {dataJogo}</p>
-            <p>Hora do Jogo: {horaJogo}</p>
             <div className="flex flex-wrap gap-4">
                 {jogadores.map((jogador, index) => (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
