@@ -88,10 +88,6 @@ const Game = () => {
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal">
                             <h3 className="text-lg font-semibold">{jogador.nome_jogador || 'Despesa'}</h3>
-                        </header>
-                        <div className="p-2">
-                            <p><strong>Forma de Pagamento:</strong> {jogador.forma_pagamento || 'N/A'}</p>
-                            <p><strong>Valor Total:</strong>R$ {jogador.valor_total || '0'}</p>
                             <div className="inline-flex">
                                 <button
                                     className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
@@ -106,6 +102,11 @@ const Game = () => {
                                     -
                                 </button>
                             </div>
+                        </header>
+                        <div className="p-2">
+                            <p><strong>Forma de Pagamento:</strong> {jogador.forma_pagamento || 'N/A'}</p>
+                            <p><strong>Valor Total:</strong>R$ {jogador.valor_total || '0'}</p>
+                            
                         </div>
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center gap-2">
