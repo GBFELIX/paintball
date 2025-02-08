@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
 import Datepicker from "react-tailwindcss-datepicker";
 import Game from "./Game";
-import { BrowserRouter as useNavigate} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate, Link } from 'react-router-dom';
 
 export default function Financeiro() {
   const [value, setValue] = useState({
