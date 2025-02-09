@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useGameContext } from '../context/GameContext';
 import { useLocation } from 'react-router-dom';
+import ClipLoader from 'react-spinners/ClipLoader'; // Importar o ClipLoader
 
 const Game = () => {
 
@@ -9,6 +10,7 @@ const Game = () => {
     const { dataJogo, horaJogo } = location.state || {}; // Recebe os dados passados
     
     const [jogadores, setJogadores] = useState([]); // Estado para armazenar os jogadores
+    const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
 
     useEffect(() => {
         // Função para buscar os dados dos jogadores
@@ -18,6 +20,8 @@ const Game = () => {
                 setJogadores(response.data || []); // Certifique-se de que é um array
             } catch (error) {
                 console.error('Erro ao buscar jogadores:', error);
+            } finally {
+                setLoading(false); // Define loading como false após a busca
             }
         };
 
@@ -25,6 +29,21 @@ const Game = () => {
             fetchJogadores();
         }
     }, [dataJogo, horaJogo]);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen">
+                <ClipLoader
+                    color="#ffffff"
+                    loading={loading}
+                    size={50}
+                    aria-label="Loading Spinner"
+                    data-testid="loader"
+                />
+                <p className="text-white mt-4">Carregando dados...</p> {/* Mensagem de carregamento */}
+            </div>
+        ); // Mensagem de carregamento
+    }
 
     if (jogadores.length === 0) {
         return <p>Nenhum jogador encontrado.</p>;
@@ -79,8 +98,8 @@ const Game = () => {
     };
 
     return (
-        <div>
-            <h1>Detalhes do Jogo</h1>
+        <div className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
+            <h1 className="text-3xl font-semibold mb-4">Detalhes do Jogo</h1>
             <p>Data do Jogo: {dataJogo}</p>
             <p>Hora do Jogo: {horaJogo}</p>
             <div className="flex flex-wrap gap-4">
@@ -105,8 +124,7 @@ const Game = () => {
                         </header>
                         <div className="p-2">
                             <p><strong>Forma de Pagamento:</strong> {jogador.forma_pagamento || 'N/A'}</p>
-                            <p><strong>Valor Total:</strong>R$ {jogador.valor_total || '0'}</p>
-                            
+                            <p><strong>Valor Total:</strong> R$ {jogador.valor_total || '0'}</p>
                         </div>
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center gap-2">
