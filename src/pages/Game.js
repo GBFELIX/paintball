@@ -216,7 +216,7 @@ const Game = () => {
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center gap-2">
                                 <h4>Itens:</h4>
-                                {jogador.items.map((item, itemIndex) => (
+                                {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
                                     <div key={itemIndex} className="p-2 flex flex-col justify-center items-center">
                                         <p>{item.nome} - {item.quantidade}</p>
                                         <button
@@ -227,7 +227,7 @@ const Game = () => {
                                             Remover Item
                                         </button>
                                     </div>
-                                ))}
+                                )) : <p>Nenhum item disponível</p>}
                             </div>
                         </div>
                         <div className="flex justify-center items-center mt-2">
