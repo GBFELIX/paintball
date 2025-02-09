@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useGameContext } from '../context/GameContext';
 import { useLocation } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader'; // Importar o ClipLoader
+import { toast } from 'react-toastify';
 
 const Game = () => {
 
@@ -11,6 +12,15 @@ const Game = () => {
     
     const [jogadores, setJogadores] = useState([]); // Estado para armazenar os jogadores
     const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
+    const [estoque, setEstoque] = useState([]); // Adicionando estado para estoque
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [jogadorIndexForPayment, setJogadorIndexForPayment] = useState(null);
+    const [paymentValues, setPaymentValues] = useState({ dinheiro: 0, credito: 0, debito: 0, pix: 0, deposito: 0 });
+    const [paymentMethods, setPaymentMethods] = useState({ dinheiro: false, credito: false, debito: false, pix: false, deposito: false });
+    const [descontos, setDescontos] = useState({});
+    const [descontoSelecionado, setDescontoSelecionado] = useState('');
+    const [valorComDesconto, setValorComDesconto] = useState(0);
+    const [valorTotalVendaAtual, setValorTotalVendaAtual] = useState(0);
 
     useEffect(() => {
         // Função para buscar os dados dos jogadores
@@ -29,6 +39,30 @@ const Game = () => {
             fetchJogadores();
         }
     }, [dataJogo, horaJogo]);
+
+    useEffect(() => {
+        const fetchEstoque = async () => {
+            try {
+                const response = await axios.get('/.netlify/functions/api-estoque');
+                setEstoque(response.data);
+            } catch (error) {
+                console.error('Erro ao buscar estoque:', error);
+            }
+        };
+        fetchEstoque();
+    }, []);
+
+    useEffect(() => {
+        const fetchDescontos = async () => {
+            try {
+                const response = await axios.get('/.netlify/functions/api-descontos');
+                setDescontos(response.data);
+            } catch (error) {
+                console.error('Erro ao buscar descontos:', error);
+            }
+        };
+        fetchDescontos();
+    }, []);
 
     if (loading) {
         return (
@@ -92,9 +126,62 @@ const Game = () => {
     };
 
     const handleClosePedido = (index) => {
+        const jogador = jogadores[index];
+        if (!jogador.nome || jogador.nome.trim() === '') {
+            toast.error('O nome do jogador é obrigatório antes de fechar o pedido.');
+            return;
+        }
+        if (jogador.isClosed) {
+            const updatedJogadores = [...jogadores];
+            updatedJogadores[index].isClosed = false;
+            updatedJogadores[index].items = [];
+            setJogadores(updatedJogadores);
+        } else {
+            setJogadorIndexForPayment(index);
+            setShowPaymentModal(true);
+        }
+        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
+        setValorTotalVendaAtual(valorTotal);
+    };
+
+    const handleConfirmPayment = async () => {
+        const jogador = jogadores[jogadorIndexForPayment];
+        if (!jogador.items || jogador.items.length === 0) {
+            toast.error('Nenhum item encontrado para o jogador');
+            return;
+        }
+        if (!Object.values(paymentMethods).some(method => method === true)) {
+            toast.error('Por favor, selecione pelo menos uma forma de pagamento');
+            return;
+        }
+        const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
+        setValorTotalVendaAtual(valorTotal);
+        if (totalPagamento !== valorTotal) {
+            toast.error('O valor total do pagamento deve ser igual ao valor total dos itens');
+            return;
+        }
         const updatedJogadores = [...jogadores];
-        updatedJogadores[index].isClosed = !updatedJogadores[index].isClosed;
+        updatedJogadores[jogadorIndexForPayment].isClosed = true;
         setJogadores(updatedJogadores);
+        setShowPaymentModal(false);
+        toast.success('Pagamento confirmado com sucesso!');
+        // Enviar o pedido para a API
+        const dataJogo = localStorage.getItem('dataJogo');
+        const horaJogo = localStorage.getItem('horaJogo');
+        try {
+            await axios.post('/.netlify/functions/api-pedidos', {
+                nomeJogador: jogador.nome,
+                items: jogador.items.map(item => item.nome),
+                formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                valorTotal: valorTotal,
+                dataPedido: dataJogo,
+                horaPedido: horaJogo,
+            });
+        } catch (error) {
+            console.error('Erro ao cadastrar pedido:', error);
+            toast.error('Erro ao finalizar pedido');
+        }
     };
 
     return (
@@ -129,9 +216,9 @@ const Game = () => {
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center gap-2">
                                 <h4>Itens:</h4>
-                                {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
+                                {jogador.items.map((item, itemIndex) => (
                                     <div key={itemIndex} className="p-2 flex flex-col justify-center items-center">
-                                        <p>{item} - 1</p> {/* Ajuste conforme necessário */}
+                                        <p>{item.nome} - {item.quantidade}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
                                             onClick={() => handleRemoveItem(index, itemIndex)}
@@ -140,7 +227,7 @@ const Game = () => {
                                             Remover Item
                                         </button>
                                     </div>
-                                )) : <p>Nenhum item disponível</p>}
+                                ))}
                             </div>
                         </div>
                         <div className="flex justify-center items-center mt-2">
@@ -154,6 +241,31 @@ const Game = () => {
                     </section>
                 ))}
             </div>
+            {showPaymentModal && (
+                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white p-6 rounded-lg w-[500px]">
+                        <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
+                        <div className="mb-4">
+                            <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
+                        </div>
+                        {/* ... código para seleção de desconto e métodos de pagamento ... */}
+                        <div className="flex justify-between mt-4">
+                            <button
+                                className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
+                                onClick={() => setShowPaymentModal(false)}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white"
+                                onClick={handleConfirmPayment}
+                            >
+                                Confirmar Pagamento
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
