@@ -84,7 +84,6 @@ const Game = () => {
     }
 
     const handleAddJogador = () => {
-        const newNumero = (jogadores.length + 1).toString();
         setJogadores([...jogadores, {
             nome: '',
             numero: newNumero,
@@ -193,8 +192,8 @@ const Game = () => {
                 {jogadores.map((jogador, index) => (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal">
-                            <h3 className="text-lg font-semibold">{jogador.nome_jogador || 'Despesa'}</h3>
-                            <div className="inline-flex">
+                            <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Pedido Sem nome'}</h3>
+                            <div className="inline-flex ml-2">
                                 <button
                                     className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
                                     onClick={() => handleAddJogador()}
