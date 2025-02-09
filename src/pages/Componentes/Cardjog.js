@@ -256,7 +256,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         try {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
-                items: jogador.items.map(item => item.nome),
+                items: jogador.items.map(item => ({ nome: item.nome, valor: item.valor })),
                 formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
                 valorTotal: valorTotal,
                 dataPedido: dataJogo,
