@@ -191,9 +191,10 @@ const Game = () => {
             <div className="flex flex-wrap gap-4 text-black">
                 {jogadores.map((jogador, index) => (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal">
+                        <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal flex justify-between items-center">
                             <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Pedido Sem nome'}</h3>
-                            <button
+                            <div>
+                                <button
                                     className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l inline-flex ml-2"
                                     onClick={() => handleAddJogador()}
                                 >
@@ -205,7 +206,7 @@ const Game = () => {
                                 >
                                     -
                                 </button>
-                            
+                            </div>
                         </header>
                         <div className="p-2">
                             <p><strong>Forma de Pagamento:</strong> {jogador.forma_pagamento || 'N/A'}</p>
