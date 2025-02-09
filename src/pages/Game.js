@@ -100,9 +100,9 @@ const Game = () => {
     return (
         <div className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
             <h1 className="text-3xl font-semibold mb-4">Detalhes do Jogo</h1>
-            <p>Data do Jogo: {dataJogo}</p>
-            <p>Hora do Jogo: {horaJogo}</p>
-            <div className="flex flex-wrap gap-4">
+            <p className="text-white">Data do Jogo: {dataJogo}</p>
+            <p className="text-white">Hora do Jogo: {horaJogo}</p>
+            <div className="flex flex-wrap gap-4 text-black">
                 {jogadores.map((jogador, index) => (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal">
