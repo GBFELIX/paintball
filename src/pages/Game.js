@@ -192,7 +192,7 @@ const Game = () => {
                 {jogadores.map((jogador, index) => (
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal flex justify-between items-center">
-                            <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Pedido Sem nome'}</h3>
+                            <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Despesa'}</h3>
                             <div>
                                 <button
                                     className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l inline-flex ml-2"
@@ -218,13 +218,6 @@ const Game = () => {
                                 {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
                                     <div key={itemIndex} className="p-2 flex flex-col justify-center items-center">
                                         <p>{item.nome} - R$ {item.valor}</p>
-                                        <button
-                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleRemoveItem(index, itemIndex)}
-                                            disabled={jogador.isClosed}
-                                        >
-                                            Remover Item
-                                        </button>
                                     </div>
                                 )) : <p>Nenhum item disponível</p>}
                             </div>

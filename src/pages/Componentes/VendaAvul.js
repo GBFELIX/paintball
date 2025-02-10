@@ -118,7 +118,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 updatedVendas[index].items.push(selectedItem);
             }
             updatedVendas[index].selectedItem = '';
-            // Armazenar a quantidade e o nome dos itens no localStorage da p��gina VendaAvul
+            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
             storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
@@ -199,6 +199,10 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
         }
 
         const venda = vendas[vendaIndexForPayment];
+        
+        // Verifica se o nome do cliente está vazio e define como "venda avulsa"
+        const nomeCliente = venda.nome.trim() === '' ? 'venda avulsa' : venda.nome;
+
         const itemsToUpdate = venda.items;
 
         // Contabiliza a quantidade total de cada item
@@ -212,8 +216,8 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             const dataJogo = localStorage.getItem('dataJogo');
             const horaJogo = localStorage.getItem('horaJogo');
             await axios.post('/.netlify/functions/api-pedidos', {
-                nomeJogador: venda.nome,
-                items: venda.items.map(item => item.nome),
+                nomeJogador: nomeCliente,
+                items: venda.items.map(item => ({ nome: item.nome, valor: item.valor })),
                 formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
                 valorTotal: valorFinal,
                 dataPedido: dataJogo,
