@@ -265,57 +265,42 @@ const Game = () => {
                             handleAddVendaAvulsa={handleAddVendaAvulsa} 
                             handleClosePedido={handleClosePedido}
                         />
-                        <button
-                            onClick={handleAddVendaAvulsa}
-                            className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
-                        >
-                            <FaPlus size={30} />
-                        </button>
-                        <button 
-                            onClick={handleClosePedido}
-                            className="bg-white hover:bg-red-600 duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <ClipLoader
-                                    color="#000000"
-                                    loading={loading}
-                                    size={20}
-                                    aria-label="Loading Spinner"
-                                    data-testid="loader"
-                                />
-                            ) : (
-                                <IoMdClose size={30}/>
-                            )}
-                        </button>
-                        {showPaymentModal && (
-                            <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                                <div className="bg-white p-6 rounded-lg w-[500px]">
-                                    <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
-                                    <div className="mb-4">
-                                        <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
-                                    </div>
-                                    {/* ... código para seleção de desconto e métodos de pagamento ... */}
-                                    <div className="flex justify-between mt-4">
-                                        <button
-                                            className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
-                                            onClick={() => setShowPaymentModal(false)}
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <button
-                                            className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white"
-                                            onClick={handleConfirmPayment}
-                                        >
-                                            Confirmar Pagamento
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </section>
                 ))}
             </div>
+            <div className="flex justify-center items-center mt-2">
+                <button
+                    onClick={handleAddVendaAvulsa}
+                    className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                >
+                    <FaPlus size={30} />
+                </button>
+            </div>
+            {showPaymentModal && (
+                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white p-6 rounded-lg w-[500px]">
+                        <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
+                        <div className="mb-4">
+                            <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
+                        </div>
+                        {/* ... código para seleção de desconto e métodos de pagamento ... */}
+                        <div className="flex justify-between mt-4">
+                            <button
+                                className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
+                                onClick={() => setShowPaymentModal(false)}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white"
+                                onClick={handleConfirmPayment}
+                            >
+                                Confirmar Pagamento
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
