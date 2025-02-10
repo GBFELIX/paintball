@@ -268,13 +268,30 @@ const Game = () => {
                     </section>
                 ))}
             </div>
-            <div className="flex justify-center items-center mt-2">
+            <div className="flex justify-end mt-auto">
                 <button
                     onClick={handleAddVendaAvulsa}
                     className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                 >
                     <FaPlus size={30} />
                 </button>
+                <button 
+                            //onClick={handleFecharPartida}
+                            className="bg-white hover:bg-red-600 duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ClipLoader
+                                    color="#000000"
+                                    loading={loading}
+                                    size={20}
+                                    aria-label="Loading Spinner"
+                                    data-testid="loader"
+                                />
+                            ) : (
+                                <IoMdClose size={30}/>
+                            )}
+                        </button>
             </div>
             {showPaymentModal && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
