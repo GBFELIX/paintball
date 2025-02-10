@@ -4,6 +4,9 @@ import { useGameContext } from '../context/GameContext';
 import { useLocation } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader'; // Importar o ClipLoader
 import { toast } from 'react-toastify';
+import VendaAvulsa from './Componentes/VendaAvul';
+import { FaPlus } from 'react-icons/fa';
+import { IoMdClose } from 'react-icons/io';
 
 const Game = () => {
 
@@ -21,6 +24,23 @@ const Game = () => {
     const [descontoSelecionado, setDescontoSelecionado] = useState('');
     const [valorComDesconto, setValorComDesconto] = useState(0);
     const [valorTotalVendaAtual, setValorTotalVendaAtual] = useState(0);
+    const [vendasAvulsas, setVendasAvulsas] = useState([{
+        nome: '',
+        numero: '1',
+        items: [],
+        selectedItem: '',
+        isClosed: false
+    }]);
+    const handleAddVendaAvulsa = () => {
+        const newNumero = (vendasAvulsas.length + 1).toString();
+        setVendasAvulsas([...vendasAvulsas, {
+            nome: '',
+            numero: newNumero,
+            items: [],
+            selectedItem: '',
+            isClosed: false
+        }]);
+    };
 
     useEffect(() => {
         // Função para buscar os dados dos jogadores
@@ -218,11 +238,11 @@ const Game = () => {
                             </div>
                         </header>
                         <div className="p-2">
-                            <p><strong>Forma de Pagamento:</strong> {jogador.forma_pagamento || 'N/A'}</p>
+                            <p><strong>Forma de Pagamento:</strong> {jogador.forma_pagamento ? jogador.forma_pagamento.join(' e ') : 'N/A'}</p>
                             <p><strong>Valor Total:</strong> R$ {jogador.valor_total || '0'}</p>
                         </div>
                         <div className="w-full h-auto p-1">
-                            <div className="p-2 flex flex-col justify-center items-center gap-2">
+                            <div className="p-2 flex flex-col justify-center items-center">
                                 <h4>Itens:</h4>
                                 {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
                                     <div key={itemIndex} className="p-2 flex flex-col justify-center items-center">
@@ -239,34 +259,63 @@ const Game = () => {
                                 {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
                             </button>
                         </div>
+                        <VendaAvulsa 
+                            vendas={vendasAvulsas} 
+                            setVendas={setVendasAvulsas} 
+                            handleAddVendaAvulsa={handleAddVendaAvulsa} 
+                            handleClosePedido={handleClosePedido}
+                        />
+                        <button
+                            onClick={handleAddVendaAvulsa}
+                            className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                        >
+                            <FaPlus size={30} />
+                        </button>
+                        <button 
+                            onClick={handleClosePedido}
+                            className="bg-white hover:bg-red-600 duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ClipLoader
+                                    color="#000000"
+                                    loading={loading}
+                                    size={20}
+                                    aria-label="Loading Spinner"
+                                    data-testid="loader"
+                                />
+                            ) : (
+                                <IoMdClose size={30}/>
+                            )}
+                        </button>
+                        {showPaymentModal && (
+                            <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                                <div className="bg-white p-6 rounded-lg w-[500px]">
+                                    <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
+                                    <div className="mb-4">
+                                        <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
+                                    </div>
+                                    {/* ... código para seleção de desconto e métodos de pagamento ... */}
+                                    <div className="flex justify-between mt-4">
+                                        <button
+                                            className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
+                                            onClick={() => setShowPaymentModal(false)}
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white"
+                                            onClick={handleConfirmPayment}
+                                        >
+                                            Confirmar Pagamento
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </section>
                 ))}
             </div>
-            {showPaymentModal && (
-                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg w-[500px]">
-                        <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
-                        <div className="mb-4">
-                            <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
-                        </div>
-                        {/* ... código para seleção de desconto e métodos de pagamento ... */}
-                        <div className="flex justify-between mt-4">
-                            <button
-                                className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
-                                onClick={() => setShowPaymentModal(false)}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white"
-                                onClick={handleConfirmPayment}
-                            >
-                                Confirmar Pagamento
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
