@@ -268,7 +268,7 @@ const Game = () => {
                     </section>
                 ))}
             </div>
-            <div className="flex justify-end mt-auto">
+            <div className="flex flex-wrap gap-4 text-black">
                 <button
                     onClick={handleAddVendaAvulsa}
                     className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
