@@ -218,7 +218,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: nomeCliente,
                 items: venda.items.map(item => ({ nome: item.nome, valor: item.valor })),
-                formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                formaPagamento: Object.keys(paymentMethods).filter(method => paymentMethods[method]),
                 valorTotal: valorFinal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,

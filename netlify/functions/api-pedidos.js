@@ -50,19 +50,21 @@ async function handlePost(event) {
 
         // Tenta converter os itens para JSON
         let itemsString;
+        let formaPagamentoString;
         try {
             itemsString = JSON.stringify(items);
+            formaPagamentoString = JSON.stringify(formaPagamento); // Converte o array de formas de pagamento para JSON
         } catch (error) {
-            console.error('Erro ao converter items para JSON:', error);
+            console.error('Erro ao converter items ou forma de pagamento para JSON:', error);
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Dados de itens inválidos' })
+                body: JSON.stringify({ error: 'Dados de itens ou forma de pagamento inválidos' })
             };
         }
 
         // Inserir pedido no banco de dados
         const queryPedido = 'INSERT INTO pedidos (nome_jogador, items, forma_pagamento, valor_total, data_pedido, hora_pedido) VALUES (?, ?, ?, ?, ?, ?)';
-        const [resultPedido] = await db.promise().query(queryPedido, [nomeJogador, itemsString, formaPagamento, valorTotal, dataPedido, horaPedido]);
+        const [resultPedido] = await db.promise().query(queryPedido, [nomeJogador, itemsString, formaPagamentoString, valorTotal, dataPedido, horaPedido]);
 
         const pedidoId = resultPedido.insertId;
 
