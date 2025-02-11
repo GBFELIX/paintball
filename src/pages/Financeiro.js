@@ -35,7 +35,6 @@ export default function Financeiro() {
     setLoading(true);
     
     if (!startDate || !endDate) {
-        console.error("Datas inválidas:", { startDate, endDate });
         toast.error('Datas inválidas. Por favor, selecione datas válidas.', {
             position: "top-right",
             autoClose: 3000,
@@ -51,11 +50,6 @@ export default function Financeiro() {
 
     const formattedStartDate = new Date(startDate).toISOString().split("T")[0];
     const formattedEndDate = new Date(endDate).toISOString().split("T")[0];
-
-    console.log("Buscando dados financeiros com as seguintes datas:", {
-        startDate: formattedStartDate,
-        endDate: formattedEndDate
-    });
 
     axios.get(`./.netlify/functions/api-financeiro?startDate=${formattedStartDate}&endDate=${formattedEndDate}`)
       .then((response) => {
