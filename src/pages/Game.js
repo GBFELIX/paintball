@@ -192,7 +192,7 @@ const Game = () => {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
                 items: jogador.items.map(item => item.nome),
-                formaPagamento: Object.keys(paymentMethods).find(method => paymentMethods[method]),
+                formaPagamento: Object.keys(paymentMethods).filter(method => paymentMethods[method]),
                 valorTotal: valorTotal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
