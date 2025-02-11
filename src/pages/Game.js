@@ -251,24 +251,18 @@ const Game = () => {
                                 )) : <p>Nenhum item disponível</p>}
                             </div>
                         </div>
-                        <div className="flex justify-center items-center mt-2">
-                            <button
-                                className="w-[180px] bg-gray-300 hover:bg-secondary text-gray-800 font-bold py-2 px-4 rounded-l"
-                                onClick={() => handleClosePedido(index)}
-                            >
-                                {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
-                            </button>
-                        </div>
-                        <VendaAvulsa 
-                            vendas={vendasAvulsas} 
-                            setVendas={setVendasAvulsas} 
-                            handleAddVendaAvulsa={handleAddVendaAvulsa} 
-                            handleClosePedido={handleClosePedido}
-                        />
                     </section>
                 ))}
+                <div className="flex flex-col justify-center items-center w-[300px]">
+                    <VendaAvulsa 
+                        vendas={vendasAvulsas} 
+                        setVendas={setVendasAvulsas} 
+                        handleAddVendaAvulsa={handleAddVendaAvulsa} 
+                        handleClosePedido={handleClosePedido}
+                    />
+                </div>
             </div>
-            <div className="flex flex-wrap gap-4 text-black">
+            <div className="flex justify-end mt-auto">
                 <button
                     onClick={handleAddVendaAvulsa}
                     className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
