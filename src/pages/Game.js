@@ -238,7 +238,7 @@ const Game = () => {
                             </div>
                         </header>
                         <div className="p-2">
-                            <p><strong>Forma de Pagamento:</strong> {Array.isArray(jogador.formaPagamento) && jogador.formaPagamento.length > 0 ? jogador.formaPagamento.join(' e ') : 'N/A'}</p>
+                            <p><strong>Forma de Pagamento:</strong> {(jogador.formaPagamento || []).join(' e ') || 'N/A'}</p>
                             <p><strong>Valor Total:</strong> R$ {jogador.valor_total || '0'}</p>
                         </div>
                         <div className="w-full h-auto p-1">
