@@ -233,8 +233,12 @@ const Game = () => {
                         </header>
                         <div className="p-2">
                             <div className="p-2 flex flex-col justify-center items-center">
-                                <p><strong>Forma de Pagamento (raw):</strong></p>
-                                <p>{jogador.forma_pagamento}</p>
+                                <p><strong>Formas de Pagamento:</strong></p>
+                                <p>
+                                    {jogador.forma_pagamento ? 
+                                        JSON.parse(jogador.forma_pagamento).join(' e ') 
+                                        : 'Nenhuma forma de pagamento disponível'}
+                                </p>
                             </div>
                             <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {jogador.valor_total || '0'}</p>
                         </div>
