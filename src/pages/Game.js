@@ -232,18 +232,9 @@ const Game = () => {
                             </div>
                         </header>
                         <div className="p-2">
-                            {console.log('Forma de Pagamento:', jogador.formaPagamento)} {/* Para depuração */}
                             <div className="p-2 flex flex-col justify-center items-center">
-                                <p><strong>Formas de Pagamento:</strong></p>
-                                {Array.isArray(jogador.formaPagamento) && jogador.formaPagamento.length > 0 ? (
-                                    jogador.formaPagamento.map((pagamento, index) => (
-                                        <div key={index} className="p-2">
-                                            <p>{pagamento}</p>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p>Nenhuma forma de pagamento disponível</p>
-                                )}
+                                <p><strong>Forma de Pagamento (raw):</strong></p>
+                                <p>{jogador.forma_pagamento}</p>
                             </div>
                             <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {jogador.valor_total || '0'}</p>
                         </div>
