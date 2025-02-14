@@ -192,7 +192,7 @@ const Game = () => {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
                 items: jogador.items.map(item => item.nome),
-                formaPagamento: Array.isArray(jogador.forma_pagamento) ? jogador.forma_pagamento : (jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : []),
+                formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
                 valorTotal: valorTotal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
@@ -241,7 +241,7 @@ const Game = () => {
                             <div className="p-2 flex flex-col justify-center items-center">
                                 <p><strong>Forma de Pagamento:</strong></p>
                                 {console.log('Forma de Pagamento:', jogador.formaPagamento)}
-                                <p>{Array.isArray(jogador.formaPagamento) || jogador.formaPagamento.length > 0 ? jogador.formaPagamento.join(' e ') : 'N/A'}</p>
+                                <p>{(jogador.formaPagamento || []).join(' e ') || 'N/A'}</p>
                             </div>
                             <p><strong>Valor Total:</strong> R$ {jogador.valor_total || '0'}</p>
                         </div>
