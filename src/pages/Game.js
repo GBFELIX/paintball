@@ -224,12 +224,6 @@ const Game = () => {
                             <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Despesa'}</h3>
                             <div>
                                 <button
-                                    className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l inline-flex ml-2"
-                                    onClick={() => handleAddJogador()}
-                                >
-                                    +
-                                </button>
-                                <button
                                     className="bg-black hover:bg-primary py-1 px-2 rounded-r text-white"
                                     onClick={() => handleRemoveJogador(index)}
                                 >
@@ -243,7 +237,7 @@ const Game = () => {
                                 {console.log('Forma de Pagamento:', jogador.formaPagamento)}
                                 <p>{(jogador.formaPagamento || []).join(' e ') || 'N/A'}</p>
                             </div>
-                            <p><strong>Valor Total:</strong> R$ {jogador.valor_total || '0'}</p>
+                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {jogador.valor_total || '0'}</p>
                         </div>
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center">
@@ -255,6 +249,7 @@ const Game = () => {
                                 )) : <p>Nenhum item disponível</p>}
                             </div>
                         </div>
+                        {console.log('Jogador:', jogador)} {/* Mostrando todas as informações do jogador */}
                     </section>
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
