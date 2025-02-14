@@ -192,14 +192,7 @@ const Game = () => {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
                 items: jogador.items.map(item => item.nome),
-                formaPagamento: (() => {
-                    try {
-                        return jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [];
-                    } catch (error) {
-                        console.error('Erro ao fazer parse de forma_pagamento:', error);
-                        return [];
-                    }
-                })(),
+                formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
                 valorTotal: valorTotal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
