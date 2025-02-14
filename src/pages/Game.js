@@ -239,6 +239,7 @@ const Game = () => {
                             </div>
                         </header>
                         <div className="p-2">
+                            {console.log('Forma de Pagamento:', jogador.formaPagamento)} {/* Para depuração */}
                             <div className="p-2 flex flex-col justify-center items-center">
                                 <p><strong>Formas de Pagamento:</strong></p>
                                 {Array.isArray(jogador.formaPagamento) && jogador.formaPagamento.length > 0 ? (
