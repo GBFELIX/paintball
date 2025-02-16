@@ -14,6 +14,8 @@ exports.handler = async(event, context) => {
         return handleGet(event);
     } else if (event.httpMethod === 'POST') {
         return handlePost(event);
+    } else if (event.httpMethod === 'DELETE') {
+        return handleDelete(event);
     }
 
     return {
@@ -95,6 +97,26 @@ async function handlePost(event) {
         return {
             statusCode: 500,
             body: JSON.stringify({ error: 'Erro ao cadastrar pedido' })
+        };
+    }
+}
+
+async function handleDelete(event) {
+    try {
+        const { pedidoId, itemIndex } = JSON.parse(event.body);
+
+        const query = 'DELETE FROM itens_pedidos WHERE pedido_id = ? AND item_index = ?';
+        await db.promise().query(query, [pedidoId, itemIndex]);
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Item removido com sucesso' })
+        };
+    } catch (error) {
+        console.error('Erro ao remover item:', error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Erro ao remover item' })
         };
     }
 }

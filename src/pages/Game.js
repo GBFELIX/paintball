@@ -138,10 +138,33 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
-    const handleRemoveItem = (jogadorIndex, itemIndex) => {
-        const updatedJogadores = [...jogadores];
-        updatedJogadores[jogadorIndex].items.splice(itemIndex, 1);
-        setJogadores(updatedJogadores);
+    const handleRemoveItem = async (itemIndex) => {
+        try {
+            // Supondo que você tenha o ID do pedido armazenado em `jogador.id`
+            const pedidoId = jogador.id; // ID do pedido
+            const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
+
+            // Verifica se o índice é válido
+            if (itemIndex < 0 || itemIndex >= itemsArray.length) {
+                console.error('Índice do item inválido.');
+                return;
+            }
+
+            // Faz a chamada para a API para remover o item
+            const response = await axios.delete(`/api/pedidos/${pedidoId}/item/${itemIndex}`);
+
+            if (response.status === 200) {
+                console.log(`Item no índice ${itemIndex} removido com sucesso.`);
+                // Atualiza o estado local para refletir a remoção
+                const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
+                setJogador(prevState => ({
+                    ...prevState,
+                    items: JSON.stringify(updatedItems) // Atualiza os itens como string JSON
+                }));
+            }
+        } catch (error) {
+            console.error('Erro ao remover o item:', error);
+        }
     };
 
     const handleClosePedido = (index) => {
@@ -246,13 +269,19 @@ const Game = () => {
                             <div className="p-2 flex flex-col justify-center items-center">
                                 <h4>Itens:</h4>
                                 {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
-                                    <div key={itemIndex} className="p-2 flex flex-col justify-center items-center">
+                                    <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
                                         <p>{item.nome} - R$ {item.valor}</p>
+                                        <button
+                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
+                                            onClick={() => handleRemoveItem(itemIndex)}
+                                            disabled={jogador.isClosed}
+                                        >
+                                            -
+                                        </button>
                                     </div>
                                 )) : <p>Nenhum item disponível</p>}
                             </div>
                         </div>
-                        {console.log('Jogador:', jogador)} {/* Mostrando todas as informações do jogador */}
                     </section>
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
