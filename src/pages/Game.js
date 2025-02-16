@@ -138,9 +138,8 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
-    const handleRemoveItem = async (itemIndex) => {
+    const handleRemoveItem = async (itemIndex, jogador) => {
         try {
-            // Supondo que você tenha o ID do pedido armazenado em `jogador.id`
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
 
@@ -273,7 +272,7 @@ const Game = () => {
                                         <p>{item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleRemoveItem(itemIndex)}
+                                            onClick={() => handleRemoveItem(itemIndex, jogador)}
                                             disabled={jogador.isClosed}
                                         >
                                             -
