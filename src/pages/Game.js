@@ -156,7 +156,7 @@ const Game = () => {
             }
 
             // Faz a chamada para a API para remover o item
-            const response = await axios.delete(`/.netlify/functions/api-descontos/${pedidoId}`, {
+            const response = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
                 data: { itemIndex } // Passa o índice do item no corpo da requisição
             });
 
