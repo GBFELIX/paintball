@@ -160,6 +160,8 @@ const Game = () => {
                 data: { itemIndex } // Passa o índice do item no corpo da requisição
             });
 
+            console.log('Resposta da API:', response); // Adicione este log
+
             if (response.status === 200) {
                 console.log(`Item no índice ${itemIndex} removido com sucesso.`);
                 // Atualiza o estado local para refletir a remoção

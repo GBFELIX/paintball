@@ -133,6 +133,7 @@ async function handleDelete(event) {
 
         // Atualiza a coluna items com a nova lista
         const queryUpdateItems = 'UPDATE pedidos SET items = ? WHERE id = ?';
+        console.log('Executando consulta:', queryUpdateItems, [JSON.stringify(updatedItems), pedidoId]);
         await db.promise().query(queryUpdateItems, [JSON.stringify(updatedItems), pedidoId]);
 
         return {
