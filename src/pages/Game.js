@@ -160,7 +160,8 @@ const Game = () => {
                 data: { itemIndex } // Passa o índice do item no corpo da requisição
             });
 
-            console.log('Resposta da API:', response); // Adicione este log
+            console.log('Resposta da API:', response.data); // Loga o corpo da resposta
+            console.log('Status da resposta:', response.status); // Loga o status da resposta
 
             if (response.status === 200) {
                 console.log(`Item no índice ${itemIndex} removido com sucesso.`);
@@ -172,7 +173,8 @@ const Game = () => {
                 }));
             }
         } catch (error) {
-            console.error('Erro ao remover o item:', error);
+            console.error('Erro ao remover o item:', error.message); // Loga a mensagem de erro
+            console.error('Configuração da requisição:', error.config); // Loga a configuração da requisição
         }
     };
 
