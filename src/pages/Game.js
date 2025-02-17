@@ -156,7 +156,9 @@ const Game = () => {
             }
 
             // Faz a chamada para a API para remover o item
-            const response = await axios.delete(`/api/pedidos/${pedidoId}/item/${itemIndex}`);
+            const response = await axios.delete(`/api/pedidos/${pedidoId}`, {
+                data: { itemIndex } // Passa o índice do item no corpo da requisição
+            });
 
             if (response.status === 200) {
                 console.log(`Item no índice ${itemIndex} removido com sucesso.`);
