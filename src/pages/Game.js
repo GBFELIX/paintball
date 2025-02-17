@@ -90,6 +90,19 @@ const Game = () => {
         fetchDescontos();
     }, []);
 
+    // Função para buscar os dados do pedido
+    const fetchPedidoData = async () => {
+        try {
+            const response = await axios.get(`/api/pedidos/${jogador.id}`); // Ajuste a rota conforme necessário
+            setJogador(prevState => ({
+                ...prevState,
+                ...response.data // Atualiza o estado com os dados do pedido
+            }));
+        } catch (error) {
+            console.error('Erro ao buscar dados do pedido:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center h-screen">
@@ -144,7 +157,7 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
-    const handleRemoveItem = async (itemIndex, jogador, setJogador) => {
+    const handleRemoveItem = async (itemIndex) => {
         try {
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
@@ -160,17 +173,20 @@ const Game = () => {
 
             if (response.status === 200) {
                 console.log(`Item no índice ${itemIndex} removido com sucesso.`);
-                // Atualiza o estado local para refletir a remoção
-                const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
-                setJogador(prevState => ({
-                    ...prevState,
-                    items: JSON.stringify(updatedItems) // Atualiza os itens como string JSON
-                }));
+                // Recarrega os dados do pedido após a remoção
+                fetchPedidoData();
             }
         } catch (error) {
             console.error('Erro ao remover o item:', error);
         }
     };
+
+    // Use useEffect para buscar os dados do pedido quando o componente for montado
+    useEffect(() => {
+        if (jogador.id) {
+            fetchPedidoData();
+        }
+    }, [jogador.id]);
 
     const handleClosePedido = (index) => {
         const jogador = jogadores[index];
@@ -278,7 +294,7 @@ const Game = () => {
                                         <p>{item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleRemoveItem(itemIndex, jogador, setJogador)}
+                                            onClick={() => handleRemoveItem(itemIndex)}
                                             disabled={jogador.isClosed}
                                         >
                                             -
