@@ -31,6 +31,12 @@ const Game = () => {
         selectedItem: '',
         isClosed: false
     }]);
+    const [jogador, setJogador] = useState({
+        id: null,
+        items: '[]', // Inicialize com um valor padrão
+        // outras propriedades...
+    });
+
     const handleAddVendaAvulsa = () => {
         const newNumero = (vendasAvulsas.length + 1).toString();
         setVendasAvulsas([...vendasAvulsas, {
@@ -138,7 +144,7 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
-    const handleRemoveItem = async (itemIndex, jogador) => {
+    const handleRemoveItem = async (itemIndex, jogador, setJogador) => {
         try {
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
@@ -272,7 +278,7 @@ const Game = () => {
                                         <p>{item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleRemoveItem(itemIndex, jogador)}
+                                            onClick={() => handleRemoveItem(itemIndex, jogador, setJogador)}
                                             disabled={jogador.isClosed}
                                         >
                                             -
