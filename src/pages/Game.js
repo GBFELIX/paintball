@@ -149,7 +149,7 @@ const Game = () => {
         try {
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
-
+            console.log(pedidoId, itemsArray);
             // Verifica se o índice é válido
             if (itemIndex < 0 || itemIndex >= itemsArray.length) {
                 console.error('Índice do item inválido.');
