@@ -174,8 +174,7 @@ const Game = () => {
                 }));
             }
         } catch (error) {
-            console.error('Erro ao remover o item:', error.message); // Loga a mensagem de erro
-            console.error('Configuração da requisição:', error.config); // Loga a configuração da requisição
+            console.error('Erro ao remover o item:', error.response ? error.response.data : error.message);
         }
     };
 
