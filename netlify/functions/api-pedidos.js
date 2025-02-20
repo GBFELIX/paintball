@@ -110,12 +110,12 @@ async function handleDelete(event) {
         const queryGetItems = 'SELECT items FROM pedidos WHERE id = ?';
         const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
 
-        if (pedido.length === 0) {
-            return {
-                statusCode: 404,
-                body: JSON.stringify({ error: 'Pedido não encontrado' })
-            };
-        }
+        //if (pedido.length === 0) {
+        //    return {
+             //   statusCode: 404,
+           //     body: JSON.stringify({ error: 'Pedido não encontrado' })
+         //   };
+        //}
 
         // Converte a string JSON em um array
         const itemsArray = JSON.parse(pedido[0].items);
