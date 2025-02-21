@@ -150,7 +150,6 @@ const Game = () => {
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
             console.log('Pedido ID:', pedidoId, 'Itens:', itemsArray);
-            console.log('Pedido encontrado:', pedido);
             console.log('Itens antes da remoção:', itemsArray);
             // Verifica se o índice é válido
             if (itemIndex < 0 || itemIndex >= itemsArray.length) {
@@ -170,7 +169,6 @@ const Game = () => {
                 console.log(`Item no índice ${itemIndex} removido com sucesso.`);
                 // Atualiza o estado local para refletir a remoção
                 const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
-                console.log('Itens atualizados:', JSON.stringify(updatedItems));
                 setJogador(prevState => ({
                     ...prevState,
                     items: JSON.stringify(updatedItems) // Atualiza os itens como string JSON

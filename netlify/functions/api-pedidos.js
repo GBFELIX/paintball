@@ -119,6 +119,7 @@ async function handleDelete(event) {
 
         // Converte a string JSON em um array
         const itemsArray = JSON.parse(pedido[0].items);
+        console.log('Itens antes da remoção:', itemsArray); // Aqui você pode acessar 'itemsArray'
 
         // Verifica se o índice é válido
         if (itemIndex < 0 || itemIndex >= itemsArray.length) {
@@ -130,6 +131,7 @@ async function handleDelete(event) {
 
         // Remove o item do array
         const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
+        console.log('Itens atualizados:', JSON.stringify(updatedItems)); // Aqui você pode acessar 'updatedItems'
 
         // Atualiza a coluna items com a nova lista
         const queryUpdateItems = 'UPDATE pedidos SET items = ? WHERE id = ?';
