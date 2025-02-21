@@ -150,7 +150,7 @@ const Game = () => {
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
             console.log('Pedido ID:', pedidoId, 'Itens:', itemsArray);
-            console.log('Itens antes da remoção:', itemsArray);
+            console.log('index:', itemIndex);
             // Verifica se o índice é válido
             if (itemIndex < 0 || itemIndex >= itemsArray.length) {
                 console.error('Índice do item inválido.');
