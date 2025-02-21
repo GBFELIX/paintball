@@ -107,7 +107,7 @@ async function handleDelete(event) {
         console.log('Removendo item:', { pedidoId, itemIndex });
 
         // Primeiro, busque o pedido para obter os itens
-        const queryGetItems = 'SELECT * FROM pedidos WHERE id = ?';
+        const queryGetItems = 'SELECT items FROM pedidos WHERE id = ?';
         const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
 
         if (pedido.length === 0) {
