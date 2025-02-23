@@ -16,6 +16,8 @@ exports.handler = async(event, context) => {
         return handlePost(event);
     } else if (event.httpMethod === 'PUT') {
         return handleUpdateItem(event);
+    } else if (event.httpMethod === 'DELETE') {
+        return handleDelete(event);
     }
 
     return {
@@ -146,6 +148,32 @@ async function handleUpdateItem(event) {
         return {
             statusCode: 500,
             body: JSON.stringify({ error: 'Erro ao atualizar item' })
+        };
+    }
+}
+
+async function handleDelete(event) {
+    try {
+        const { pedidoId, itemIndex } = JSON.parse(event.body);
+        console.log('Removendo item:', { pedidoId, itemIndex });
+
+        // Primeiro, busque o pedido para obter os itens
+        const queryGetItems = 'SELECT items FROM pedidos WHERE id = ?';
+        const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
+
+        if (pedido.length === 0) {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ error: 'Pedido não encontrado' })
+            };
+        }
+
+        // Continue com a lógica de remoção...
+    } catch (error) {
+        console.error('Erro ao remover item:', error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Erro ao remover item' })
         };
     }
 }
