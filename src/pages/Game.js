@@ -159,7 +159,7 @@ const Game = () => {
             }
 
             // Faz a chamada para a API para atualizar o item
-            const response = await axios.put(`/.netlify/functions/api-pedidos/${pedidoId}`, {
+            const response = await axios.put(`./netlify/functions/api-pedidos/${pedidoId}`, {
                 itemIndex // Passa o índice do item no corpo da requisição
             });
 
