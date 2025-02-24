@@ -14,8 +14,6 @@ exports.handler = async(event, context) => {
         return handleGet(event);
     } else if (event.httpMethod === 'POST') {
         return handlePost(event);
-    } else if (event.httpMethod === 'PUT') {
-        return handleUpdateItem(event);
     } else if (event.httpMethod === 'DELETE') {
         return handleDelete(event);
     }
@@ -103,13 +101,13 @@ async function handlePost(event) {
     }
 }
 
-async function handleUpdateItem(event) {
+async function handleDelete(event) {
     try {
         const { pedidoId, itemIndex } = JSON.parse(event.body);
-        console.log('Atualizando item:', { pedidoId, itemIndex });
+        console.log('Removendo item:', { pedidoId, itemIndex });
 
         // Primeiro, busque o pedido para obter os itens
-        const queryGetItems = 'SELECT * FROM pedidos WHERE id = ?';
+        const queryGetItems = 'SELECT items FROM pedidos WHERE id = ?';
         const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
 
         if (pedido.length === 0) {
@@ -121,7 +119,7 @@ async function handleUpdateItem(event) {
 
         // Converte a string JSON em um array
         const itemsArray = JSON.parse(pedido[0].items);
-        console.log('Itens antes da atualização:', itemsArray);
+        console.log('Itens antes da remoção:', itemsArray);
 
         // Verifica se o índice é válido
         if (itemIndex < 0 || itemIndex >= itemsArray.length) {
@@ -141,34 +139,8 @@ async function handleUpdateItem(event) {
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Item atualizado com sucesso' })
+            body: JSON.stringify({ message: 'Item removido com sucesso' })
         };
-    } catch (error) {
-        console.error('Erro ao atualizar item:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Erro ao atualizar item' })
-        };
-    }
-}
-
-async function handleDelete(event) {
-    try {
-        const { pedidoId, itemIndex } = JSON.parse(event.body);
-        console.log('Removendo item:', { pedidoId, itemIndex });
-
-        // Primeiro, busque o pedido para obter os itens
-        const queryGetItems = 'SELECT * FROM pedidos WHERE id = ?';
-        const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
-
-        if (pedido.length === 0) {
-            return {
-                statusCode: 404,
-                body: JSON.stringify({ error: 'Pedido não encontrado' })
-            };
-        }
-
-        // Continue com a lógica de remoção...
     } catch (error) {
         console.error('Erro ao remover item:', error);
         return {
