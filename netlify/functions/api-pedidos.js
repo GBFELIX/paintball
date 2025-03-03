@@ -122,7 +122,7 @@ async function handleDelete(event) {
         console.log('Itens antes da remoção:', itemsArray);
 
         // Verifica se o índice é válido
-        if (itemIndex < 0 || itemIndex >= itemsArray.length) {
+        if (itemIndex < 0) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: 'Índice do item inválido' })
@@ -142,10 +142,10 @@ async function handleDelete(event) {
             body: JSON.stringify({ message: 'Item removido com sucesso' })
         };
     } catch (error) {
-        console.error('Erro ao remover item:', error);
+        console.error('Erro ao remover item:', error.message); // Loga a mensagem de erro
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Erro ao remover item' })
+            body: JSON.stringify({ error: 'Erro ao remover item', details: error.message })
         };
     }
 }
