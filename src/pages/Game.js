@@ -160,7 +160,7 @@ const Game = () => {
 
             // Faz a chamada para a API para atualizar o item
             const response = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
-                itemIndex // Passa o índice do item no corpo da requisição
+                data: { itemIndex } // Passa o índice do item no corpo da requisição
             });
 
             console.log('Resposta da API:', response.data); // Loga o corpo da resposta

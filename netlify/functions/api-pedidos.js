@@ -103,7 +103,21 @@ async function handlePost(event) {
 
 async function handleDelete(event) {
     try {
-        const { pedidoId, itemIndex } = JSON.parse(event.body);
+        console.log('Corpo da requisição:', event.body); // Log do corpo da requisição
+
+        let pedidoId, itemIndex;
+        try {
+            const data = JSON.parse(event.body);
+            pedidoId = data.pedidoId;
+            itemIndex = data.itemIndex;
+        } catch (error) {
+            console.error('Erro ao analisar JSON:', error);
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'Corpo da requisição inválido' })
+            };
+        }
+
         console.log('Removendo item:', { pedidoId, itemIndex });
 
         // Primeiro, busque o pedido para obter os itens
@@ -142,7 +156,7 @@ async function handleDelete(event) {
             body: JSON.stringify({ message: 'Item removido com sucesso' })
         };
     } catch (error) {
-        console.error('Erro ao remover item:', error.message); // Loga a mensagem de erro
+        console.error('Erro ao remover item:', error.message);
         return {
             statusCode: 500,
             body: JSON.stringify({ error: 'Erro ao remover item', details: error.message })
