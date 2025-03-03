@@ -26,32 +26,21 @@ exports.handler = async(event, context) => {
 
 async function handleGet(event) {
     try {
-        const pedidoId = event.pathParameters.id; // Supondo que você esteja usando path parameters
-        console.log('Buscando pedido com ID:', pedidoId);
+        const params = new URLSearchParams(event.queryStringParameters);
+        const data = params.get('data');
+        const hora = params.get('hora');
 
-        const queryGetItems = 'SELECT items FROM pedidos WHERE id = ?';
-        const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
+        const query = 'SELECT * FROM pedidos WHERE DATE(data_pedido) = ? AND hora_pedido = ?';
+        const [results] = await db.promise().query(query, [data, hora]);
 
-        console.log('Resultado da consulta:', pedido); // Adicione este log
-
-        if (pedido.length === 0) {
-            console.log('Pedido não encontrado');
-            return {
-                statusCode: 404,
-                body: JSON.stringify({ error: 'Pedido não encontrado' })
-            };
-        }
-
-        // Retorne os itens encontrados
         return {
             statusCode: 200,
-            body: JSON.stringify(pedido)
+            body: JSON.stringify(results)
         };
     } catch (error) {
-        console.error('Erro ao buscar pedido:', error.message);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Erro ao buscar pedido', details: error.message })
+            body: JSON.stringify({ error: 'Erro ao buscar pedidos' })
         };
     }
 }
