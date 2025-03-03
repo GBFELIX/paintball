@@ -52,7 +52,7 @@ const Game = () => {
         // Função para buscar os dados dos jogadores
         const fetchJogadores = async () => {
             try {
-                const response = await axios.get(`./.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
+                const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
                 setJogadores(response.data || []); // Certifique-se de que é um array
                 console.log(response.data); //
             } catch (error) {
