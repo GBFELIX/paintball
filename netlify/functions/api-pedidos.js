@@ -145,7 +145,7 @@ async function handleUpdateItem(event) {
             body: JSON.stringify({ message: 'Item atualizado com sucesso' })
         };
     } catch (error) {
-        console.error('Erro ao atualizar item:', error.message);
+        console.error(`Erro ao atualizar item no pedido ${pedidoId}:`, error.message);
         return {
             statusCode: 500,
             body: JSON.stringify({ error: 'Erro ao atualizar item', details: error.message })
