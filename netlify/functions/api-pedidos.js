@@ -110,7 +110,7 @@ async function handleDelete(event) {
         console.log('Pedido ID recebido:', pedidoId);
 
         // Primeiro, busque o pedido para obter os itens
-        const queryGetItems = 'SELECT items FROM pedidos WHERE id = ?';
+        const queryGetItems = 'SELECT pedidos WHERE id = ?';
         const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
 
         console.log('Resultado da consulta:', pedido); // Adicione este log
