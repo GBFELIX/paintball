@@ -103,28 +103,20 @@ async function handlePost(event) {
 
 async function handleDelete(event) {
     try {
-        console.log('Corpo da requisição:', event.body); // Log do corpo da requisição
-
-        let pedidoId, itemIndex;
-        try {
-            const data = JSON.parse(event.body);
-            pedidoId = data.pedidoId;
-            itemIndex = data.itemIndex;
-        } catch (error) {
-            console.error('Erro ao analisar JSON:', error);
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Corpo da requisição inválido' })
-            };
-        }
-
+        const { pedidoId, itemIndex } = JSON.parse(event.body);
         console.log('Removendo item:', { pedidoId, itemIndex });
+
+        // Log para verificar o pedidoId
+        console.log('Pedido ID recebido:', pedidoId);
 
         // Primeiro, busque o pedido para obter os itens
         const queryGetItems = 'SELECT items FROM pedidos WHERE id = ?';
         const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
 
+        console.log('Resultado da consulta:', pedido); // Adicione este log
+
         if (pedido.length === 0) {
+            console.log('Pedido não encontrado');
             return {
                 statusCode: 404,
                 body: JSON.stringify({ error: 'Pedido não encontrado' })
