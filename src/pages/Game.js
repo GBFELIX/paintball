@@ -145,7 +145,7 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
-    const handleDeleteItem = async (itemIndex, jogador, setJogador) => {
+    const handleUpdateItem = async (itemIndex, jogador, setJogador) => {
         try {
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
@@ -159,8 +159,8 @@ const Game = () => {
             }
 
             // Faz a chamada para a API para atualizar o item
-            const response = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
-                data: { itemIndex } // Passa o índice do item no corpo da requisição
+            const response = await axios.put(`/.netlify/functions/api-pedidos/${pedidoId}`, {
+                itemIndex // Passa o índice do item no corpo da requisição
             });
 
             console.log('Resposta da API:', response.data); // Loga o corpo da resposta
@@ -286,7 +286,7 @@ const Game = () => {
                                         <p>{item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleDeleteItem(itemIndex, jogador, setJogador)}
+                                            onClick={() => handleUpdateItem(itemIndex, jogador, setJogador)}
                                             disabled={jogador.isClosed}
                                         >
                                             -

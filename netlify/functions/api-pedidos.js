@@ -14,8 +14,8 @@ exports.handler = async(event, context) => {
         return handleGet(event);
     } else if (event.httpMethod === 'POST') {
         return handlePost(event);
-    } else if (event.httpMethod === 'DELETE') {
-        return handleDelete(event);
+    } else if (event.httpMethod === 'PUT') {
+        return handleUpdateItem(event);
     }
 
     return {
@@ -101,19 +101,16 @@ async function handlePost(event) {
     }
 }
 
-async function handleDelete(event) {
+async function handleUpdateItem(event) {
     try {
         const { pedidoId, itemIndex } = JSON.parse(event.body);
-        console.log('Removendo item:', { pedidoId, itemIndex });
-
-        // Log para verificar o pedidoId
-        console.log('Pedido ID recebido:', pedidoId);
+        console.log('Atualizando item:', { pedidoId, itemIndex });
 
         // Primeiro, busque o pedido para obter os itens
         const queryGetItems = 'SELECT * FROM pedidos WHERE id = ?';
         const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
 
-        console.log('Resultado da consulta:', pedido); // Adicione este log
+        console.log('Resultado da consulta:', pedido);
 
         if (pedido.length === 0) {
             console.log('Pedido não encontrado');
@@ -125,10 +122,10 @@ async function handleDelete(event) {
 
         // Converte a string JSON em um array
         const itemsArray = JSON.parse(pedido[0].items);
-        console.log('Itens antes da remoção:', itemsArray);
+        console.log('Itens antes da atualização:', itemsArray);
 
         // Verifica se o índice é válido
-        if (itemIndex < 0) {
+        if (itemIndex < 0 || itemIndex >= itemsArray.length) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: 'Índice do item inválido' })
@@ -145,13 +142,13 @@ async function handleDelete(event) {
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Item removido com sucesso' })
+            body: JSON.stringify({ message: 'Item atualizado com sucesso' })
         };
     } catch (error) {
-        console.error('Erro ao remover item:', error.message);
+        console.error('Erro ao atualizar item:', error.message);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Erro ao remover item', details: error.message })
+            body: JSON.stringify({ error: 'Erro ao atualizar item', details: error.message })
         };
     }
 }
