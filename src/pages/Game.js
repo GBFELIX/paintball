@@ -145,7 +145,7 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
-    const handleUpdateItem = async (itemIndex, jogador, setJogador) => {
+    const handleUpdateItem = async (jogador, itemIndex, setJogador) => {
         try {
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
@@ -158,18 +158,42 @@ const Game = () => {
                 return;
             }
 
+            // Faz a chamada para a API para buscar o pedido
+            const pedidoResponse = await axios.get(`/.netlify/functions/api-pedidos/${pedidoId}`);
+            const pedido = pedidoResponse.data;
+
+            console.log('Resultado da consulta:', pedido);
+
+            if (!pedido || pedido.length === 0) {
+                console.error('Pedido não encontrado');
+                return;
+            }
+
+            // Converte a string JSON em um array
+            const itemsArrayFromDB = JSON.parse(pedido.items);
+            console.log('Itens antes da atualização:', itemsArrayFromDB);
+
+            // Verifica se o índice é válido
+            if (itemIndex < 0 || itemIndex >= itemsArrayFromDB.length) {
+                console.error('Índice do item inválido.');
+                return;
+            }
+
+            // Remove o item do array
+            const updatedItems = itemsArrayFromDB.filter((_, index) => index !== itemIndex);
+            console.log('Itens atualizados:', JSON.stringify(updatedItems));
+
             // Faz a chamada para a API para atualizar o item
-            const response = await axios.put(`/.netlify/functions/api-pedidos/${pedidoId}`, {
+            const updateResponse = await axios.put(`/.netlify/functions/api-pedidos/${pedidoId}`, {
                 itemIndex // Passa o índice do item no corpo da requisição
             });
 
-            console.log('Resposta da API:', response.data); // Loga o corpo da resposta
-            console.log('Status da resposta:', response.status); // Loga o status da resposta
+            console.log('Resposta da API:', updateResponse.data); // Loga o corpo da resposta
+            console.log('Status da resposta:', updateResponse.status); // Loga o status da resposta
 
-            if (response.status === 200) {
+            if (updateResponse.status === 200) {
                 console.log(`Item no índice ${itemIndex} atualizado com sucesso.`);
                 // Atualiza o estado local para refletir a remoção
-                const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
                 setJogador(prevState => ({
                     ...prevState,
                     items: JSON.stringify(updatedItems) // Atualiza os itens como string JSON
@@ -286,7 +310,7 @@ const Game = () => {
                                         <p>{item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleUpdateItem(itemIndex, jogador, setJogador)}
+                                            onClick={() => handleUpdateItem(jogador, itemIndex, setJogador)}
                                             disabled={jogador.isClosed}
                                         >
                                             -
