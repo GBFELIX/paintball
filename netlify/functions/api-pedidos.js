@@ -161,7 +161,7 @@ async function handleDeleteItem(event) {
         console.log('Itens atualizados:', JSON.stringify(updatedItems));
 
         // Atualiza a coluna items com a nova lista
-        const queryUpdateItems = 'UPDATE pedidos SET items = ? WHERE id = ?';
+        const queryUpdateItems = 'DELETE pedidos SET items = ? WHERE id = ?';
         await db.promise().query(queryUpdateItems, [JSON.stringify(updatedItems), pedidoId]);
 
         return {
