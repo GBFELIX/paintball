@@ -48,20 +48,20 @@ const Game = () => {
         }]);
     };
 
-    useEffect(() => {
-        // Função para buscar os dados dos jogadores
-        const fetchJogadores = async () => {
-            try {
-                const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
-                setJogadores(response.data || []); // Certifique-se de que é um array
-                console.log(response.data); //
-            } catch (error) {
-                console.error('Erro ao buscar jogadores:', error);
-            } finally {
-                setLoading(false); // Define loading como false após a busca
-            }
-        };
+    // Função para buscar os dados dos jogadores
+    const fetchJogadores = async () => {
+        try {
+            const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
+            setJogadores(response.data || []); // Certifique-se de que é um array
+            console.log(response.data);
+        } catch (error) {
+            console.error('Erro ao buscar jogadores:', error);
+        } finally {
+            setLoading(false); // Define loading como false após a busca
+        }
+    };
 
+    useEffect(() => {
         if (dataJogo && horaJogo) {
             fetchJogadores();
         }
@@ -149,8 +149,6 @@ const Game = () => {
         try {
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
-            console.log('Pedido ID:', pedidoId, 'Itens:', itemsArray);
-            console.log('index:', itemIndex);
 
             // Verifica se o índice é válido
             if (itemIndex < 0 || itemIndex >= itemsArray.length) {
@@ -160,23 +158,21 @@ const Game = () => {
 
             // Remove o item do array
             const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
-            console.log('Itens atualizados:', JSON.stringify(updatedItems));
 
             // Faz a chamada para a API para deletar o item
             const deleteResponse = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
                 data: { pedidoId, itemIndex } // Envie o ID do pedido e o índice do item a ser removido
             });
 
-            console.log('Resposta da API:', deleteResponse.data); // Loga o corpo da resposta
-            console.log('Status da resposta:', deleteResponse.status); // Loga o status da resposta
-
             if (deleteResponse.status === 200) {
-                console.log(`Item no índice ${itemIndex} removido com sucesso.`);
                 // Atualiza o estado local para refletir a remoção
                 setJogador(prevState => ({
                     ...prevState,
                     items: JSON.stringify(updatedItems) // Atualiza os itens como string JSON
                 }));
+
+                // Chama a função para buscar os dados atualizados
+                fetchJogadores(); // Chame a função para atualizar os dados
             }
         } catch (error) {
             console.error('Erro ao remover o item:', error.response ? error.response.data : error.message);
@@ -290,7 +286,6 @@ const Game = () => {
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
                                             onClick={() => handleDeleteItem(jogador, itemIndex, setJogador)}
-                                            disabled={jogador.isClosed}
                                         >
                                             -
                                         </button>
