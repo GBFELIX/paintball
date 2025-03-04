@@ -158,34 +158,13 @@ const Game = () => {
                 return;
             }
 
-            // Faz a chamada para a API para buscar o pedido
-            const pedidoResponse = await axios.get(`/.netlify/functions/api-pedidos/${pedidoId}`);
-            const pedido = pedidoResponse.data;
-
-            console.log('Resultado da consulta:', pedido);
-
-            if (!pedido || pedido.length === 0) {
-                console.error('Pedido não encontrado');
-                return;
-            }
-
-            // Converte a string JSON em um array
-            const itemsArrayFromDB = JSON.parse(pedido.items);
-            console.log('Itens antes da atualização:', itemsArrayFromDB);
-
-            // Verifica se o índice é válido
-            if (itemIndex < 0 || itemIndex >= itemsArrayFromDB.length) {
-                console.error('Índice do item inválido.');
-                return;
-            }
-
             // Remove o item do array
-            const updatedItems = itemsArrayFromDB.filter((_, index) => index !== itemIndex);
+            const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
             console.log('Itens atualizados:', JSON.stringify(updatedItems));
 
             // Faz a chamada para a API para atualizar o item
             const updateResponse = await axios.put(`/.netlify/functions/api-pedidos/${pedidoId}`, {
-                itemIndex // Passa o índice do item no corpo da requisição
+                items: updatedItems // Envie a nova lista de itens
             });
 
             console.log('Resposta da API:', updateResponse.data); // Loga o corpo da resposta

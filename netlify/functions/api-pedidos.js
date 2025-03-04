@@ -103,52 +103,22 @@ async function handlePost(event) {
 
 async function handleUpdateItem(event) {
     try {
-        const { pedidoId, itemIndex } = JSON.parse(event.body);
-        console.log('Atualizando item:', { pedidoId, itemIndex });
-
-        // Primeiro, busque o pedido para obter os itens
-        const queryGetItems = 'SELECT * FROM pedidos WHERE id = ?';
-        const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
-
-        console.log('Resultado da consulta:', pedido);
-
-        if (pedido.length === 0) {
-            console.log('Pedido não encontrado');
-            return {
-                statusCode: 404,
-                body: JSON.stringify({ error: 'Pedido não encontrado' })
-            };
-        }
-
-        // Converte a string JSON em um array
-        const itemsArray = JSON.parse(pedido[0].items);
-        console.log('Itens antes da atualização:', itemsArray);
-
-        // Verifica se o índice é válido
-        if (itemIndex < 0 || itemIndex >= itemsArray.length) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Índice do item inválido' })
-            };
-        }
-
-        // Remove o item do array
-        const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
-        console.log('Itens atualizados:', JSON.stringify(updatedItems));
+        const { pedidoId, items } = JSON.parse(event.body); // Recebe a nova lista de itens
+        console.log('Atualizando itens do pedido:', { pedidoId, items });
 
         // Atualiza a coluna items com a nova lista
         const queryUpdateItems = 'UPDATE pedidos SET items = ? WHERE id = ?';
-        await db.promise().query(queryUpdateItems, [JSON.stringify(updatedItems), pedidoId]);
+        await db.promise().query(queryUpdateItems, [JSON.stringify(items), pedidoId]);
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Item atualizado com sucesso' })
+            body: JSON.stringify({ message: 'Itens atualizados com sucesso' })
         };
     } catch (error) {
-        console.error(`Erro ao atualizar item no pedido ${pedidoId}:`, error.message);
+        console.error('Erro ao atualizar itens:', error.message);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Erro ao atualizar item', details: error.message })
+            body: JSON.stringify({ error: 'Erro ao atualizar itens', details: error.message })
         };
     }
 }
