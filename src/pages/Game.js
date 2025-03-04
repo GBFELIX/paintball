@@ -28,6 +28,13 @@ const Game = () => {
 
     const location = useLocation();
     const { dataJogo, horaJogo } = location.state || {}; // Recebe os dados passados
+
+    useEffect(() => {
+        if (dataJogo && horaJogo) {
+            localStorage.setItem('dataJogo', dataJogo);
+            localStorage.setItem('horaJogo', horaJogo);
+        }
+    }, [dataJogo, horaJogo]);
     
     const [jogadores, setJogadores] = useState([]); // Estado para armazenar os jogadores
     const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
