@@ -145,7 +145,7 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
-    const handleUpdateItem = async (jogador, itemIndex, setJogador) => {
+    const handleDeleteItem = async (jogador, itemIndex, setJogador) => {
         try {
             const pedidoId = jogador.id; // ID do pedido
             const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
@@ -162,16 +162,16 @@ const Game = () => {
             const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
             console.log('Itens atualizados:', JSON.stringify(updatedItems));
 
-            // Faz a chamada para a API para atualizar o item
-            const updateResponse = await axios.put(`/.netlify/functions/api-pedidos/${pedidoId}`, {
-                items: updatedItems // Envie a nova lista de itens
+            // Faz a chamada para a API para deletar o item
+            const deleteResponse = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
+                data: { itemIndex } // Envie o índice do item a ser removido
             });
 
-            console.log('Resposta da API:', updateResponse.data); // Loga o corpo da resposta
-            console.log('Status da resposta:', updateResponse.status); // Loga o status da resposta
+            console.log('Resposta da API:', deleteResponse.data); // Loga o corpo da resposta
+            console.log('Status da resposta:', deleteResponse.status); // Loga o status da resposta
 
-            if (updateResponse.status === 200) {
-                console.log(`Item no índice ${itemIndex} atualizado com sucesso.`);
+            if (deleteResponse.status === 200) {
+                console.log(`Item no índice ${itemIndex} removido com sucesso.`);
                 // Atualiza o estado local para refletir a remoção
                 setJogador(prevState => ({
                     ...prevState,
@@ -179,7 +179,7 @@ const Game = () => {
                 }));
             }
         } catch (error) {
-            console.error('Erro ao atualizar o item:', error.response ? error.response.data : error.message);
+            console.error('Erro ao remover o item:', error.response ? error.response.data : error.message);
         }
     };
 
@@ -289,7 +289,7 @@ const Game = () => {
                                         <p>{item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleUpdateItem(jogador, itemIndex, setJogador)}
+                                            onClick={() => handleDeleteItem(jogador, itemIndex, setJogador)}
                                             disabled={jogador.isClosed}
                                         >
                                             -
