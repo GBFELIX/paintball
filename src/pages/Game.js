@@ -173,9 +173,31 @@ const Game = () => {
 
                 // Chama a função para buscar os dados atualizados
                 fetchJogadores(); // Chame a função para atualizar os dados
+
+                // Exibe um toast de sucesso
+                toast.success('Item removido com sucesso!', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
             }
         } catch (error) {
             console.error('Erro ao remover o item:', error.response ? error.response.data : error.message);
+            
+            // Exibe um toast de erro
+            toast.error('Erro ao remover o item. Tente novamente.', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
         }
     };
 
@@ -238,6 +260,10 @@ const Game = () => {
         }
     };
 
+    const calculateTotalValue = (items) => {
+        return items.reduce((total, item) => total + parseFloat(item.valor), 0).toFixed(2);
+    };
+
     return (
         <div className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
             <div className="flex justify-between w-full gap-4 mb-4">
@@ -275,7 +301,7 @@ const Game = () => {
                                         : 'Nenhuma forma de pagamento disponível'}
                                 </p>
                             </div>
-                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {jogador.valor_total || '0'}</p>
+                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : [])}</p>
                         </div>
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center">
