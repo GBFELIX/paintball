@@ -289,7 +289,7 @@ const Game = () => {
                                         <p>{item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleDeleteItem(itemIndex, jogador, setJogador)}
+                                            onClick={() => handleDeleteItem(jogador, itemIndex, setJogador)}
                                             disabled={jogador.isClosed}
                                         >
                                             -
