@@ -164,7 +164,7 @@ const Game = () => {
 
             // Faz a chamada para a API para deletar o item
             const deleteResponse = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
-                data: { itemIndex } // Envie o índice do item a ser removido
+                data: { pedidoId, itemIndex } // Envie o ID do pedido e o índice do item a ser removido
             });
 
             console.log('Resposta da API:', deleteResponse.data); // Loga o corpo da resposta
@@ -289,7 +289,7 @@ const Game = () => {
                                         <p>{item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleDeleteItem(jogador, itemIndex, setJogador)}
+                                            onClick={() => handleDeleteItem(itemIndex, jogador, setJogador)}
                                             disabled={jogador.isClosed}
                                         >
                                             -

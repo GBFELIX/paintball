@@ -127,52 +127,31 @@ async function handleUpdateItem(event) {
 
 async function handleDeleteItem(event) {
     try {
-        const { pedidoId, itemIndex } = JSON.parse(event.body); // Recebe o ID do pedido e o índice do item a ser removido
-        console.log('Removendo item do pedido:', { pedidoId, itemIndex });
+        const { pedidoId, itemIndex } = JSON.parse(event.body);
+        console.log('Removendo item:', { pedidoId, itemIndex });
+
+        // Log para verificar o pedidoId
+        console.log('Pedido ID recebido:', pedidoId);
 
         // Primeiro, busque o pedido para obter os itens
-        const queryGetItems = 'SELECT * FROM pedidos WHERE id = ?';
+        const queryGetItems = 'SELECT items FROM pedidos WHERE id = ?';
         const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
 
         console.log('Resultado da consulta:', pedido);
 
         if (pedido.length === 0) {
-            console.log('Pedido não encontrado');
             return {
                 statusCode: 404,
                 body: JSON.stringify({ error: 'Pedido não encontrado' })
             };
         }
 
-        // Converte a string JSON em um array
-        const itemsArray = JSON.parse(pedido[0].items);
-        console.log('Itens antes da remoção:', itemsArray);
-
-        // Verifica se o índice é válido
-        if (itemIndex < 0 || itemIndex >= itemsArray.length) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Índice do item inválido' })
-            };
-        }
-
-        // Remove o item do array
-        const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
-        console.log('Itens atualizados:', JSON.stringify(updatedItems));
-
-        // Atualiza a coluna items com a nova lista
-        const queryUpdateItems = 'UPDATE pedidos SET items = ? WHERE id = ?';
-        await db.promise().query(queryUpdateItems, [JSON.stringify(updatedItems), pedidoId]);
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Item removido com sucesso' })
-        };
+        // Continue com a lógica de remoção...
     } catch (error) {
-        console.error('Erro ao remover item:', error.message);
+        console.error('Erro ao remover item:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Erro ao remover item', details: error.message })
+            body: JSON.stringify({ error: 'Erro ao remover item' })
         };
     }
 }
