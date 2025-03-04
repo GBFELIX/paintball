@@ -8,6 +8,22 @@ import VendaAvulsa from './Componentes/VendaAvul';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
+// Adicione o estilo do spinner
+const spinnerStyle = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+`;
+
 const Game = () => {
 
     const location = useLocation();
@@ -93,17 +109,12 @@ const Game = () => {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-screen">
-                <ClipLoader
-                    color="#ffffff"
-                    loading={loading}
-                    size={50}
-                    aria-label="Loading Spinner"
-                    data-testid="loader"
-                />
-                <p className="text-white mt-4">Carregando dados...</p> {/* Mensagem de carregamento */}
+            <div className="flex items-center justify-center h-screen bg-black">
+                <style>{spinnerStyle}</style>
+                <div className="loading-spinner"></div>
+                <p className="text-white mt-4">Carregando dados...</p>
             </div>
-        ); // Mensagem de carregamento
+        );
     }
 
     if (jogadores.length === 0) {
