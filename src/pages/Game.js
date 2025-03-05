@@ -59,6 +59,8 @@ const Game = () => {
         items: '[]', // Inicialize com um valor padrão
         // outras propriedades...
     });
+    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
+    const [itemToDelete, setItemToDelete] = useState(null); // Estado para armazenar o item a ser deletado
 
     const handleAddVendaAvulsa = () => {
         const newNumero = (vendasAvulsas.length + 1).toString();
@@ -76,7 +78,6 @@ const Game = () => {
         try {
             const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
             setJogadores(response.data || []); // Certifique-se de que é um array
-            console.log(response.data);
         } catch (error) {
             console.error('Erro ao buscar jogadores:', error);
         } finally {
@@ -163,59 +164,41 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
-    const handleDeleteItem = async (jogador, itemIndex, setJogador) => {
-        try {
-            const pedidoId = jogador.id; // ID do pedido
-            const itemsArray = JSON.parse(jogador.items); // Converte a string JSON em um array
+    const handleDeleteItem = (jogador, itemIndex) => {
+        setItemToDelete({ jogador, itemIndex }); // Armazena o jogador e o índice do item a ser deletado
+        setIsModalOpen(true); // Abre o modal de confirmação
+    };
 
-            // Verifica se o índice é válido
-            if (itemIndex < 0 || itemIndex >= itemsArray.length) {
-                console.error('Índice do item inválido.');
-                return;
-            }
+    const confirmDeleteItem = async () => {
+        if (!itemToDelete) return;
+
+        const { jogador, itemIndex } = itemToDelete;
+        try {
+            const pedidoId = jogador.id;
+            const itemsArray = JSON.parse(jogador.items);
 
             // Remove o item do array
             const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
 
             // Faz a chamada para a API para deletar o item
             const deleteResponse = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
-                data: { pedidoId, itemIndex } // Envie o ID do pedido e o índice do item a ser removido
+                data: { pedidoId, itemIndex }
             });
 
             if (deleteResponse.status === 200) {
-                // Atualiza o estado local para refletir a remoção
-                setJogador(prevState => ({
-                    ...prevState,
-                    items: JSON.stringify(updatedItems) // Atualiza os itens como string JSON
-                }));
-
-                // Chama a função para buscar os dados atualizados
-                fetchJogadores(); // Chame a função para atualizar os dados
-
-                // Exibe um toast de sucesso
-                toast.success('Item removido com sucesso!', {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
+                setJogadores(prevState => {
+                    const updatedJogadores = [...prevState];
+                    updatedJogadores[jogadores.indexOf(jogador)].items = JSON.stringify(updatedItems);
+                    return updatedJogadores;
                 });
+                toast.success('Item removido com sucesso!');
             }
         } catch (error) {
-            console.error('Erro ao remover o item:', error.response ? error.response.data : error.message);
-            
-            // Exibe um toast de erro
-            toast.error('Erro ao remover o item. Tente novamente.', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
+            console.error('Erro ao remover o item:', error);
+            toast.error('Erro ao remover o item.');
+        } finally {
+            setIsModalOpen(false); // Fecha o modal após a confirmação
+            setItemToDelete(null); // Limpa o item a ser deletado
         }
     };
 
@@ -329,7 +312,7 @@ const Game = () => {
                                         <p>{item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleDeleteItem(jogador, itemIndex, setJogador)}
+                                            onClick={() => handleDeleteItem(jogador, itemIndex)}
                                         >
                                             -
                                         </button>
@@ -394,6 +377,20 @@ const Game = () => {
                             >
                                 Confirmar Pagamento
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modal de Confirmação */}
+            {isModalOpen && (
+                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white p-6 rounded-lg w-96">
+                        <h2 className="text-black text-2xl font-semibold mb-4">
+                            Realmente deseja apagar o item?
+                        </h2>
+                        <div className="flex justify-between mt-4">
+                            <button onClick={confirmDeleteItem} className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg">Sim</button>
+                            <button onClick={() => setIsModalOpen(false)} className="bg-black hover:bg-primary py-2 px-4 rounded-lg text-white">Não</button>
                         </div>
                     </div>
                 </div>
