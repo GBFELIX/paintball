@@ -295,7 +295,11 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             return total + valorJogador;
         }, 0);
     };
-
+    const calcularDesconto = (valorTotal) => {
+        if (!descontoSelecionado) return valorTotal;
+        const valorDesconto = descontos[descontoSelecionado] || 0;
+        return Math.max(0, valorTotal - valorDesconto);
+    };
     // Atualize o valor total sempre que os jogadores mudarem
     useEffect(() => {
         const total = calcularTotal();

@@ -180,8 +180,8 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
 
     const calcularDesconto = (valorTotal) => {
         if (!descontoSelecionado) return valorTotal;
-        const percentualDesconto = descontos[descontoSelecionado] || 0;
-        return valorTotal * (1 - percentualDesconto / 100);
+        const valorDesconto = descontos[descontoSelecionado] || 0;
+        return Math.max(0, valorTotal - valorDesconto);
     };
 
     const handleConfirmPayment = async () => {
