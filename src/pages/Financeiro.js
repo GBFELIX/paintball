@@ -27,8 +27,7 @@ export default function Financeiro() {
     today.setDate(today.getDate() - 1);
     const formattedDate = today.toISOString().split("T")[0];
     setValue({ startDate: formattedDate, endDate: formattedDate });
-    buscarDadosFinanceiros(formattedDate);
-    filtrarJogos();
+    
   }, []);
 
   const buscarDadosFinanceiros = (startDate, endDate) => {
