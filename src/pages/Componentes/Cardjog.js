@@ -257,7 +257,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
                 items: jogador.items.map(item => ({ nome: item.nome, valor: item.valor })),
-                formaPagamento: Object.keys(paymentMethods).filter(method => paymentMethods[method]),
+                formaPagamento: Object.keys(paymentMethods).filter(method => paymentMethods[method]), //ENVIAR METODO E VALOR DO PAGAMENTO
                 valorTotal: valorTotal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
@@ -468,7 +468,10 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                         </div>
                         <div className="mb-4">
                             <p className="font-bold">
-                                Valor com Desconto: R$ {valorComDesconto.toFixed(2)}
+                                Valor do Desconto: R$ {descontoSelecionado ? (descontos[descontoSelecionado] || 0).toFixed(2) : '0.00'}
+                            </p>
+                            <p className="font-bold">
+                                Valor com Desconto: R$ {calcularDesconto(Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0)).toFixed(2)}
                             </p>
                             <p className="font-bold">
                                 Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0).toFixed(2)}
