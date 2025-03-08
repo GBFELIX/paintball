@@ -11,6 +11,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     const [paymentMethods, setPaymentMethods] = useState({ dinheiro: false, credito: false, debito: false, pix: false, deposito: false });
     const [descontos, setDescontos] = useState({});
     const [descontoSelecionado, setDescontoSelecionado] = useState('');
+    const [valorDesconto, setValorDesconto] = useState(0);
     const [valorComDesconto, setValorComDesconto] = useState(0);
     const [valorTotalVendaAtual, setValorTotalVendaAtual] = useState(0);
 
@@ -298,6 +299,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     const calcularDesconto = (valorTotal) => {
         if (!descontoSelecionado) return valorTotal;
         const valorDesconto = descontos[descontoSelecionado] || 0;
+        setValorDesconto(valorDesconto);
         return Math.max(0, valorTotal - valorDesconto);
     };
     // Atualize o valor total sempre que os jogadores mudarem
@@ -468,13 +470,10 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                         </div>
                         <div className="mb-4">
                             <p className="font-bold">
-                                Valor do Desconto: R$ {descontoSelecionado ? (descontos[descontoSelecionado] || 0).toFixed(2) : '0.00'}
+                                Valor do Desconto: R$ {valorDesconto.toFixed(2)}
                             </p>
                             <p className="font-bold">
-                                Valor com Desconto: R$ {calcularDesconto(Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0)).toFixed(2)}
-                            </p>
-                            <p className="font-bold">
-                                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0).toFixed(2)}
+                                Valor com Desconto: R$ {valorComDesconto.toFixed(2)}
                             </p>
                         </div>
                         <div className="flex justify-between mt-4">
