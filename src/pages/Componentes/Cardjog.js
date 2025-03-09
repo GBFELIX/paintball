@@ -250,6 +250,21 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             theme: "light",
         });
 
+        const formaPagamento = Object.keys(paymentMethods).map(method => {
+            if (paymentMethods[method]) {
+                return {
+                    metodo: method,
+                    valor: paymentValues[method] || 0 // Inclui o valor associado a cada forma de pagamento
+                };
+            }
+            return null; // Retorna null para métodos não selecionados
+        }).filter(Boolean); // Remove os métodos que não foram selecionados (null)
+
+        const dadosParaEnviar = {
+            items: venda.items.map(item => ({ nome: item.nome, valor: item.valor })),
+            formaPagamento: formaPagamento, // Agora inclui os valores das formas de pagamento
+        };
+
         // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
@@ -257,8 +272,8 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         try {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
-                items: jogador.items.map(item => ({ nome: item.nome, valor: item.valor })),
-                formaPagamento: Object.keys(paymentMethods).filter(method => paymentMethods[method]), //ENVIAR METODO E VALOR DO PAGAMENTO
+                items: dadosParaEnviar.items,
+                formaPagamento: dadosParaEnviar.formaPagamento,
                 valorTotal: valorTotal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,

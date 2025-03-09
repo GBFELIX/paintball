@@ -225,10 +225,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             items: venda.items.map(item => ({ nome: item.nome, valor: item.valor })),
             formaPagamento: formaPagamento, // Agora inclui os valores das formas de pagamento
         };
-
-        // Aqui você pode fazer a chamada para a API ou qualquer outra lógica necessária
-        console.log(dadosParaEnviar); // Para depuração, verifique o que está sendo enviado
-
+        
         try {
             // Finaliza pedido
             const dataJogo = localStorage.getItem('dataJogo');

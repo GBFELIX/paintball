@@ -78,18 +78,6 @@ async function handlePost(event) {
             return acc;
         }, {});
 
-        // Inserir itens do pedido
-        //const queryItens = 'INSERT INTO itens_pedidos (pedido_id, nome_item, quantidade, valor) VALUES ?';
-        //const values = Object.keys(itemCountMap).map(nomeItem => [
-        //    pedidoId,
-        //    nomeItem,
-        //    itemCountMap[nomeItem],
-        //    items.find(item => item.nome === nomeItem).valor
-        //]);
-
-        //await db.promise().query(queryItens, [values]);
-
-        // Retornar sucesso após todas as operações
         return {
             statusCode: 200,
             body: JSON.stringify({ message: 'Pedido cadastrado com sucesso' })
