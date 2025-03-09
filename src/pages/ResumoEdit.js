@@ -54,9 +54,8 @@ export default function ResumoEdit() {
         const despesasArmazenadas = JSON.parse(localStorage.getItem('despesas')) || [];
         setDespesas(despesasArmazenadas);
 
-        // Acesse os dados passados
         const dataFromGame = location.state || {};
-        // Use os dados conforme necessário
+       
         console.log(dataFromGame);
     }, [location.state]);
 
@@ -95,7 +94,7 @@ export default function ResumoEdit() {
             totalDespesas,
             valortot
         };
-        axios.post('./.netlify/functions/api-financeiro', dataFinanceira)
+        axios.put('./.netlify/functions/api-financeiro', dataFinanceira)
         .then(() => {
             toast.success('Partida fechada com sucesso!', {
                 position: "top-right",
@@ -127,7 +126,7 @@ export default function ResumoEdit() {
         localStorage.removeItem('itensVendaAvul'); 
         localStorage.removeItem('despesas'); 
         
-        navigate('/addjogo');
+        navigate('/estoque');
     };
 
     return (
@@ -137,7 +136,7 @@ export default function ResumoEdit() {
                 <div className="grid grid-flow-row md:grid-cols-2 gap-2">
                     <div className="bg-primary rounded-md w-full h-30 flex flex-col justify-center items-center py-14">
                         <h1 className="text-2xl font-bold">Data Partida</h1>
-                        <h2 id="datapartida" className="text-3xl font-semibold">{jogo.data || 'Carregando...'}</h2>
+                        <h2 id="datapartida" className="text-3xl font-semibold">{new Date(data).toLocaleDateString('pt-BR')}</h2>
                     </div>
                     <div className="bg-primary rounded-md w-full h-30 flex flex-col justify-center items-center py-14">
                         <h1 className="text-2xl font-bold">Total Jogadores</h1>
