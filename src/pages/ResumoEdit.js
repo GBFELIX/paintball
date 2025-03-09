@@ -167,7 +167,7 @@ export default function ResumoEdit() {
                         {pagamentos.map((pagamento, index) => (
                             <div key={index} className="flex flex-row justify-around items-start">
                                 <p className="text-xl font-semibold">{pagamento.metodo}</p>
-                                <p>R$ {pagamento.valor.toFixed(2)}</p>
+                                <p>R$ {(pagamento.valor && !isNaN(pagamento.valor)) ? pagamento.valor.toFixed(2) : '0.00'}</p>
                             </div>
                         ))}
                     </div>
