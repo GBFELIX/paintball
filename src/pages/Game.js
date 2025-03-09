@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useGameContext } from '../context/GameContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader'; // Importar o ClipLoader
 import { toast } from 'react-toastify';
 import VendaAvulsa from './Componentes/VendaAvul';
@@ -28,6 +28,7 @@ const Game = () => {
 
     const location = useLocation();
     const { dataJogo, horaJogo } = location.state || {}; // Recebe os dados passados
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (dataJogo && horaJogo) {
@@ -265,6 +266,18 @@ const Game = () => {
         return items.reduce((total, item) => total + parseFloat(item.valor), 0).toFixed(2);
     };
 
+    const handleFecharPartida = () => {
+        // Aqui você pode coletar os dados que deseja passar para ResumoEdit
+        const dataToSend = {
+            // Exemplo de dados que você pode querer passar
+            formaPagamento: jogador.forma_pagamento,
+            // Adicione outros dados necessários aqui
+        };
+
+        // Redireciona para a página ResumoEdit com os dados
+        navigate('/resumoedit', { state: dataToSend });
+    };
+
     return (
         <div className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
             <div className="flex justify-between w-full gap-4 mb-4">
@@ -340,23 +353,25 @@ const Game = () => {
                 >
                     <FaPlus size={30} />
                 </button>
-                <button 
-                            //onClick={handleFecharPartida}
-                            className="bg-white hover:bg-red-600 duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <ClipLoader
-                                    color="#000000"
-                                    loading={loading}
-                                    size={20}
-                                    aria-label="Loading Spinner"
-                                    data-testid="loader"
-                                />
-                            ) : (
-                                <IoMdClose size={30}/>
-                            )}
-                        </button>
+                <div className="p-2 flex flex-col justify-center items-center">
+                    <button 
+                        onClick={handleFecharPartida}
+                        className="bg-white hover:bg-red-600 duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ClipLoader
+                                color="#000000"
+                                loading={loading}
+                                size={20}
+                                aria-label="Loading Spinner"
+                                data-testid="loader"
+                            />
+                        ) : (
+                            <IoMdClose size={30}/>
+                        )}
+                    </button>
+                </div>
             </div>
             {showPaymentModal && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
