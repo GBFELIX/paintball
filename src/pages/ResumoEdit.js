@@ -136,7 +136,7 @@ export default function ResumoEdit() {
                 <div className="grid grid-flow-row md:grid-cols-2 gap-2">
                     <div className="bg-primary rounded-md w-full h-30 flex flex-col justify-center items-center py-14">
                         <h1 className="text-2xl font-bold">Data Partida</h1>
-                        <h2 id="datapartida" className="text-3xl font-semibold">{new Date(data).toLocaleDateString('pt-BR')}</h2>
+                        <h2 id="datapartida" className="text-3xl font-semibold">{jogo.data || 'Carregando...'}</h2>
                     </div>
                     <div className="bg-primary rounded-md w-full h-30 flex flex-col justify-center items-center py-14">
                         <h1 className="text-2xl font-bold">Total Jogadores</h1>
