@@ -298,7 +298,9 @@ const Game = () => {
                                 <p><strong>Formas de Pagamento:</strong></p>
                                 <p>
                                     {jogador.forma_pagamento ? 
-                                        JSON.parse(jogador.forma_pagamento).join(' e ') 
+                                        JSON.parse(jogador.forma_pagamento).map(pagamento => 
+                                            `${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`
+                                        ).join(' e ') 
                                         : 'Nenhuma forma de pagamento disponível'}
                                 </p>
                             </div>
