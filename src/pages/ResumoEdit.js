@@ -55,8 +55,26 @@ export default function ResumoEdit() {
         setDespesas(despesasArmazenadas);
 
         const dataFromGame = location.state || {};
-       
         console.log(dataFromGame);
+
+        setJogo({
+            data: dataFromGame.dataJogo,
+            hora: dataFromGame.horaJogo,
+        });
+
+        setPagamentos(dataFromGame.formaPagamento || []);
+        const totaisFromGame = dataFromGame.formaPagamento.reduce((acc, pagamento) => {
+            acc[pagamento.metodo] = (acc[pagamento.metodo] || 0) + pagamento.valor;
+            return acc;
+        }, {
+            credito: 0,
+            debito: 0,
+            dinheiro: 0,
+            avulso: 0,
+            pix: 0,
+            deposito: 0,
+        });
+        setFormasPagamento(totaisFromGame);
     }, [location.state]);
 
     const imprimirResumo = () => {
@@ -136,41 +154,22 @@ export default function ResumoEdit() {
                 <div className="grid grid-flow-row md:grid-cols-2 gap-2">
                     <div className="bg-primary rounded-md w-full h-30 flex flex-col justify-center items-center py-14">
                         <h1 className="text-2xl font-bold">Data Partida</h1>
-                        <h2 id="datapartida" className="text-3xl font-semibold">{jogo.data || 'Carregando...'}</h2>
+                        <h2 id="datapartida" className="text-3xl font-semibold">{jogo.data ? new Date(jogo.data).toLocaleDateString('pt-BR') : 'Carregando...'}</h2>
                     </div>
                     <div className="bg-primary rounded-md w-full h-30 flex flex-col justify-center items-center py-14">
-                        <h1 className="text-2xl font-bold">Total Jogadores</h1>
-                        <h2 id="totalJogadores" className="text-3xl font-semibold">{pagamentos.length}</h2>
+                        <h1 className="text-2xl font-bold">Hora do Jogo</h1>
+                        <h2 id="horaJogo" className="text-3xl font-semibold">{jogo.hora || 'Carregando...'}</h2>
                     </div>
                 </div>
                 <div className="bg-primary rounded-md w-full h-auto p-5 mt-3 gap-4 flex flex-col justify-center items-center">
                     <h1 className="text-2xl font-bold">Formas de pagamento</h1>
                     <div className="w-full px-3">
-                        <div className="flex flex-row justify-around items-start">
-                            <p className="text-xl font-semibold">Crédito</p>
-                            <p id="credito">R${formasPagamento.credito.toFixed(2)}</p>
-                        </div>
-                        <div className="flex flex-row justify-around items-start">
-                            <p className="text-xl font-semibold">Débito</p>
-                            <p id="debito">R${formasPagamento.debito.toFixed(2)}</p>
-                        </div>
-                        <div className="flex flex-row justify-around items-start">
-                            <p className="text-xl font-semibold">Dinheiro</p>
-                            <p id="dinheiro">R${formasPagamento.dinheiro.toFixed(2)}</p>
-                        </div>
-                        <div className="flex flex-row justify-around items-start">
-                            <p className="text-xl font-semibold">Pix</p>
-                            <p id="pix">R${formasPagamento.pix.toFixed(2)}</p>
-                        </div>
-                        <div className="flex flex-row justify-around items-start">
-                            <p className="text-xl font-semibold">Depósito</p>
-                            <p id="deposito">R${formasPagamento.deposito.toFixed(2)}</p>
-                        </div>
-                        <div className="flex flex-row justify-around items-start">
-                            <p className="text-xl font-semibold">Despesas</p>
-                            <p id="despesas">R${despesas.reduce((acc, despesa) => acc + parseFloat(despesa.valorTotal), 0).toFixed(2)}</p>
-                        </div>
-                        
+                        {pagamentos.map((pagamento, index) => (
+                            <div key={index} className="flex flex-row justify-around items-start">
+                                <p className="text-xl font-semibold">{pagamento.metodo}</p>
+                                <p>R$ {pagamento.valor.toFixed(2)}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <div className="grid grid-flow-row md:grid-cols-2 gap-2 mt-3">
