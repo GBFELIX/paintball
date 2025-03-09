@@ -267,11 +267,20 @@ const Game = () => {
     };
 
     const handleFecharPartida = () => {
-        // Aqui você pode coletar os dados que deseja passar para ResumoEdit
+        // Coletar dados de pagamento de todos os jogadores
+        const pagamentos = jogadores.map(jogador => {
+            return {
+                nomeJogador: jogador.nome_jogador,
+                formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
+                valorTotal: calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : []), // Supondo que você tenha uma função para calcular o valor total
+            };
+        });
+
         const dataToSend = {
-            // Exemplo de dados que você pode querer passar
-            formaPagamento: jogador.forma_pagamento,
-            // Adicione outros dados necessários aqui
+            formaPagamento: pagamentos,
+            // Adicione outros dados necessários aqui, como data do jogo, hora, etc.
+            dataJogo: dataJogo,
+            horaJogo: horaJogo,
         };
 
         // Redireciona para a página ResumoEdit com os dados
