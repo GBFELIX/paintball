@@ -150,7 +150,7 @@ export default function ResumoEdit() {
                             formasPagamento.map((pagamento, index) => (
                                 <div key={index} className="flex flex-row justify-around items-start">
                                     <p className="text-xl font-semibold">{pagamento.metodo}</p>
-                                    <p id={pagamento.metodo.toLowerCase()}>{`R$ ${pagamento.valor.toFixed(2)}`}</p>
+                                    <p id={pagamento.metodo}>{`R$ ${pagamento.valor.toFixed(2)}`}</p>
                                 </div>
                             ))
                         ) : (
