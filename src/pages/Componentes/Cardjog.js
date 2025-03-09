@@ -470,10 +470,10 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                         </div>
                         <div className="mb-4">
                             <p className="font-bold">
-                                Valor do Desconto: R$ {typeof valorDesconto === 'number' ? valorDesconto.toFixed(2) : '0.00'}
+                                Valor com Desconto: R$ {typeof valorComDesconto === 'number' ? valorComDesconto.toFixed(2) : '0.00'}
                             </p>
                             <p className="font-bold">
-                                Valor com Desconto: R$ {typeof valorComDesconto === 'number' ? valorComDesconto.toFixed(2) : '0.00'}
+                                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + b, 0).toFixed(2)}
                             </p>
                         </div>
                         <div className="flex justify-between mt-4">
