@@ -211,14 +211,32 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             return acc;
         }, {});
 
+        const formaPagamento = Object.keys(paymentMethods).map(method => {
+            if (paymentMethods[method]) {
+                return {
+                    metodo: method,
+                    valor: paymentValues[method] || 0 // Inclui o valor associado a cada forma de pagamento
+                };
+            }
+            return null; // Retorna null para métodos não selecionados
+        }).filter(Boolean); // Remove os métodos que não foram selecionados (null)
+
+        const dadosParaEnviar = {
+            items: venda.items.map(item => ({ nome: item.nome, valor: item.valor })),
+            formaPagamento: formaPagamento, // Agora inclui os valores das formas de pagamento
+        };
+
+        // Aqui você pode fazer a chamada para a API ou qualquer outra lógica necessária
+        console.log(dadosParaEnviar); // Para depuração, verifique o que está sendo enviado
+
         try {
             // Finaliza pedido
             const dataJogo = localStorage.getItem('dataJogo');
             const horaJogo = localStorage.getItem('horaJogo');
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: nomeCliente,
-                items: venda.items.map(item => ({ nome: item.nome, valor: item.valor })),
-                formaPagamento: Object.keys(paymentMethods).filter(method => paymentMethods[method]),
+                items: dadosParaEnviar.items,
+                formaPagamento: dadosParaEnviar.formaPagamento,
                 valorTotal: valorFinal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
@@ -231,13 +249,11 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             setShowPaymentModal(false);
 
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-            const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-
-            formasSelecionadas.forEach(forma => {
-                const valorForma = paymentValues[forma]; 
+            dadosParaEnviar.formaPagamento.forEach(forma => {
+                const valorForma = forma.valor; 
                 pagamentosAnteriores.push({
                     valorTotal: valorForma, 
-                    formaPagamento: forma,
+                    formaPagamento: forma.metodo,
                 });
             });
 
@@ -393,7 +409,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                                 <option value="">Selecione o desconto</option>
                                 {Object.entries(descontos).map(([tipo, percentual]) => (
                                     <option key={tipo} value={tipo}>
-                                        {tipo} - {percentual}%
+                                        {tipo} - {percentual}
                                     </option>
                                 ))}
                             </select>

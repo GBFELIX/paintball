@@ -432,7 +432,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                 <option value="">Selecione o desconto</option>
                                 {Object.entries(descontos).map(([tipo, percentual]) => (
                                     <option key={tipo} value={tipo}>
-                                        {tipo} - {percentual}%
+                                        {tipo} - {percentual}
                                     </option>
                                 ))}
                             </select>
