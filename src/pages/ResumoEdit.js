@@ -149,8 +149,8 @@ export default function ResumoEdit() {
                         {formasPagamento.length > 0 ? (
                             formasPagamento.map((pagamento, index) => (
                                 <div key={index} className="flex flex-row justify-around items-start">
-                                    <p className="text-xl font-semibold">{pagamento.metodo}</p>
-                                    <p id={pagamento.metodo.toLowerCase()}>
+                                    <p className="text-xl font-semibold">{pagamento.metodo || 'Método Indefinido'}</p>
+                                    <p id={pagamento.metodo ? pagamento.metodo.toLowerCase() : 'metodo-indefinido'}>
                                         {pagamento.valor !== undefined ? `R$ ${pagamento.valor.toFixed(2)}` : 'R$ 0.00'}
                                     </p>
                                 </div>
