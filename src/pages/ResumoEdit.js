@@ -39,46 +39,38 @@ export default function ResumoEdit() {
         janelaImpressao.close();
     };
 
-    const fecharPartida = () => {
-        const totalArrecadado = Object.values(formasPagamento).reduce((acc, val) => acc + val, 0);
+    const atualizarDadosFinanceiros = async () => {
+        const totalArrecadado = formasPagamento.reduce((acc, jogador) => {
+            return acc + jogador.formaPagamento.reduce((innerAcc, pagamento) => innerAcc + (parseFloat(pagamento.valor) || 0), 0);
+        }, 0).toFixed(2);
+
         const dataFinanceira = {
+            id: 1, // Substitua pelo ID correto do registro que você deseja atualizar
             dataJogo: jogo.data,
             horaJogo: jogo.hora,
             totalJogadores: pagamentos.length,
-            formasPagamento,
-            totalArrecadado,
+            formasPagamento: {
+                credito: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'credito')?.valor || 0), 0),
+                debito: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'debito')?.valor || 0), 0),
+                dinheiro: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'dinheiro')?.valor || 0), 0),
+                pix: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'pix')?.valor || 0), 0),
+                deposito: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'deposito')?.valor || 0), 0),
+            },
+            totalArrecadado
         };
-        axios.put('./.netlify/functions/api-financeiro', dataFinanceira)
-        .then(() => {
-            toast.success('Partida fechada com sucesso!', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-        })
-        .catch(error => {
-            console.error('Erro ao enviar dados financeiros:', error);
-            toast.error('Erro ao finalizar partida', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-        });
-        
-        localStorage.removeItem('pagamentos');
-        localStorage.removeItem('dataJogo');
-        localStorage.removeItem('horaJogo');
-        localStorage.removeItem('itensVendaAvul'); 
-        
-        navigate('/estoque');
+
+        try {
+            await axios.put('./.netlify/functions/api-financeiro', dataFinanceira);
+            toast.success('Dados financeiros atualizados com sucesso!');
+            localStorage.removeItem('pagamentos');
+            localStorage.removeItem('dataJogo');
+            localStorage.removeItem('horaJogo');
+            localStorage.removeItem('itensVendaAvul'); 
+            navigate('/estoque');
+        } catch (error) {
+            console.error('Erro ao atualizar dados financeiros:', error);
+            toast.error('Erro ao atualizar dados financeiros');
+        }
     };
 
     return (
@@ -131,10 +123,8 @@ export default function ResumoEdit() {
                     >
                         <p>Imprimir Resumo</p>
                     </button>
-                    <button 
-                        onClick={fecharPartida} 
-                        className="bg-white hover:bg-red-700 duration-300 text-black hover:text-white font-semibold p-5 rounded-md">
-                        <p>Fechar Partida</p>
+                    <button onClick={atualizarDadosFinanceiros} className="bg-primary hover:bg-white duration-300 text-black hover:text-white font-semibold p-5 rounded-md">
+                        Atualizar Dados Financeiros
                     </button>
                 </div>
             </div>

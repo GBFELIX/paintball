@@ -102,6 +102,50 @@ exports.handler = async(event, context) => {
         }
     }
 
+    if (event.httpMethod === 'PUT') {
+        try {
+            const { id, dataJogo, horaJogo, totalJogadores, formasPagamento, totalArrecadado } = JSON.parse(event.body);
+
+            const query = `
+                UPDATE financeiro SET 
+                    data_jogo = ?, 
+                    hora_jogo = ?, 
+                    total_jogadores = ?, 
+                    credito = ?, 
+                    debito = ?, 
+                    dinheiro = ?, 
+                    pix = ?, 
+                    deposito = ?, 
+                    total_arrecadado = ?
+                WHERE id = ?
+            `;
+
+            await connection.query(query, [
+                dataJogo,
+                horaJogo,
+                totalJogadores,
+                formasPagamento.credito,
+                formasPagamento.debito,
+                formasPagamento.dinheiro,
+                formasPagamento.pix,
+                formasPagamento.deposito,
+                totalArrecadado,
+                id // ID do registro a ser atualizado
+            ]);
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify('Dados financeiros atualizados com sucesso')
+            };
+        } catch (err) {
+            console.error('Erro ao atualizar dados financeiros:', err);
+            return {
+                statusCode: 500,
+                body: JSON.stringify('Erro no servidor')
+            };
+        }
+    }
+
     return {
         statusCode: 405,
         body: JSON.stringify({ error: 'Método não permitido' })
