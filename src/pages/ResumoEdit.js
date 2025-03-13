@@ -45,7 +45,6 @@ export default function ResumoEdit() {
         }, 0).toFixed(2);
 
         const dataFinanceira = {
-            id: 1, // Substitua pelo ID correto do registro que você deseja atualizar
             dataJogo: jogo.data,
             horaJogo: jogo.hora,
             totalJogadores: pagamentos.length,
@@ -61,7 +60,15 @@ export default function ResumoEdit() {
 
         try {
             await axios.put('./.netlify/functions/api-financeiro', dataFinanceira);
-            toast.success('Dados financeiros atualizados com sucesso!');
+            toast.success('Dados financeiros atualizados com sucesso!', {
+                position: "top-right",
+                autoClose: 2000, // 2 segundos
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
             localStorage.removeItem('pagamentos');
             localStorage.removeItem('dataJogo');
             localStorage.removeItem('horaJogo');
