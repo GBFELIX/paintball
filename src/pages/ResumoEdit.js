@@ -90,16 +90,20 @@ export default function ResumoEdit() {
                 <div className="bg-primary rounded-md w-full h-auto p-5 mt-3 gap-4 flex flex-col justify-center items-center">
                     <h1 className="text-2xl font-bold">Formas de pagamento</h1>
                     <div className="w-full px-3">
-                        {formasPagamento.length > 0 ? (
+                        {formasPagamento && formasPagamento.length > 0 ? (
                             formasPagamento.map((jogador, index) => (
-                                jogador.formaPagamento.map((pagamento, pagamentoIndex) => (
-                                    <div key={`${index}-${pagamentoIndex}`} className="flex flex-row justify-around items-start">
-                                        <p className="text-xl font-semibold">{pagamento.metodo || 'Método Indefinido'}</p>
-                                        <p id={pagamento.metodo ? pagamento.metodo.toLowerCase() : 'metodo-indefinido'}>
-                                            {pagamento.valor !== undefined ? `R$ ${pagamento.valor.toFixed(2)}` : 'R$ 0.00'}
-                                        </p>
-                                    </div>
-                                ))
+                                jogador.formaPagamento && jogador.formaPagamento.length > 0 ? (
+                                    jogador.formaPagamento.map((pagamento, pagamentoIndex) => (
+                                        <div key={`${index}-${pagamentoIndex}`} className="flex flex-row justify-around items-start">
+                                            <p className="text-xl font-semibold">{pagamento.metodo || 'Método Indefinido'}</p>
+                                            <p id={pagamento.metodo ? pagamento.metodo.toLowerCase() : 'metodo-indefinido'}>
+                                                {pagamento.valor !== undefined ? `R$ ${pagamento.valor.toFixed(2)}` : 'R$ 0.00'}
+                                            </p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>Nenhuma forma de pagamento disponível</p>
+                                )
                             ))
                         ) : (
                             <p>Nenhuma forma de pagamento disponível</p>
