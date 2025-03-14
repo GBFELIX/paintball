@@ -73,7 +73,9 @@ export default function ResumoEdit() {
             localStorage.removeItem('dataJogo');
             localStorage.removeItem('horaJogo');
             localStorage.removeItem('itensVendaAvul'); 
-            //navigate('/estoque');
+            setTimeout(() => {
+                navigate('/estoque');
+            }, 2000);
         } catch (error) {
             console.error('Erro ao atualizar dados financeiros:', error);
             toast.error('Erro ao atualizar dados financeiros');
