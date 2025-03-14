@@ -69,13 +69,16 @@ export default function ResumoEdit() {
                 draggable: true,
                 theme: "light",
             });
+
+            // Limpar o localStorage
             localStorage.removeItem('pagamentos');
             localStorage.removeItem('dataJogo');
             localStorage.removeItem('horaJogo');
             localStorage.removeItem('itensVendaAvul'); 
+
             setTimeout(() => {
                 navigate('/estoque');
-            }, 2000);
+            }, 2000); // Aguarda 2 segundos antes de redirecionar
         } catch (error) {
             console.error('Erro ao atualizar dados financeiros:', error);
             toast.error('Erro ao atualizar dados financeiros');
