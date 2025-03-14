@@ -69,10 +69,10 @@ export default function ResumoEdit() {
                 draggable: true,
                 theme: "light",
             });
-            //localStorage.removeItem('pagamentos');
-            //localStorage.removeItem('dataJogo');
-            //localStorage.removeItem('horaJogo');
-            //localStorage.removeItem('itensVendaAvul'); 
+            localStorage.removeItem('pagamentos');
+            localStorage.removeItem('dataJogo');
+            localStorage.removeItem('horaJogo');
+            localStorage.removeItem('itensVendaAvul'); 
             //navigate('/estoque');
         } catch (error) {
             console.error('Erro ao atualizar dados financeiros:', error);
