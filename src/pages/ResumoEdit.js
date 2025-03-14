@@ -62,18 +62,18 @@ export default function ResumoEdit() {
             await axios.put('./.netlify/functions/api-financeiro', dataFinanceira);
             toast.success('Dados financeiros atualizados com sucesso!', {
                 position: "top-right",
-                autoClose: 2000, // 2 segundos
+                autoClose: 2000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
                 theme: "light",
             });
-            localStorage.removeItem('pagamentos');
-            localStorage.removeItem('dataJogo');
-            localStorage.removeItem('horaJogo');
-            localStorage.removeItem('itensVendaAvul'); 
-            navigate('/estoque');
+            //localStorage.removeItem('pagamentos');
+            //localStorage.removeItem('dataJogo');
+            //localStorage.removeItem('horaJogo');
+            //localStorage.removeItem('itensVendaAvul'); 
+            //navigate('/estoque');
         } catch (error) {
             console.error('Erro ao atualizar dados financeiros:', error);
             toast.error('Erro ao atualizar dados financeiros');
