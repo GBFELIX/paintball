@@ -182,7 +182,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
     const handleConfirmPayment = async () => {
         const jogador = jogadores[jogadorIndexForPayment];
-
+        const valorFinal = valorComDesconto || valorTotalVendaAtual;
         // Verifique se items estão definidos
         if (!jogador.items || jogador.items.length === 0) {
             toast.error('Nenhum item encontrado para o jogador', {
@@ -268,13 +268,12 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
-        const dataHoraJogo = `${dataJogo} ${horaJogo}:00`;
         try {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
                 items: dadosParaEnviar.items,
                 formaPagamento: dadosParaEnviar.formaPagamento,
-                valorTotal: valorTotal,
+                valorTotal: valorFinal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
             });
