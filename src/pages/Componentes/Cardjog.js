@@ -261,7 +261,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }).filter(Boolean); // Remove os métodos que não foram selecionados (null)
 
         const dadosParaEnviar = {
-            items: venda.items.map(item => ({ nome: item.nome, valor: item.valor })),
+            items: jogador.items.map(item => ({ nome: item.nome, valor: item.valor })),
             formaPagamento: formaPagamento, // Agora inclui os valores das formas de pagamento
         };
 
