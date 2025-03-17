@@ -254,21 +254,35 @@ const Game = () => {
 
     const handleClosePedido = (index) => {
         const jogador = jogadores[index];
+
+        // Verifique se o nome do jogador está preenchido
         if (!jogador.nome || jogador.nome.trim() === '') {
-            toast.error('O nome do jogador é obrigatório antes de fechar o pedido.');
-            return;
+            toast.error('O nome do jogador é obrigatório antes de fechar o pedido.', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            return; // Não fecha o pedido se o nome não estiver preenchido
         }
+
         if (jogador.isClosed) {
             const updatedJogadores = [...jogadores];
             updatedJogadores[index].isClosed = false;
             updatedJogadores[index].items = [];
-            setJogadores(updatedJogadores);
+            updateJogadores(updatedJogadores);
         } else {
             setJogadorIndexForPayment(index);
             setShowPaymentModal(true);
         }
-        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
-        setValorTotalVendaAtual(valorTotal);
+
+        // Calcular o valor total após fechar o pedido
+        const items = Array.isArray(jogador.items) ? jogador.items : []; // Garantir que items seja um array
+        const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
+        setValorTotalVendaAtual(valorTotal); // Atualiza o estado com o novo total
     };
     const handleRemoveItem = (jogadorIndex, itemIndex) => {
         const updatedJogadores = [...jogadores];
