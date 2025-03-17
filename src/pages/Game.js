@@ -130,6 +130,10 @@ const Game = () => {
         return <p>Nenhum jogador encontrado.</p>;
     }
 
+    const updateJogadores = (updatedJogadores) => {
+        setJogadores(updatedJogadores);
+    };
+
     const handleAddJogador = () => {
         setJogadores([...jogadores, {
             nome: '',
@@ -159,12 +163,57 @@ const Game = () => {
 
     const handleAddItem = (index) => {
         const updatedJogadores = [...jogadores];
-        const selectedItem = { nome: updatedJogadores[index].selectedItem, valor: 10 }; // Exemplo de valor
-        updatedJogadores[index].items.push({ ...selectedItem, quantidade: 1 });
-        updatedJogadores[index].selectedItem = '';
-        setJogadores(updatedJogadores);
+        if (updatedJogadores[index].selectedItem) {
+            const selectedItem = { ...updatedJogadores[index].selectedItem };
+            selectedItem.valor = parseFloat(selectedItem.valor) || 0;
+
+            // Verifica se o item já existe na lista de itens do jogador
+            const existingItem = updatedJogadores[index].items.find(item => item.nome === selectedItem.nome);
+            if (existingItem) {
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+            } else {
+                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                updatedJogadores[index].items.push(selectedItem);
+            }
+            updatedJogadores[index].selectedItem = '';
+
+            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
+            const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+            const itemName = selectedItem.nome;
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+            localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
+            updateJogadores(updatedJogadores);
+        } else {
+            toast.error('Por favor, selecione um item antes de adicionar.');
+        }
     };
 
+    const handleAddItemNovo = (index, item) => {
+        const updatedJogadores = [...jogadores];
+        if (item) {
+            const selectedItem = { ...item };
+            selectedItem.valor = parseFloat(selectedItem.valor) || 0;
+            // Verifica se o item já existe na lista de itens do jogador
+            const existingItem = updatedJogadores[index].items.find(i => i.nome === selectedItem.nome)
+            if (existingItem) {
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+            } else {
+                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                updatedJogadores[index].items.push(selectedItem);
+            }
+            updatedJogadores[index].selectedItem = '';
+            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
+            const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+            const itemName = selectedItem.nome;
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+            localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+            updateJogadores(updatedJogadores);
+        } else {
+            toast.error('Por favor, selecione um item antes de adicionar.');
+        }
+    };
+    
     const handleDeleteItem = (jogador, itemIndex) => {
         setItemToDelete({ jogador, itemIndex }); // Armazena o jogador e o índice do item a ser deletado
         setIsModalOpen(true); // Abre o modal de confirmação
@@ -221,7 +270,35 @@ const Game = () => {
         const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
         setValorTotalVendaAtual(valorTotal);
     };
+    const handleRemoveItem = (jogadorIndex, itemIndex) => {
+        const updatedJogadores = [...jogadores];
+        const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
 
+        // Atualiza o localStorage ao remover um item
+        const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+        if (storedItems[itemName]) {
+            storedItems[itemName] -= 1; // Decrementa a quantidade
+            if (storedItems[itemName] <= 0) {
+                delete storedItems[itemName]; // Remove o item se a quantidade for zero
+            }
+        }
+        localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
+        // Reduz a quantidade do item ou remove o item se a quantidade for zero
+        if (updatedJogadores[jogadorIndex].items[itemIndex].quantidade > 1) {
+            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; // Decrementa a quantidade
+        } else {
+            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
+        }
+        
+        updateJogadores(updatedJogadores);
+    };
+    const handleItemSelectChange = (index, event) => {
+        const updatedJogadores = [...jogadores];
+        const selectedItem = estoque.find(item => item.nome === event.target.value);
+        updatedJogadores[index].selectedItem = selectedItem;
+        updateJogadores(updatedJogadores);
+    };
     const handleConfirmPayment = async () => {
         const jogador = jogadores[jogadorIndexForPayment];
         if (!jogador.items || jogador.items.length === 0) {
@@ -327,6 +404,54 @@ const Game = () => {
                                 </p>
                             </div>
                             <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : [])}</p>
+                        </div>
+                        <div className="w-full h-auto p-1" id="itemsObrigatorio">
+                            <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
+                                <select
+                                    className="w-full border border-slate-400 rounded px-2 p-1 text-center"
+                                    value={(jogador.selectedItem && jogador.selectedItem.nome) || ''}
+                                    onChange={(e) => handleItemSelectChange(index, e)}
+                                    disabled={jogador.isClosed}
+                                >
+                                    <option value="">Selecione o item</option>
+                                    {estoque.map((item) => (
+                                        <option key={item.id} value={item.nome}>
+                                            {item.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="inline-flex">
+                                    <button
+                                        className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                        onClick={() => handleAddItem(index)}
+                                        disabled={jogador.isClosed}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                            {jogador.items.map((item, itemIndex) => (
+                                <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
+                                    <div className="inline-flex">
+                                        <button
+                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
+                                            onClick={() => handleRemoveItem(index, itemIndex)}
+                                            disabled={jogador.isClosed}
+                                        >
+                                            -
+                                        </button>
+                                        <button
+                                            className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                            onClick={() => handleAddItemNovo(index, item)}
+                                            disabled={jogador.isClosed}
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                    <p>{item.nome} - {item.quantidade || 1}</p>
+                                    <p>R${parseFloat(item.valor).toFixed(2)}</p>
+                                </div>
+                            ))}
                         </div>
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center">
