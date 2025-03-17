@@ -430,7 +430,7 @@ const Game = () => {
                                     </button>
                                 </div>
                             </div>
-                            {jogador.items.map((item, itemIndex) => (
+                            {Array.isArray(jogador.items) && jogador.items.map((item, itemIndex) => (
                                 <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
                                     <div className="inline-flex">
                                         <button
