@@ -453,6 +453,17 @@ const Game = () => {
                                 </div>
                             ))}
                         </div>
+                        <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
+                            <h1 className="text-md font-semibold">Total: R${valorTotalVenda.toFixed(2)}</h1>
+                        </div>
+                        <div className="flex justify-center items-center mt-2">
+                            <button
+                                className="w-[180px] bg-gray-300 hover:bg-secondary text-gray-800 font-bold py-2 px-4 rounded-l"
+                                onClick={() => handleClosePedido(index)}
+                            >
+                                {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
+                            </button>
+                        </div>
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center">
                                 <h4>Itens:</h4>
@@ -514,11 +525,72 @@ const Game = () => {
                         <div className="mb-4">
                             <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
                         </div>
-                        {/* ... código para seleção de desconto e métodos de pagamento ... */}
+                        <div className="mb-4">
+                            <select
+                                value={descontoSelecionado}
+                                onChange={(e) => {
+                                    setDescontoSelecionado(e.target.value);
+                                    setValorComDesconto(calcularDesconto(valorTotalVendaAtual));
+                                }}
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                            >
+                                <option value="">Selecione o desconto</option>
+                                {Object.entries(descontos).map(([tipo, percentual]) => (
+                                    <option key={tipo} value={tipo}>
+                                        {tipo} - {percentual}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex flex-col gap-4 mb-4">
+                            {['dinheiro', 'credito', 'debito', 'pix', 'deposito'].map((method) => (
+                                <div key={method} className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={paymentMethods[method]}
+                                        onChange={(e) => {
+                                            setPaymentMethods({
+                                                ...paymentMethods,
+                                                [method]: e.target.checked
+                                            });
+                                        }}
+                                        className="w-4 h-4"
+                                    />
+                                    <input
+                                        type="number"
+                                        value={paymentValues[method]}
+                                        onChange={(e) => {
+                                            setPaymentValues({
+                                                ...paymentValues,
+                                                [method]: parseFloat(e.target.value) || 0
+                                            });
+                                        }}
+                                        disabled={!paymentMethods[method]}
+                                        placeholder={`Valor ${method}`}
+                                        className="w-full p-2 border border-gray-300 rounded-md"
+                                    />
+                                    <label className="capitalize">{method}</label>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mb-4">
+                            <p className="font-bold">
+                                Valor com Desconto: R$ {typeof valorComDesconto === 'number' ? valorComDesconto.toFixed(2) : '0.00'}
+                            </p>
+                            <p className="font-bold">
+                                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + b, 0).toFixed(2)}
+                            </p>
+                        </div>
                         <div className="flex justify-between mt-4">
                             <button
                                 className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
-                                onClick={() => setShowPaymentModal(false)}
+                                onClick={() => {
+                                    setShowPaymentModal(false);
+                                    setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0, deposito: 0 });
+                                    setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false, deposito: false });
+                                    setDescontoSelecionado('');
+                                    setValorComDesconto(0);
+                                }}
                             >
                                 Cancelar
                             </button>
