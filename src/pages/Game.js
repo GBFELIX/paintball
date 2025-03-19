@@ -411,16 +411,15 @@ const Game = () => {
                             </div>
                         </header>
                         <div className="p-2">
-                            <div className="p-2 flex flex-col justify-center items-center">
-                                <p><strong>Formas de Pagamento:</strong></p>
-                                <p>
+                        <div className="flex flex-col items-center">
                                     {jogador.forma_pagamento ? 
-                                        JSON.parse(jogador.forma_pagamento).map(pagamento => 
-                                            `${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`
-                                        ).join(' e ') 
-                                        : 'Nenhuma forma de pagamento disponível'}
-                                </p>
-                            </div>
+                                        JSON.parse(jogador.forma_pagamento).map(pagamento => (
+                                            <p key={pagamento.metodo} className="text-center">
+                                                {`${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`}
+                                            </p>
+                                        )) 
+                                        : <p>Nenhuma forma de pagamento disponível</p>}
+                                </div>
                             <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : [])}</p>
                         </div>
                         <div className="w-full h-auto p-1" id="itemsObrigatorio">
