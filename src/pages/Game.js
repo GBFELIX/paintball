@@ -318,11 +318,13 @@ const Game = () => {
                         <div className="p-2">
                             <div className="p-2 flex flex-col justify-center items-center">
                                 <p><strong>Formas de Pagamento:</strong></p>
-                                <p>
+                                <p className="text-center">
                                     {jogador.forma_pagamento ? 
                                         JSON.parse(jogador.forma_pagamento).map(pagamento => 
-                                            `${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`
-                                        ).join(' e ') 
+                                            <span key={pagamento.metodo} className="block">
+                                                {`${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`}
+                                            </span>
+                                        ) 
                                         : 'Nenhuma forma de pagamento disponível'}
                                 </p>
                             </div>
