@@ -46,7 +46,6 @@ const Game = () => {
     const [paymentMethods, setPaymentMethods] = useState({ dinheiro: false, credito: false, debito: false, pix: false, deposito: false });
     const [descontos, setDescontos] = useState({});
     const [descontoSelecionado, setDescontoSelecionado] = useState('');
-    const [valorDesconto, setValorDesconto] = useState(0);
     const [valorComDesconto, setValorComDesconto] = useState(0);
     const [valorTotalVendaAtual, setValorTotalVendaAtual] = useState(0);
     const [vendasAvulsas, setVendasAvulsas] = useState([{
@@ -131,6 +130,10 @@ const Game = () => {
         return <p>Nenhum jogador encontrado.</p>;
     }
 
+    const updateJogadores = (updatedJogadores) => {
+        setJogadores(updatedJogadores);
+    };
+
     const handleAddJogador = () => {
         setJogadores([...jogadores, {
             nome: '',
@@ -185,9 +188,7 @@ const Game = () => {
             toast.error('Por favor, selecione um item antes de adicionar.');
         }
     };
-    const updateJogadores = (updatedJogadores) => {
-        setJogadores(updatedJogadores);
-    };
+
     const handleAddItemNovo = (index, item) => {
         const updatedJogadores = [...jogadores];
         if (item) {
@@ -212,38 +213,10 @@ const Game = () => {
             toast.error('Por favor, selecione um item antes de adicionar.');
         }
     };
-    const handleItemSelectChange = (index, event) => {
-        const updatedJogadores = [...jogadores];
-        const selectedItem = estoque.find(item => item.nome === event.target.value);
-        updatedJogadores[index].selectedItem = selectedItem;
-        updateJogadores(updatedJogadores);
-    };
+    
     const handleDeleteItem = (jogador, itemIndex) => {
         setItemToDelete({ jogador, itemIndex }); // Armazena o jogador e o índice do item a ser deletado
         setIsModalOpen(true); // Abre o modal de confirmação
-    };
-    const handleRemoveItem = (jogadorIndex, itemIndex) => {
-        const updatedJogadores = [...jogadores];
-        const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
-
-        // Atualiza o localStorage ao remover um item
-        const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
-        if (storedItems[itemName]) {
-            storedItems[itemName] -= 1; // Decrementa a quantidade
-            if (storedItems[itemName] <= 0) {
-                delete storedItems[itemName]; // Remove o item se a quantidade for zero
-            }
-        }
-        localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
-
-        // Reduz a quantidade do item ou remove o item se a quantidade for zero
-        if (updatedJogadores[jogadorIndex].items[itemIndex].quantidade > 1) {
-            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; // Decrementa a quantidade
-        } else {
-            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
-        }
-        
-        updateJogadores(updatedJogadores);
     };
 
     const confirmDeleteItem = async () => {
@@ -281,147 +254,108 @@ const Game = () => {
 
     const handleClosePedido = (index) => {
         const jogador = jogadores[index];
+
+        // Verifique se o nome do jogador está preenchido
         if (!jogador.nome || jogador.nome.trim() === '') {
-            toast.error('O nome do jogador é obrigatório antes de fechar o pedido.');
-            return;
+            toast.error('O nome do jogador é obrigatório antes de fechar o pedido.', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+            return; // Não fecha o pedido se o nome não estiver preenchido
         }
+
         if (jogador.isClosed) {
             const updatedJogadores = [...jogadores];
             updatedJogadores[index].isClosed = false;
             updatedJogadores[index].items = [];
-            setJogadores(updatedJogadores);
+            updateJogadores(updatedJogadores);
         } else {
             setJogadorIndexForPayment(index);
             setShowPaymentModal(true);
         }
-        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
-        setValorTotalVendaAtual(valorTotal);
-    };
 
+        // Calcular o valor total após fechar o pedido
+        const items = jogador.items ? JSON.parse(jogador.items) : [];
+        if (!Array.isArray(items)) {
+            console.error('items não é um array:', items);
+            return;
+        }
+        const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
+        setValorTotalVendaAtual(valorTotal); // Atualiza o estado com o novo total
+    };
+    const handleRemoveItem = (jogadorIndex, itemIndex) => {
+        const updatedJogadores = [...jogadores];
+        const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
+
+        // Atualiza o localStorage ao remover um item
+        const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
+        if (storedItems[itemName]) {
+            storedItems[itemName] -= 1; // Decrementa a quantidade
+            if (storedItems[itemName] <= 0) {
+                delete storedItems[itemName]; // Remove o item se a quantidade for zero
+            }
+        }
+        localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
+
+        // Reduz a quantidade do item ou remove o item se a quantidade for zero
+        if (updatedJogadores[jogadorIndex].items[itemIndex].quantidade > 1) {
+            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; // Decrementa a quantidade
+        } else {
+            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
+        }
+        
+        updateJogadores(updatedJogadores);
+    };
+    const handleItemSelectChange = (index, event) => {
+        const updatedJogadores = [...jogadores];
+        const selectedItem = estoque.find(item => item.nome === event.target.value);
+        updatedJogadores[index].selectedItem = selectedItem;
+        updateJogadores(updatedJogadores);
+    };
     const handleConfirmPayment = async () => {
         const jogador = jogadores[jogadorIndexForPayment];
-        const valorFinal = valorComDesconto || valorTotalVendaAtual;
-        // Verifique se items estão definidos
         if (!jogador.items || jogador.items.length === 0) {
-            toast.error('Nenhum item encontrado para o jogador', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
+            toast.error('Nenhum item encontrado para o jogador');
             return;
         }
-
-        // Verifique se pelo menos uma forma de pagamento foi selecionada
         if (!Object.values(paymentMethods).some(method => method === true)) {
-            toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
+            toast.error('Por favor, selecione pelo menos uma forma de pagamento');
             return;
         }
-
-        // Verifique se os valores foram inseridos
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);;
+        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
         setValorTotalVendaAtual(valorTotal);
         if (totalPagamento !== valorTotal) {
-            toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
+            toast.error('O valor total do pagamento deve ser igual ao valor total dos itens');
             return;
         }
-
-        // Mapeie os itens do jogador para calcular as quantidades
-        const itemCountMap = jogador.items.reduce((acc, item) => {
-            acc[item.nome] = (acc[item.nome] || 0) + 1;
-            return acc;
-        }, {});
-
-     
         const updatedJogadores = [...jogadores];
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
-        updateJogadores(updatedJogadores);
+        setJogadores(updatedJogadores);
         setShowPaymentModal(false);
-        toast.dismiss();
-        toast.success('Pagamento confirmado com sucesso!', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
-
-        const formaPagamento = Object.keys(paymentMethods).map(method => {
-            if (paymentMethods[method]) {
-                return {
-                    metodo: method,
-                    valor: paymentValues[method] || 0 // Inclui o valor associado a cada forma de pagamento
-                };
-            }
-            return null; // Retorna null para métodos não selecionados
-        }).filter(Boolean); // Remove os métodos que não foram selecionados (null)
-
-        const dadosParaEnviar = {
-            items: jogador.items.map(item => ({ nome: item.nome, valor: item.valor })),
-            formaPagamento: formaPagamento, // Agora inclui os valores das formas de pagamento
-        };
-
+        toast.success('Pagamento confirmado com sucesso!');
         // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
         try {
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
-                items: dadosParaEnviar.items,
-                formaPagamento: dadosParaEnviar.formaPagamento,
-                valorTotal: valorFinal,
+                items: jogador.items.map(item => item.nome),
+                formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
+                valorTotal: valorTotal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
             });
-            
-            
         } catch (error) {
             console.error('Erro ao cadastrar pedido:', error);
-            toast.error('Erro ao finalizar pedido', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
+            toast.error('Erro ao finalizar pedido');
         }
-        const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-            const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
-
-            formasSelecionadas.forEach(forma => {
-                const valorForma = paymentValues[forma]; 
-                pagamentosAnteriores.push({
-                    valorTotal: valorForma, 
-                    formaPagamento: forma,
-                });
-            });
-            localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
     };
-
 
     const calculateTotalValue = (items) => {
         return items.reduce((total, item) => total + parseFloat(item.valor), 0).toFixed(2);
@@ -447,23 +381,7 @@ const Game = () => {
         // Redireciona para a página ResumoEdit com os dados
         navigate('/resumoedit', { state: dataToSend });
     };
-    const calcularTotal = () => {
-        return jogadores.reduce((total, jogador) => {
-            const valorJogador = jogador.items.reduce((soma, item) => soma + (parseFloat(item.valor) || 0), 0);
-            return total + valorJogador;
-        }, 0);
-    };
-    const calcularDesconto = (valorTotal) => {
-        if (!descontoSelecionado) return valorTotal;
-        const valorDesconto = descontos[descontoSelecionado] || 0;
-        setValorDesconto(valorDesconto);
-        return Math.max(0, valorTotal - valorDesconto);
-    };
-    // Atualize o valor total sempre que os jogadores mudarem
-    useEffect(() => {
-        const total = calcularTotal();
-        setValorTotalVendaAtual(total);
-    }, [jogadores]); // Dependência para re-calcular quando jogadores mudarem
+    const valorTotalVenda = jogador.items ? JSON.parse(jogador.items).reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0) : 0;
     return (
         <div className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
             <div className="flex justify-between w-full gap-4 mb-4">
@@ -479,7 +397,7 @@ const Game = () => {
                 </div>
             </div>
             <div className="flex flex-wrap gap-4 text-black">
-                {jogadores.map((jogador, index) => (
+                {jogadores.map((jogador, index) => (      
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal flex justify-between items-center">
                             <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Despesa'}</h3>
@@ -495,33 +413,15 @@ const Game = () => {
                         <div className="p-2">
                             <div className="p-2 flex flex-col justify-center items-center">
                                 <p><strong>Formas de Pagamento:</strong></p>
-                                <p className="text-center">
+                                <p>
                                     {jogador.forma_pagamento ? 
                                         JSON.parse(jogador.forma_pagamento).map(pagamento => 
-                                            <span key={pagamento.metodo} className="block">
-                                                {`${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`}
-                                            </span>
-                                        ) 
+                                            `${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`
+                                        ).join(' e ') 
                                         : 'Nenhuma forma de pagamento disponível'}
                                 </p>
                             </div>
                             <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : [])}</p>
-                        </div>
-                        <div className="w-full h-auto p-1">
-                            <div className="p-2 flex flex-col justify-center items-center">
-                                <h4>Itens:</h4>
-                                {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
-                                    <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
-                                        <p>{item.nome} - R$ {item.valor}</p>
-                                        <button
-                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleDeleteItem(jogador, itemIndex)}
-                                        >
-                                            -
-                                        </button>
-                                    </div>
-                                )) : <p>Nenhum item disponível</p>}
-                            </div>
                         </div>
                         <div className="w-full h-auto p-1" id="itemsObrigatorio">
                             <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
@@ -571,8 +471,34 @@ const Game = () => {
                                 </div>
                             ))}
                         </div>
+                        <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
+                            <h1 className="text-md font-semibold">Total: R${valorTotalVenda.toFixed(2)}</h1>
+                        </div>
+                        <div className="flex justify-center items-center mt-2">
+                            <button
+                                className="w-[180px] bg-gray-300 hover:bg-secondary text-gray-800 font-bold py-2 px-4 rounded-l"
+                                onClick={() => handleClosePedido(index)}
+                            >
+                                {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
+                            </button>
+                        </div>
+                        <div className="w-full h-auto p-1">
+                            <div className="p-2 flex flex-col justify-center items-center">
+                                <h4>Itens:</h4>
+                                {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
+                                    <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
+                                        <p>{item.nome} - R$ {item.valor}</p>
+                                        <button
+                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
+                                            onClick={() => handleDeleteItem(jogador, itemIndex)}
+                                        >
+                                            -
+                                        </button>
+                                    </div>
+                                )) : <p>Nenhum item disponível</p>}
+                            </div>
+                        </div>
                     </section>
-                    
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
@@ -617,11 +543,72 @@ const Game = () => {
                         <div className="mb-4">
                             <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
                         </div>
-                        {/* ... código para seleção de desconto e métodos de pagamento ... */}
+                        <div className="mb-4">
+                            <select
+                                value={descontoSelecionado}
+                                onChange={(e) => {
+                                    setDescontoSelecionado(e.target.value);
+                                    setValorComDesconto(calcularDesconto(valorTotalVendaAtual));
+                                }}
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                            >
+                                <option value="">Selecione o desconto</option>
+                                {Object.entries(descontos).map(([tipo, percentual]) => (
+                                    <option key={tipo} value={tipo}>
+                                        {tipo} - {percentual}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex flex-col gap-4 mb-4">
+                            {['dinheiro', 'credito', 'debito', 'pix', 'deposito'].map((method) => (
+                                <div key={method} className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={paymentMethods[method]}
+                                        onChange={(e) => {
+                                            setPaymentMethods({
+                                                ...paymentMethods,
+                                                [method]: e.target.checked
+                                            });
+                                        }}
+                                        className="w-4 h-4"
+                                    />
+                                    <input
+                                        type="number"
+                                        value={paymentValues[method]}
+                                        onChange={(e) => {
+                                            setPaymentValues({
+                                                ...paymentValues,
+                                                [method]: parseFloat(e.target.value) || 0
+                                            });
+                                        }}
+                                        disabled={!paymentMethods[method]}
+                                        placeholder={`Valor ${method}`}
+                                        className="w-full p-2 border border-gray-300 rounded-md"
+                                    />
+                                    <label className="capitalize">{method}</label>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mb-4">
+                            <p className="font-bold">
+                                Valor com Desconto: R$ {typeof valorComDesconto === 'number' ? valorComDesconto.toFixed(2) : '0.00'}
+                            </p>
+                            <p className="font-bold">
+                                Valor Total Inserido: R$ {Object.values(paymentValues).reduce((a, b) => a + b, 0).toFixed(2)}
+                            </p>
+                        </div>
                         <div className="flex justify-between mt-4">
                             <button
                                 className="bg-gray-500 hover:bg-black text-white py-2 px-4 rounded-lg"
-                                onClick={() => setShowPaymentModal(false)}
+                                onClick={() => {
+                                    setShowPaymentModal(false);
+                                    setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0, deposito: 0 });
+                                    setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false, deposito: false });
+                                    setDescontoSelecionado('');
+                                    setValorComDesconto(0);
+                                }}
                             >
                                 Cancelar
                             </button>
