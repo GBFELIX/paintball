@@ -523,7 +523,56 @@ const Game = () => {
                                 )) : <p>Nenhum item disponível</p>}
                             </div>
                         </div>
+                        <div className="w-full h-auto p-1" id="itemsObrigatorio">
+                            <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
+                                <select
+                                    className="w-full border border-slate-400 rounded px-2 p-1 text-center"
+                                    value={(jogador.selectedItem && jogador.selectedItem.nome) || ''}
+                                    onChange={(e) => handleItemSelectChange(index, e)}
+                                    disabled={jogador.isClosed}
+                                >
+                                    <option value="">Selecione o item</option>
+                                    {estoque.map((item) => (
+                                        <option key={item.id} value={item.nome}>
+                                            {item.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="inline-flex">
+                                    <button
+                                        className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                        onClick={() => handleAddItem(index)}
+                                        disabled={jogador.isClosed}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                            {jogador.items.map((item, itemIndex) => (
+                                <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
+                                    <div className="inline-flex">
+                                        <button
+                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
+                                            onClick={() => handleRemoveItem(index, itemIndex)}
+                                            disabled={jogador.isClosed}
+                                        >
+                                            -
+                                        </button>
+                                        <button
+                                            className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                            onClick={() => handleAddItemNovo(index, item)}
+                                            disabled={jogador.isClosed}
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                    <p>{item.nome} - {item.quantidade || 1}</p>
+                                    <p>R${parseFloat(item.valor).toFixed(2)}</p>
+                                </div>
+                            ))}
+                        </div>
                     </section>
+                    
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
