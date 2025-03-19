@@ -397,118 +397,109 @@ const Game = () => {
                 </div>
             </div>
             <div className="flex flex-wrap gap-4 text-black">
-                {jogadores.map((jogador, index) => {
-                    const items = jogador.items ? JSON.parse(jogador.items) : [];
-                    if (!Array.isArray(items)) {
-                        console.error('items não é um array:', items);
-                        return null; // ou algum valor padrão
-                    }
-                    const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
-                    
-                    return (
-                        <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
-                            <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal flex justify-between items-center">
-                                <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Despesa'}</h3>
-                                <div>
-                                    <button
-                                        className="bg-black hover:bg-primary py-1 px-2 rounded-r text-white"
-                                        onClick={() => handleRemoveJogador(index)}
-                                    >
-                                        -
-                                    </button>
-                                </div>
-                            </header>
-                            <div className="p-2">
-                                <div className="p-2 flex flex-col justify-center items-center">
-                                    <p><strong>Formas de Pagamento:</strong></p>
-                                    <p>
-                                        {jogador.forma_pagamento ? 
-                                            JSON.parse(jogador.forma_pagamento).map(pagamento => 
-                                                `${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`
-                                            ).join(' e ') 
-                                            : 'Nenhuma forma de pagamento disponível'}
-                                    </p>
-                                </div>
-                                <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {valorTotal.toFixed(2)}</p>
+                {jogadores.map((jogador, index) => (      
+                    <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal flex justify-between items-center">
+                            <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Despesa'}</h3>
+                            <div>
+                                <button
+                                    className="bg-black hover:bg-primary py-1 px-2 rounded-r text-white"
+                                    onClick={() => handleRemoveJogador(index)}
+                                >
+                                    -
+                                </button>
                             </div>
-                            <div className="w-full h-auto p-1" id="itemsObrigatorio">
-                                <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
-                                    <select
-                                        className="w-full border border-slate-400 rounded px-2 p-1 text-center"
-                                        value={(jogador.selectedItem && jogador.selectedItem.nome) || ''}
-                                        onChange={(e) => handleItemSelectChange(index, e)}
+                        </header>
+                        <div className="p-2">
+                            <div className="p-2 flex flex-col justify-center items-center">
+                                <p><strong>Formas de Pagamento:</strong></p>
+                                <p>
+                                    {jogador.forma_pagamento ? 
+                                        JSON.parse(jogador.forma_pagamento).map(pagamento => 
+                                            `${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`
+                                        ).join(' e ') 
+                                        : 'Nenhuma forma de pagamento disponível'}
+                                </p>
+                            </div>
+                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : [])}</p>
+                        </div>
+                        <div className="w-full h-auto p-1" id="itemsObrigatorio">
+                            <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
+                                <select
+                                    className="w-full border border-slate-400 rounded px-2 p-1 text-center"
+                                    value={(jogador.selectedItem && jogador.selectedItem.nome) || ''}
+                                    onChange={(e) => handleItemSelectChange(index, e)}
+                                    disabled={jogador.isClosed}
+                                >
+                                    <option value="">Selecione o item</option>
+                                    {estoque.map((item) => (
+                                        <option key={item.id} value={item.nome}>
+                                            {item.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="inline-flex">
+                                    <button
+                                        className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                        onClick={() => handleAddItem(index)}
                                         disabled={jogador.isClosed}
                                     >
-                                        <option value="">Selecione o item</option>
-                                        {estoque.map((item) => (
-                                            <option key={item.id} value={item.nome}>
-                                                {item.nome}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                            {jogador.items.map((item, itemIndex) => (
+                                <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
                                     <div className="inline-flex">
                                         <button
+                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
+                                            onClick={() => handleRemoveItem(index, itemIndex)}
+                                            disabled={jogador.isClosed}
+                                        >
+                                            -
+                                        </button>
+                                        <button
                                             className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                            onClick={() => handleAddItem(index)}
+                                            onClick={() => handleAddItemNovo(index, item)}
                                             disabled={jogador.isClosed}
                                         >
                                             +
                                         </button>
                                     </div>
+                                    <p>{item.nome} - {item.quantidade || 1}</p>
+                                    <p>R${parseFloat(item.valor).toFixed(2)}</p>
                                 </div>
-                                {jogador.items.map((item, itemIndex) => (
-                                    <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
-                                        <div className="inline-flex">
-                                            <button
-                                                className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                                onClick={() => handleRemoveItem(index, itemIndex)}
-                                                disabled={jogador.isClosed}
-                                            >
-                                                -
-                                            </button>
-                                            <button
-                                                className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                                onClick={() => handleAddItemNovo(index, item)}
-                                                disabled={jogador.isClosed}
-                                            >
-                                                +
-                                            </button>
-                                        </div>
-                                        <p>{item.nome} - {item.quantidade || 1}</p>
-                                        <p>R${parseFloat(item.valor).toFixed(2)}</p>
+                            ))}
+                        </div>
+                        <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
+                            <h1 className="text-md font-semibold">Total: R${valorTotalVenda.toFixed(2)}</h1>
+                        </div>
+                        <div className="flex justify-center items-center mt-2">
+                            <button
+                                className="w-[180px] bg-gray-300 hover:bg-secondary text-gray-800 font-bold py-2 px-4 rounded-l"
+                                onClick={() => handleClosePedido(index)}
+                            >
+                                {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
+                            </button>
+                        </div>
+                        <div className="w-full h-auto p-1">
+                            <div className="p-2 flex flex-col justify-center items-center">
+                                <h4>Itens:</h4>
+                                {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
+                                    <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
+                                        <p>{item.nome} - R$ {item.valor}</p>
+                                        <button
+                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
+                                            onClick={() => handleDeleteItem(jogador, itemIndex)}
+                                        >
+                                            -
+                                        </button>
                                     </div>
-                                ))}
+                                )) : <p>Nenhum item disponível</p>}
                             </div>
-                            <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
-                                <h1 className="text-md font-semibold">Total: R${valorTotal.toFixed(2)}</h1>
-                            </div>
-                            <div className="flex justify-center items-center mt-2">
-                                <button
-                                    className="w-[180px] bg-gray-300 hover:bg-secondary text-gray-800 font-bold py-2 px-4 rounded-l"
-                                    onClick={() => handleClosePedido(index)}
-                                >
-                                    {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
-                                </button>
-                            </div>
-                            <div className="w-full h-auto p-1">
-                                <div className="p-2 flex flex-col justify-center items-center">
-                                    <h4>Itens:</h4>
-                                    {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
-                                        <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
-                                            <p>{item.nome} - R$ {item.valor}</p>
-                                            <button
-                                                className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                                onClick={() => handleDeleteItem(jogador, itemIndex)}
-                                            >
-                                                -
-                                            </button>
-                                        </div>
-                                    )) : <p>Nenhum item disponível</p>}
-                                </div>
-                            </div>
-                        </section>
-                    );
-                })}
+                        </div>
+                    </section>
+                ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
                         vendas={vendasAvulsas} 
