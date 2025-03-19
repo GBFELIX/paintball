@@ -412,6 +412,7 @@ const Game = () => {
                         </header>
                         <div className="p-2">
                         <div className="flex flex-col items-center">
+                            <p><strong>Formas de Pagamento:</strong></p>
                                     {jogador.forma_pagamento ? 
                                         JSON.parse(jogador.forma_pagamento).map(pagamento => (
                                             <p key={pagamento.metodo} className="text-center">
