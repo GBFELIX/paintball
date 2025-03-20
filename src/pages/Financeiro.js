@@ -146,6 +146,9 @@ export default function Financeiro() {
     navigate('/game', { state: { dataJogo, horaJogo } });
   };
 
+  const totalArrecadado = financeiroData.reduce((acc, item) => acc + (item.total_arrecadado || 0), 0);
+  const totalDespesas = financeiroData.reduce((acc, item) => acc + (item.despesas || 0), 0);
+
   return (
     <section className="bg-black p-4 w-full h-screen flex flex-col items-center overflow-auto"> 
       <ToastContainer />
