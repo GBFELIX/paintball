@@ -282,6 +282,20 @@ export default function Financeiro() {
                 ))}
             </tbody>
           </table>
+          <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300">
+            <div className="w-1/3 text-center">
+              <p className="text-black text-lg font-semibold">Valor Total Arrecadado:</p>
+              <p className="text-red-500 text-lg font-bold">R$ {totalArrecadado.toFixed(2)}</p>
+            </div>
+            <div className="w-1/3 text-center">
+              <p className="text-black text-lg font-semibold">Valor Total de Despesas:</p>
+              <p className="text-red-500 text-lg font-bold">R$ {totalDespesas.toFixed(2)}</p>
+            </div>
+            <div className="w-1/3 text-center">
+              <p className="text-black text-lg font-semibold">Total Geral:</p>
+              <p className="text-red-500 text-lg font-bold">R$ {(totalArrecadado - totalDespesas).toFixed(2)}</p>
+            </div>
+          </div>
         </div>
       )}
 
