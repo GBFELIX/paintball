@@ -21,6 +21,8 @@ export default function Financeiro() {
   const [dadosPedido, setDadosPedido] = useState(null);
   const [showStatusGamer, setShowStatusGamer] = useState(false);
   const navigate = useNavigate();
+  const [totalArrecadado, setTotalArrecadado] = useState(0);
+  const [totalDespesas, setTotalDespesas] = useState(0);
 
   useEffect(() => {
     const today = new Date();
@@ -52,7 +54,17 @@ export default function Financeiro() {
 
     axios.get(`./.netlify/functions/api-financeiro?startDate=${formattedStartDate}&endDate=${formattedEndDate}`)
       .then((response) => {
-        setFinanceiroData(response.data);
+        const data = response.data;
+        setFinanceiroData(data);
+
+        // Cálculo dos totais
+        const totalArrecadado = data.reduce((acc, item) => acc + (item.total_arrecadado || 0), 0);
+        const totalDespesas = data.reduce((acc, item) => acc + (item.despesas || 0), 0);
+
+        // Atualiza os estados dos totais
+        setTotalArrecadado(totalArrecadado);
+        setTotalDespesas(totalDespesas);
+
         toast.success('Dados financeiros carregados com sucesso!', {
           position: "top-right",
           autoClose: 3000,
@@ -145,6 +157,21 @@ export default function Financeiro() {
   const handleMostrarJogo = (dataJogo, horaJogo) => {
     navigate('/game', { state: { dataJogo, horaJogo } });
   };
+
+  useEffect(() => {
+    // Filtra os dados com base nas datas
+    const filteredData = financeiroData.filter(item => {
+      const itemDate = new Date(item.data_jogo); // Supondo que você tenha uma propriedade data_jogo
+      return itemDate >= new Date(value.startDate) && itemDate <= new Date(value.endDate);
+    });
+
+    // Calcula os totais
+    const arrecadado = filteredData.reduce((acc, item) => acc + (item.total_arrecadado || 0), 0);
+    const despesas = filteredData.reduce((acc, item) => acc + (item.despesas || 0), 0);
+
+    setTotalArrecadado(arrecadado);
+    setTotalDespesas(despesas);
+  }, [financeiroData, value.startDate, value.endDate]); // Dependências para recalcular quando as datas mudarem
 
   return (
     <section className="bg-black p-4 w-full h-screen flex flex-col items-center overflow-auto"> 
@@ -282,6 +309,20 @@ export default function Financeiro() {
                 ))}
             </tbody>
           </table>
+          <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300">
+            <div className="w-1/3 text-center">
+              <p className="text-black text-lg font-semibold">Valor Total Arrecadado:</p>
+              <p className="text-red-500 text-lg font-bold">R$ {totalArrecadado.toFixed(2)}</p>
+            </div>
+            <div className="w-1/3 text-center">
+              <p className="text-black text-lg font-semibold">Valor Total de Despesas:</p>
+              <p className="text-red-500 text-lg font-bold">R$ {totalDespesas.toFixed(2)}</p>
+            </div>
+            <div className="w-1/3 text-center">
+              <p className="text-black text-lg font-semibold">Total Geral:</p>
+              <p className="text-red-500 text-lg font-bold">R$ {(totalArrecadado - totalDespesas).toFixed(2)}</p>
+            </div>
+          </div>
         </div>
       )}
 
