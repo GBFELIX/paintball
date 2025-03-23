@@ -97,15 +97,7 @@ export default function Financeiro() {
 
   const buscarDados = () => {
     if (value.startDate && value.endDate) {
-        buscarDadosFinanceiros(value.startDate, value.endDate).then(() => {
-            // Após buscar os dados, calcule os totais
-            const totalArrecadado = (financeiroData || []).reduce((acc, item) => acc + (item.total_arrecadado || 0), 0);
-            const totalDespesas = (financeiroData || []).reduce((acc, item) => acc + (item.despesas || 0), 0);
-
-            // Atualiza os estados dos totais
-            setTotalArrecadado(totalArrecadado);
-            setTotalDespesas(totalDespesas);
-        });
+        buscarDadosFinanceiros(value.startDate, value.endDate);
     } else {
         toast.error('Por favor, selecione uma data válida', {
             position: "top-right",
