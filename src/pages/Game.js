@@ -487,7 +487,7 @@ const Game = () => {
                                 <h4>Itens:</h4>
                                 {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
                                     <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
-                                        <p>{item.nome} - R$ {item.valor}</p>
+                                        <p>{item.quantidade }x - {item.nome} - R$ {item.valor}</p>
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
                                             onClick={() => handleDeleteItem(jogador, itemIndex)}
