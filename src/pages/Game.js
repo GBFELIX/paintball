@@ -358,7 +358,11 @@ const Game = () => {
     };
 
     const calculateTotalValue = (items) => {
-        return items.reduce((total, item) => total + parseFloat(item.valor), 0).toFixed(2);
+        return items.reduce((acc, item) => {
+            const quantidade = item.qtd || 0; // Pega a quantidade, se não existir, usa 0
+            const valor = parseFloat(item.valor) || 0; // Pega o valor, se não existir, usa 0
+            return acc + (quantidade * valor); // Soma a quantidade multiplicada pelo valor
+        }, 0);
     };
 
     const handleFecharPartida = () => {
