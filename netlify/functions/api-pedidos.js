@@ -144,13 +144,18 @@ async function handleDeleteItem(event) {
             };
         }
 
-        // Remove o item do array
-        const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
-        console.log('Itens atualizados:', JSON.stringify(updatedItems));
+        // Decrementa a quantidade do item
+        const itemToUpdate = itemsArray[itemIndex];
+        itemToUpdate.qtd -= 1; // Decrementa a quantidade
+
+        // Se a quantidade chegar a zero, remove o item
+        if (itemToUpdate.qtd <= 0) {
+            itemsArray.splice(itemIndex, 1); // Remove o item do array
+        }
 
         // Atualiza a coluna items com a nova lista
         const queryUpdateItems = 'UPDATE pedidos SET items = ? WHERE id = ?';
-        await db.promise().query(queryUpdateItems, [JSON.stringify(updatedItems), pedidoId]);
+        await db.promise().query(queryUpdateItems, [JSON.stringify(itemsArray), pedidoId]);
 
         return {
             statusCode: 200,
