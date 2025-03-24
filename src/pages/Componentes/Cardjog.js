@@ -38,10 +38,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         };
         fetchDescontos();
     }, []);
-    useEffect(() => {
-        // Função para buscar dados atualizados
-        fetchData(); // Chame sua função de busca de dados aqui
-    }, [jogadores]);
+
     const updateJogadores = (updatedJogadores) => {
         setJogadores(updatedJogadores);
     };
@@ -79,11 +76,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         if (updatedJogadores[index].selectedItem) {
             const selectedItem = { ...updatedJogadores[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-
-            // Verifica se items é um array
-            if (!Array.isArray(updatedJogadores[index].items)) {
-                updatedJogadores[index].items = []; // Inicializa como um array se não for
-            }
 
             // Verifica se o item já existe na lista de itens do jogador
             const existingItem = updatedJogadores[index].items.find(item => item.nome === selectedItem.nome);
@@ -154,7 +146,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }
         
         updateJogadores(updatedJogadores);
-        fetchData();
     };
 
     const handleClosePedido = (index) => {
