@@ -214,54 +214,35 @@ const Game = () => {
         }
     };
     
-    const handleDeleteItem = async (jogador, itemIndex) => {
+    const handleDeleteItem = (jogador, itemIndex) => {
+        setItemToDelete({ jogador, itemIndex }); // Armazena o jogador e o índice do item a ser deletado
+        setIsModalOpen(true); // Abre o modal de confirmação
+    };
+
+    const confirmDeleteItem = async () => {
         if (!itemToDelete) return;
 
-        const { jogador: jogadorToDelete, itemIndex: itemIndexToDelete } = itemToDelete;
+        const { jogador, itemIndex } = itemToDelete;
         try {
-            const pedidoId = jogadorToDelete.id;
-            const itemsArray = JSON.parse(jogadorToDelete.items);
+            const pedidoId = jogador.id;
+            const itemsArray = JSON.parse(jogador.items);
 
-            // Decrementa a quantidade do item
-            const itemToUpdate = itemsArray[itemIndexToDelete];
-            if (itemToUpdate) {
-                itemToUpdate.qtd -= 1; // Decrementa a quantidade
+            // Remove o item do array
+            const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
 
-                // Se a quantidade chegar a zero, remove o item do banco de dados
-                if (itemToUpdate.qtd <= 0) {
-                    const deleteResponse = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
-                        data: { pedidoId, itemIndex: itemIndexToDelete }
-                    });
-                    console.log('Delete Response:', deleteResponse);
+            // Faz a chamada para a API para deletar o item
+            const deleteResponse = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
+                data: { pedidoId, itemIndex }
+            });
 
-                    if (deleteResponse.status === 200) {
-                        itemsArray.splice(itemIndexToDelete, 1); // Remove o item do array
-                    }
-                }
-            }
-
-            // Se a quantidade não chegou a zero, apenas atualiza o pedido
-            if (itemToUpdate.qtd > 0) {
-                const updateResponse = await axios.put(`/.netlify/functions/api-pedidos/${pedidoId}`, {
-                    pedidoId,
-                    items: JSON.stringify(itemsArray)
+            if (deleteResponse.status === 200) {
+                setJogadores(prevState => {
+                    const updatedJogadores = [...prevState];
+                    updatedJogadores[jogadores.indexOf(jogador)].items = JSON.stringify(updatedItems);
+                    return updatedJogadores;
                 });
-                console.log('Update Response:', updateResponse);
-
-                if (updateResponse.status === 200) {
-                    toast.success('Item atualizado com sucesso!');
-                }
-            } else {
                 toast.success('Item removido com sucesso!');
             }
-
-            // Atualiza o estado local
-            setJogadores(prevState => {
-                const updatedJogadores = [...prevState];
-                updatedJogadores[jogadores.indexOf(jogadorToDelete)].items = JSON.stringify(itemsArray);
-                console.log('Updated Jogadores:', updatedJogadores); // Verifique o estado atualizado
-                return updatedJogadores;
-            });
         } catch (error) {
             console.error('Erro ao remover o item:', error);
             toast.error('Erro ao remover o item.');
