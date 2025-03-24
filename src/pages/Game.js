@@ -62,6 +62,7 @@ const Game = () => {
     });
     const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
     const [itemToDelete, setItemToDelete] = useState(null); // Estado para armazenar o item a ser deletado
+    const [updateCounter, setUpdateCounter] = useState(0);
 
     const handleAddVendaAvulsa = () => {
         const newNumero = (vendasAvulsas.length + 1).toString();
@@ -242,6 +243,9 @@ const Game = () => {
                     return updatedJogadores;
                 });
                 toast.success('Item removido com sucesso!');
+
+                // Força uma atualização
+                setUpdateCounter(prev => prev + 1);
             }
         } catch (error) {
             console.error('Erro ao remover o item:', error);
