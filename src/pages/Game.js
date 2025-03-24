@@ -117,6 +117,11 @@ const Game = () => {
         fetchDescontos();
     }, []);
 
+    useEffect(() => {
+        // Função para buscar dados atualizados
+        fetchData(); // Chame sua função de busca de dados aqui
+    }, [jogadores]); // O efeito será executado sempre que 'jogadores' mudar
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen bg-black">
