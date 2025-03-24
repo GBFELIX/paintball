@@ -229,10 +229,10 @@ const Game = () => {
 
                 // Se a quantidade chegar a zero, remove o item do banco de dados
                 if (itemToUpdate.qtd <= 0) {
-                    // Faz a chamada para a API para deletar o item
                     const deleteResponse = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
                         data: { pedidoId, itemIndex: itemIndexToDelete }
                     });
+                    console.log('Delete Response:', deleteResponse);
 
                     if (deleteResponse.status === 200) {
                         itemsArray.splice(itemIndexToDelete, 1); // Remove o item do array
@@ -242,11 +242,11 @@ const Game = () => {
 
             // Se a quantidade não chegou a zero, apenas atualiza o pedido
             if (itemToUpdate.qtd > 0) {
-                // Faz a chamada para a API para atualizar o pedido
                 const updateResponse = await axios.put(`/.netlify/functions/api-pedidos/${pedidoId}`, {
                     pedidoId,
                     items: JSON.stringify(itemsArray)
                 });
+                console.log('Update Response:', updateResponse);
 
                 if (updateResponse.status === 200) {
                     toast.success('Item atualizado com sucesso!');
@@ -259,6 +259,7 @@ const Game = () => {
             setJogadores(prevState => {
                 const updatedJogadores = [...prevState];
                 updatedJogadores[jogadores.indexOf(jogadorToDelete)].items = JSON.stringify(itemsArray);
+                console.log('Updated Jogadores:', updatedJogadores); // Verifique o estado atualizado
                 return updatedJogadores;
             });
         } catch (error) {
