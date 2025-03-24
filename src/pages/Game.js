@@ -217,13 +217,13 @@ const Game = () => {
     const handleDeleteItem = async (jogador, itemIndex) => {
         if (!itemToDelete) return;
 
-        const { jogador, itemIndex } = itemToDelete;
+        const { jogador: jogadorToDelete, itemIndex: itemIndexToDelete } = itemToDelete;
         try {
-            const pedidoId = jogador.id;
-            const itemsArray = JSON.parse(jogador.items);
+            const pedidoId = jogadorToDelete.id;
+            const itemsArray = JSON.parse(jogadorToDelete.items);
 
             // Decrementa a quantidade do item
-            const itemToUpdate = itemsArray[itemIndex];
+            const itemToUpdate = itemsArray[itemIndexToDelete];
             if (itemToUpdate) {
                 itemToUpdate.qtd -= 1; // Decrementa a quantidade
 
@@ -231,11 +231,11 @@ const Game = () => {
                 if (itemToUpdate.qtd <= 0) {
                     // Faz a chamada para a API para deletar o item
                     const deleteResponse = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
-                        data: { pedidoId, itemIndex }
+                        data: { pedidoId, itemIndex: itemIndexToDelete }
                     });
 
                     if (deleteResponse.status === 200) {
-                        itemsArray.splice(itemIndex, 1); // Remove o item do array
+                        itemsArray.splice(itemIndexToDelete, 1); // Remove o item do array
                     }
                 }
             }
@@ -258,7 +258,7 @@ const Game = () => {
             // Atualiza o estado local
             setJogadores(prevState => {
                 const updatedJogadores = [...prevState];
-                updatedJogadores[jogadores.indexOf(jogador)].items = JSON.stringify(itemsArray);
+                updatedJogadores[jogadores.indexOf(jogadorToDelete)].items = JSON.stringify(itemsArray);
                 return updatedJogadores;
             });
         } catch (error) {
