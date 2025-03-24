@@ -24,7 +24,7 @@ const spinnerStyle = `
   }
 `;
 
-const Game = () => {
+const Game = ({ jogadores, setJogadores}) => {
 
     const location = useLocation();
     const { dataJogo, horaJogo } = location.state || {}; // Recebe os dados passados
