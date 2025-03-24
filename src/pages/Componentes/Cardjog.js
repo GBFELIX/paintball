@@ -38,7 +38,10 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         };
         fetchDescontos();
     }, []);
-
+    useEffect(() => {
+        // Função para buscar dados atualizados
+        fetchData(); // Chame sua função de busca de dados aqui
+    }, [jogadores]);
     const updateJogadores = (updatedJogadores) => {
         setJogadores(updatedJogadores);
     };
@@ -151,6 +154,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }
         
         updateJogadores(updatedJogadores);
+        fetchData();
     };
 
     const handleClosePedido = (index) => {
