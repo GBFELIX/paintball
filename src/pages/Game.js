@@ -119,7 +119,7 @@ const Game = () => {
 
     useEffect(() => {
         // Função para buscar dados atualizados
-        fetchData(); // Chame sua função de busca de dados aqui
+        fetchJogadores(); // Chame sua função de busca de dados aqui
     }, [jogadores]); // O efeito será executado sempre que 'jogadores' mudar
 
     if (loading) {
