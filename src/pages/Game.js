@@ -117,10 +117,10 @@ const Game = () => {
         fetchDescontos();
     }, []);
 
-    useEffect(() => {
+    //useEffect(() => {
         // Função para buscar dados atualizados
-        fetchJogadores(); // Chame sua função de busca de dados aqui
-    }, [jogadores]); // O efeito será executado sempre que 'jogadores' mudar
+    //    fetchJogadores(); // Chame sua função de busca de dados aqui
+    //}, [jogadores]); // O efeito será executado sempre que 'jogadores' mudar
 
     if (loading) {
         return (
@@ -259,6 +259,7 @@ const Game = () => {
             setIsModalOpen(false); // Fecha o modal após a confirmação
             setItemToDelete(null); // Limpa o item a ser deletado
         }
+        fetchJogadores();
     };
 
     const handleClosePedido = (index) => {
