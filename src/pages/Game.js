@@ -217,7 +217,7 @@ const Game = () => {
     const handleDeleteItem = async (jogador, itemIndex) => {
         if (!itemToDelete) return;
 
-        
+        const { jogador, itemIndex } = itemToDelete;
         try {
             const pedidoId = jogador.id;
             const itemsArray = JSON.parse(jogador.items);
