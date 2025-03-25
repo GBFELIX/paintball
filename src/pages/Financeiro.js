@@ -56,6 +56,7 @@ export default function Financeiro() {
       .then((response) => {
         const data = response.data;
         setFinanceiroData(data);
+        console.log(data);
 
         // Cálculo dos totais
         const totalArrecadado = data.reduce((acc, item) => acc + (item.total_arrecadado || 0), 0);
