@@ -313,15 +313,15 @@ export default function Financeiro() {
           <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300">
             <div className="w-1/3 text-center">
                 <p className="text-primary text-lg font-semibold">Valor Total Arrecadado:</p>
-                <p className="text-red-500 text-lg font-bold">R$ {(typeof totalArrecadado === 'number' ? totalArrecadado : 0).toFixed(2)}</p>
+                <p className="text-red-500 text-lg font-bold">R$ {(typeof totalArrecadado === 'float' ? totalArrecadado : 0).toFixed(2)}</p>
             </div>
             <div className="w-1/3 text-center">
                 <p className="text-primary text-lg font-semibold">Valor Total de Despesas:</p>
-                <p className="text-red-500 text-lg font-bold">R$ {(typeof totalDespesas === 'number' ? totalDespesas : 0).toFixed(2)}</p>
+                <p className="text-red-500 text-lg font-bold">R$ {(typeof totalDespesas === 'float' ? totalDespesas : 0).toFixed(2)}</p>
             </div>
             <div className="w-1/3 text-center">
                 <p className="text-primary text-lg font-semibold">Total Geral:</p>
-                <p className="text-red-500 text-lg font-bold">R$ {((typeof totalArrecadado === 'number' ? totalArrecadado : 0) - (typeof totalDespesas === 'number' ? totalDespesas : 0)).toFixed(2)}</p>
+                <p className="text-red-500 text-lg font-bold">R$ {((typeof totalArrecadado === 'float' ? totalArrecadado : 0) - (typeof totalDespesas === 'float' ? totalDespesas : 0)).toFixed(2)}</p>
             </div>
           </div>
         </div>
