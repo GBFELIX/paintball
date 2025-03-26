@@ -61,7 +61,7 @@ export default function Financeiro() {
         // Cálculo dos totais
         const totalArrecadado = data.reduce((acc, item) => acc + (parseFloat(item.total_arrecadado) || 0), 0);
         const totalDespesas = data.reduce((acc, item) => acc + (parseFloat(item.despesas) || 0), 0);
-
+        console.log("total", totalArrecadado);
         // Atualiza os estados dos totais
         setTotalArrecadado(totalArrecadado);
         setTotalDespesas(totalDespesas);
