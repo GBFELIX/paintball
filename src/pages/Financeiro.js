@@ -166,13 +166,6 @@ export default function Financeiro() {
       const itemDate = new Date(item.data_jogo); // Supondo que você tenha uma propriedade data_jogo
       return itemDate >= new Date(value.startDate) && itemDate <= new Date(value.endDate);
     });
-
-    // Calcula os totais
-    const arrecadado = filteredData.reduce((acc, item) => acc + (item.total_arrecadado || 0), 0);
-    const despesas = filteredData.reduce((acc, item) => acc + (item.despesas || 0), 0);
-
-    setTotalArrecadado(arrecadado);
-    setTotalDespesas(despesas);
   }, [financeiroData, value.startDate, value.endDate]); // Dependências para recalcular quando as datas mudarem
 
   return (
