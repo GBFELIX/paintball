@@ -179,15 +179,21 @@ const Game = () => {
             const selectedItem = { ...updatedJogadores[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
+            // Garante que items seja um array
+            const items = Array.isArray(updatedJogadores[index].items) 
+                ? updatedJogadores[index].items 
+                : JSON.parse(updatedJogadores[index].items || '[]');
+
             // Verifica se o item já existe na lista de itens do jogador
-            const existingItem = updatedJogadores[index].items.find(item => item.nome === selectedItem.nome);
+            const existingItem = items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
                 existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
             } else {
                 selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
-                updatedJogadores[index].items.push(selectedItem);
+                items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
+            updatedJogadores[index].items = items;
 
             // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};

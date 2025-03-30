@@ -328,7 +328,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             {jogadores.map((jogador, index) => {
                 const valorTotalVenda = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
                 return (
-                    <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50' : ''}`}>
                         <header className="bg-primary w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
                             <div className="flex items-center gap-2">
                                 <p className="text-black">Jogador</p>
