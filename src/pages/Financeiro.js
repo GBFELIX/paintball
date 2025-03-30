@@ -304,7 +304,7 @@ export default function Financeiro() {
                 ))}
             </tbody>
           </table>
-          <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300 fixed bottom-0 left-0 bg-white shadow-lg">
+          <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300 fixed bottom-0 left-0 bg-black shadow-lg">
             <div className="w-1/3 text-center">
                 <p className="text-primary text-lg font-semibold">Valor Total Arrecadado:</p>
                 <p className="text-red-500 text-lg font-bold">R$ {(typeof totalArrecadado === 'number' ? totalArrecadado : 0).toFixed(2)}</p>

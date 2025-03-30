@@ -213,14 +213,18 @@ const Game = () => {
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
             // Verifica se o item já existe na lista de itens do jogador
-            const existingItem = updatedJogadores[index].items.find(i => i.nome === selectedItem.nome)
+            const items = Array.isArray(updatedJogadores[index].items) 
+                ? updatedJogadores[index].items 
+                : JSON.parse(updatedJogadores[index].items || '[]');
+            const existingItem = items.find(i => i.nome === selectedItem.nome)
             if (existingItem) {
                 existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
             } else {
                 selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
-                updatedJogadores[index].items.push(selectedItem);
+                items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
+            updatedJogadores[index].items = items;
             // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
@@ -243,7 +247,7 @@ const Game = () => {
         const { jogador, itemIndex } = itemToDelete;
         try {
             const pedidoId = jogador.id;
-            const itemsArray = JSON.parse(jogador.items);
+            const itemsArray = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
 
             // Remove o item do array
             const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
@@ -302,11 +306,7 @@ const Game = () => {
         }
 
         // Calcular o valor total após fechar o pedido
-        const items = jogador.items ? JSON.parse(jogador.items) : [];
-        if (!Array.isArray(items)) {
-            console.error('items não é um array:', items);
-            return;
-        }
+        const items = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
         const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
         setValorTotalVendaAtual(valorTotal); // Atualiza o estado com o novo total
     };
@@ -430,7 +430,7 @@ const Game = () => {
                                 <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Despesa'}</h3>
                                 <button
                                     onClick={() => {
-                                        const items = jogador.items ? JSON.parse(jogador.items) : [];
+                                        const items = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
                                         const total = calculateTotalValue(items);
                                         const formasPagamento = jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [];
                                         
