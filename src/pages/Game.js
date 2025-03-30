@@ -37,7 +37,13 @@ const Game = () => {
         }
     }, [dataJogo, horaJogo]);
     
-    const [jogadores, setJogadores] = useState([]); // Estado para armazenar os jogadores
+    const [jogadores, setJogadores] = useState([{
+        nome: '',
+        numero: '1',
+        items: [],
+        selectedItem: '',
+        isClosed: false
+    }]); // Estado para armazenar os jogadores
     const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
     const [estoque, setEstoque] = useState([]); // Adicionando estado para estoque
     const [showPaymentModal, setShowPaymentModal] = useState(false);
