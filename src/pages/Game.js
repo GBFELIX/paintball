@@ -544,7 +544,7 @@ const Game = () => {
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center">
                                 <h4>Itens:</h4>
-                                {jogador.items ? JSON.parse(jogador.items).map((item, itemIndex) => (
+                                {jogador.items ? (Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items)).map((item, itemIndex) => (
                                     <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
                                         <p>{item.qtd}x - {item.nome} - R$ {item.valor}</p>
                                         <button
