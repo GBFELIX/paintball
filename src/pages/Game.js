@@ -182,7 +182,7 @@ const Game = () => {
             // Garante que items seja um array
             const items = Array.isArray(updatedJogadores[index].items) 
                 ? updatedJogadores[index].items 
-                : JSON.parse(updatedJogadores[index].items || '[]');
+                : (typeof updatedJogadores[index].items === 'string' ? JSON.parse(updatedJogadores[index].items) : []);
 
             // Verifica se o item já existe na lista de itens do jogador
             const existingItem = items.find(item => item.nome === selectedItem.nome);
@@ -473,14 +473,14 @@ const Game = () => {
                         <div className="flex flex-col items-center">
                             <p><strong>Formas de Pagamento:</strong></p>
                                     {jogador.forma_pagamento ? 
-                                        JSON.parse(jogador.forma_pagamento).map(pagamento => (
+                                        (Array.isArray(jogador.forma_pagamento) ? jogador.forma_pagamento : JSON.parse(jogador.forma_pagamento)).map(pagamento => (
                                             <p key={pagamento.metodo} className="text-center">
                                                 {`${pagamento.metodo} - R$ ${pagamento.valor.toFixed(2)}`}
                                             </p>
                                         )) 
                                         : <p>Nenhuma forma de pagamento disponível</p>}
                                 </div>
-                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : [])}</p>
+                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]'))}</p>
                         </div>
                         <div className="w-full h-auto p-1" id="itemsObrigatorio">
                             <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
