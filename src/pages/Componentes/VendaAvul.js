@@ -287,25 +287,8 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${venda.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className="bg-blue-600 w-full p-3 rounded-t-lg gap-2 flex flex-col justify-center items-center text-black font-normal md:flex-col md:justify-between">
                             <p className="text-black">Venda Avulsa</p>
-                            <div className="flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
-                                <input
-                                    type="text"
-                                    className="text-center w-10 rounded-sm px-2 py-1"
-                                    placeholder="N°"
-                                    value={venda.numero}
-                                    onChange={(e) => handleNumeroChange(index, e)}
-                                    disabled={venda.isClosed}
-                                />
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="text"
-                                        className="text-center w-44 rounded-sm px-2 py-1"
-                                        placeholder="Cliente"
-                                        value={venda.nome}
-                                        onChange={(e) => handleNomeChange(index, e)}
-                                        disabled={venda.isClosed}
-                                    />
-                                    {venda.isClosed && (
+                            <div className="flex items-center gap-2">
+                            {venda.isClosed && (
                                         <button
                                             onClick={() => {
                                                 const items = venda.items || [];
@@ -339,6 +322,25 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                                         </button>
                                     )}
                                 </div>
+                            <div className="flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
+                                <input
+                                    type="text"
+                                    className="text-center w-10 rounded-sm px-2 py-1"
+                                    placeholder="N°"
+                                    value={venda.numero}
+                                    onChange={(e) => handleNumeroChange(index, e)}
+                                    disabled={venda.isClosed}
+                                />
+                                
+                                    <input
+                                        type="text"
+                                        className="text-center w-44 rounded-sm px-2 py-1"
+                                        placeholder="Cliente"
+                                        value={venda.nome}
+                                        onChange={(e) => handleNomeChange(index, e)}
+                                        disabled={venda.isClosed}
+                                    />
+                                    
                                 <div className="inline-flex">
                                     <button
                                         className="bg-white hover:bg-green-600 text-black py-1 px-2 rounded-l"
