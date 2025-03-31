@@ -535,7 +535,11 @@ const Game = () => {
                             ))}
                         </div>
                         <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
-                            <h1 className="text-md font-semibold">Total: R${valorTotalVenda.toFixed(2)}</h1>
+                            <h1 className="text-md font-semibold">Total: R${(Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]')).reduce((sum, item) => {
+                                const quantidade = item.quantidade || 1;
+                                const valor = parseFloat(item.valor) || 0;
+                                return sum + (quantidade * valor);
+                            }, 0).toFixed(2)}</h1>
                         </div>
                         <div className="flex justify-center items-center mt-2">
                             <button
