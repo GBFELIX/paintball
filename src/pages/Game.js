@@ -282,7 +282,7 @@ const Game = () => {
         const jogador = jogadores[index];
 
         // Verifique se o nome do jogador está preenchido
-        if (!jogador.nome || jogador.nome.trim() === '') {
+        if (!jogador.nome_jogador || jogador.nome_jogador.trim() === '') {
             toast.error('O nome do jogador é obrigatório antes de fechar o pedido.', {
                 position: "top-right",
                 autoClose: 3000,
