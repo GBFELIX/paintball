@@ -377,6 +377,7 @@ const Game = () => {
             console.error('Erro ao cadastrar pedido:', error);
             toast.error('Erro ao finalizar pedido');
         }
+        fetchJogadores();
     };
 
     const calculateTotalValue = (items) => {
