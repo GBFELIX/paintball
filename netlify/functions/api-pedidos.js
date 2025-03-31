@@ -93,22 +93,36 @@ async function handlePost(event) {
 
 async function handleUpdateItem(event) {
     try {
-        const { pedidoId, items } = JSON.parse(event.body); // Recebe a nova lista de itens
-        console.log('Atualizando itens do pedido:', { pedidoId, items });
+        const { nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido } = JSON.parse(event.body);
+        console.log('Atualizando pedido:', { nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido });
 
-        // Atualiza a coluna items com a nova lista
-        const queryUpdateItems = 'UPDATE pedidos SET items = ? WHERE id = ?';
-        await db.promise().query(queryUpdateItems, [JSON.stringify(items), pedidoId]);
+        // Converte os arrays para JSON
+        const itemsString = JSON.stringify(items);
+        const formaPagamentoString = JSON.stringify(formaPagamento);
+
+        // Atualiza o pedido com todas as informações
+        const queryUpdatePedido = 'UPDATE pedidos SET nome_jogador = ?, items = ?, forma_pagamento = ?, valor_total = ?, data_pedido = ?, hora_pedido = ? WHERE nome_jogador = ? AND DATE(data_pedido) = ? AND hora_pedido = ?';
+        await db.promise().query(queryUpdatePedido, [
+            nomeJogador,
+            itemsString,
+            formaPagamentoString,
+            valorTotal,
+            dataPedido,
+            horaPedido,
+            nomeJogador,
+            dataPedido,
+            horaPedido
+        ]);
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Itens atualizados com sucesso' })
+            body: JSON.stringify({ message: 'Pedido atualizado com sucesso' })
         };
     } catch (error) {
-        console.error('Erro ao atualizar itens:', error.message);
+        console.error('Erro ao atualizar pedido:', error.message);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Erro ao atualizar itens', details: error.message })
+            body: JSON.stringify({ error: 'Erro ao atualizar pedido', details: error.message })
         };
     }
 }

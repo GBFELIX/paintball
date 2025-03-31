@@ -365,7 +365,7 @@ const Game = () => {
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
         try {
-            await axios.post('/.netlify/functions/api-pedidos', {
+            await axios.put('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
                 items: jogador.items.map(item => item.nome),
                 formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
