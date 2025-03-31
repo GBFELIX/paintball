@@ -407,7 +407,11 @@ const Game = () => {
         // Redireciona para a página ResumoEdit com os dados
         navigate('/resumoedit', { state: dataToSend });
     };
-    const valorTotalVenda = jogador.items ? JSON.parse(jogador.items).reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0) : 0;
+    const valorTotalVenda = jogador.items ? (Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]')).reduce((sum, item) => {
+        const quantidade = item.quantidade || 1;
+        const valor = parseFloat(item.valor) || 0;
+        return sum + (quantidade * valor);
+    }, 0) : 0;
     return (
         <div className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
             <div className="flex justify-between w-full gap-4 mb-4">
