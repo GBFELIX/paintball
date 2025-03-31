@@ -218,9 +218,9 @@ const Game = () => {
                 : JSON.parse(updatedJogadores[index].items || '[]');
             const existingItem = items.find(i => i.nome === selectedItem.nome)
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+                existingItem.qtd = (existingItem.qtd || 1) + 1; // Incrementa a quantidade
             } else {
-                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                selectedItem.qtd = 1; // Define a quantidade como 1 se for um novo item
                 items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
