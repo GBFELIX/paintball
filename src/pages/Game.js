@@ -605,7 +605,7 @@ const Game = () => {
             </div>
             {showPaymentModal && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg w-[500px]">
+                    <div className="bg-white p-6 rounded-lg w-[500px] text-black">
                         <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
                         <div className="mb-4">
                             <p className="font-bold">Valor Total: R$ {valorTotalVendaAtual.toFixed(2)}</p>
@@ -627,7 +627,7 @@ const Game = () => {
                                 ))}
                             </select>
                         </div>
-                        <div className="flex flex-col gap-4 mb-4">
+                        <div className="flex flex-col gap-4 mb-4 text-black">
                             {['dinheiro', 'credito', 'debito', 'pix', 'deposito'].map((method) => (
                                 <div key={method} className="flex items-center space-x-2">
                                     <input
@@ -658,7 +658,7 @@ const Game = () => {
                                 </div>
                             ))}
                         </div>
-                        <div className="mb-4">
+                        <div className="mb-4 text-black">
                             <p className="font-bold">
                                 Valor com Desconto: R$ {typeof valorComDesconto === 'number' ? valorComDesconto.toFixed(2) : '0.00'}
                             </p>
