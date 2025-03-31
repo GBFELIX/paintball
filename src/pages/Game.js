@@ -502,6 +502,16 @@ const Game = () => {
                                         </option>
                                     ))}
                                 </select>
+                                <div className="inline-flex">
+                                    <button
+                                        className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                        onClick={() => handleAddItem(index)}
+                                        disabled={jogador.isClosed}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                         <div className="w-full h-auto p-1">
