@@ -361,14 +361,17 @@ const Game = () => {
         setJogadores(updatedJogadores);
         setShowPaymentModal(false);
         toast.success('Pagamento confirmado com sucesso!');
+        
         // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
         try {
             await axios.put('/.netlify/functions/api-pedidos', {
-                nomeJogador: jogador.nome,
-                items: jogador.items.map(item => item.nome),
-                formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
+                nomeJogador: jogador.nome_jogador,
+                items: jogador.items,
+                formaPagamento: Object.entries(paymentValues)
+                    .filter(([_, value]) => value > 0)
+                    .map(([metodo, valor]) => ({ metodo, valor })),
                 valorTotal: valorTotal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
