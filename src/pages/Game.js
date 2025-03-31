@@ -502,38 +502,33 @@ const Game = () => {
                                         </option>
                                     ))}
                                 </select>
-                                <div className="inline-flex">
-                                    <button
-                                        className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                        onClick={() => handleAddItem(index)}
-                                        disabled={jogador.isClosed}
-                                    >
-                                        +
-                                    </button>
-                                </div>
                             </div>
-                            {Array.isArray(jogador.items) && jogador.items.map((item, itemIndex) => (
-                                <div key={itemIndex} className="p-2 flex flex-col justify-center items-center md:flex-row md:justify-between">
-                                    <div className="inline-flex">
+                        </div>
+                        <div className="w-full h-auto p-1">
+                            <div className="p-2 flex flex-col justify-center items-center">
+                                <h4>Itens:</h4>
+                                {jogador.items ? (Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items)).map((item, itemIndex) => (
+                                    <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
+                                        <div className="inline-flex">
                                         <button
                                             className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleRemoveItem(index, itemIndex)}
-                                            disabled={jogador.isClosed}
+                                            onClick={() => handleDeleteItem(jogador, itemIndex)}
                                         >
                                             -
                                         </button>
-                                        <button
-                                            className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
-                                            onClick={() => handleAddItemNovo(index, item)}
-                                            disabled={jogador.isClosed}
-                                        >
-                                            +
-                                        </button>
+                                            <button
+                                                className="bg-black hover:bg-primary py-1 px-2 rounded text-white"
+                                                onClick={() => handleAddItemNovo(index, item)}
+                                                disabled={jogador.isClosed}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                        <p>{item.qtd}x - {item.nome} - R$ {item.valor}</p>
+                                        
                                     </div>
-                                    <p>{item.nome} - {item.quantidade || 1}</p>
-                                    <p>R${parseFloat(item.valor).toFixed(2)}</p>
-                                </div>
-                            ))}
+                                )) : <p>Nenhum item disponível</p>}
+                            </div>
                         </div>
                         <div className="inline-flex gap-4 justify-around w-full items-center mt-4">
                             <h1 className="text-md font-semibold">Total: R${(Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]')).reduce((sum, item) => {
@@ -549,22 +544,6 @@ const Game = () => {
                             >
                                 {jogador.isClosed ? 'Fechado' : 'Fechar Pedido'}
                             </button>
-                        </div>
-                        <div className="w-full h-auto p-1">
-                            <div className="p-2 flex flex-col justify-center items-center">
-                                <h4>Itens:</h4>
-                                {jogador.items ? (Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items)).map((item, itemIndex) => (
-                                    <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
-                                        <p>{item.qtd}x - {item.nome} - R$ {item.valor}</p>
-                                        <button
-                                            className="bg-black hover:bg-red-500 py-1 px-2 rounded text-white"
-                                            onClick={() => handleDeleteItem(jogador, itemIndex)}
-                                        >
-                                            -
-                                        </button>
-                                    </div>
-                                )) : <p>Nenhum item disponível</p>}
-                            </div>
                         </div>
                     </section>
                 ))}
