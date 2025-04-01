@@ -187,18 +187,18 @@ const Game = () => {
             // Verifica se o item já existe na lista de itens do jogador
             const existingItem = items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
-                existingItem.qtd = (existingItem.qtd || 1) + 1; // Incrementa a quantidade
+                existingItem.qtd = (existingItem.qtd || 1) + 1; 
             } else {
-                selectedItem.qtd = 1; // Define a quantidade como 1 se for um novo item
+                selectedItem.qtd = 1; 
                 items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
             updatedJogadores[index].items = items;
 
-            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
+            
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
-            storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
             updateJogadores(updatedJogadores);
@@ -307,7 +307,7 @@ const Game = () => {
 
         // Calcular o valor total após fechar o pedido
         const items = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
-        const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
+        const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
         setValorTotalVendaAtual(valorTotal); // Atualiza o estado com o novo total
     };
     const handleRemoveItem = (jogadorIndex, itemIndex) => {
@@ -325,8 +325,8 @@ const Game = () => {
         localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
         // Reduz a quantidade do item ou remove o item se a quantidade for zero
-        if (updatedJogadores[jogadorIndex].items[itemIndex].quantidade > 1) {
-            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; // Decrementa a quantidade
+        if (updatedJogadores[jogadorIndex].items[itemIndex].qtd > 1) {
+            updatedJogadores[jogadorIndex].items[itemIndex].qtd -= 1; // Decrementa a quantidade
         } else {
             updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
         }
@@ -350,7 +350,7 @@ const Game = () => {
             return;
         }
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
+        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
         setValorTotalVendaAtual(valorTotal);
         if (totalPagamento !== valorTotal) {
             toast.error('O valor total do pagamento deve ser igual ao valor total dos itens');
@@ -400,16 +400,14 @@ const Game = () => {
 
         const dataToSend = {
             formaPagamento: pagamentos,
-            // Adicione outros dados necessários aqui, como data do jogo, hora, etc.
             dataJogo: dataJogo,
             horaJogo: horaJogo,
         };
 
-        // Redireciona para a página ResumoEdit com os dados
         navigate('/resumoedit', { state: dataToSend });
     };
     const valorTotalVenda = jogador.items ? (Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]')).reduce((sum, item) => {
-        const quantidade = item.quantidade || 1;
+        const quantidade = item.qtd || 1;
         const valor = parseFloat(item.valor) || 0;
         return sum + (quantidade * valor);
     }, 0) : 0;
