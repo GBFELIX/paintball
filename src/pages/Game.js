@@ -373,6 +373,15 @@ const Game = () => {
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
             });
+            console.log('Pedido atualizado com sucesso:', {
+                nomeJogador: jogador.nome,
+                items: jogador.items.map(item => item.nome),
+                formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
+                valorTotal: valorTotal,
+                dataPedido: dataJogo,
+                horaPedido: horaJogo,
+            });
+            toast.success('Pedido atualizado com sucesso!');
         } catch (error) {
             console.error('Erro ao cadastrar pedido:', error);
             toast.error('Erro ao finalizar pedido');
