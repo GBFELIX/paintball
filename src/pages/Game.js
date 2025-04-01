@@ -377,7 +377,10 @@ const Game = () => {
             console.error('Erro ao cadastrar pedido:', error);
             toast.error('Erro ao finalizar pedido');
         }
-        fetchJogadores();
+        // Adiciona um delay de 3 segundos antes de recarregar os jogadores
+        setTimeout(() => {
+            fetchJogadores();
+        }, 3000);
     };
 
     const calculateTotalValue = (items) => {
