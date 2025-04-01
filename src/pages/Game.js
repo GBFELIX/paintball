@@ -366,7 +366,7 @@ const Game = () => {
         const horaJogo = localStorage.getItem('horaJogo');
         try {
             await axios.put('/.netlify/functions/api-pedidos', {
-                nomeJogador: jogador.nome,
+                nomeJogador: jogador.nome_jogador,
                 items: jogador.items.map(item => item.nome),
                 formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
                 valorTotal: valorTotal,
@@ -374,7 +374,7 @@ const Game = () => {
                 horaPedido: horaJogo,
             });
             console.log('Pedido atualizado com sucesso:', {
-                nomeJogador: jogador.nome,
+                nomeJogador: jogador.nome_jogador,
                 items: jogador.items.map(item => item.nome),
                 formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
                 valorTotal: valorTotal,
