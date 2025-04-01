@@ -361,7 +361,6 @@ const Game = () => {
         setJogadores(updatedJogadores);
         setShowPaymentModal(false);
         toast.success('Pagamento confirmado com sucesso!');
-        
         // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');

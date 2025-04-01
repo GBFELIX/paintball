@@ -96,31 +96,12 @@ async function handleUpdateItem(event) {
         const { nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido } = JSON.parse(event.body);
         console.log('Atualizando pedido:', { nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido });
 
-        // Verifica se todos os campos necessários estão presentes
-        if (!nomeJogador || !dataPedido || !horaPedido) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Campos obrigatórios não fornecidos' })
-            };
-        }
-
         // Converte os arrays para JSON
-        const itemsString = JSON.stringify(items || []);
-        const formaPagamentoString = JSON.stringify(formaPagamento || []);
-
-        // Verifica se o pedido existe antes de atualizar
-        const checkQuery = 'UPDATE pedidos SET nomeJogador = ?, items = ?, forma_pagamento = ?, valor_total = ?, data_pedido = ?, hora_pedido = ? WHERE nome_jogador = ? AND DATE(data_pedido) = ? AND hora_pedido = ?';
-        const [existingPedido] = await db.promise().query(checkQuery, [nomeJogador, dataPedido, horaPedido]);
-
-        if (!existingPedido || existingPedido.length === 0) {
-            return {
-                statusCode: 404,
-                body: JSON.stringify({ error: 'Pedido não encontrado' })
-            };
-        }
+        const itemsString = JSON.stringify(items);
+        const formaPagamentoString = JSON.stringify(formaPagamento);
 
         // Atualiza o pedido com todas as informações
-        const queryUpdatePedido = 'UPDATE pedidos SET nomeJogador = ?, items = ?, forma_pagamento = ?, valor_total = ?, data_pedido = ?, hora_pedido = ? WHERE nome_jogador = ? AND DATE(data_pedido) = ? AND hora_pedido = ?';
+        const queryUpdatePedido = 'UPDATE pedidos SET nome_jogador = ?, items = ?, forma_pagamento = ?, valor_total = ?, data_pedido = ?, hora_pedido = ? WHERE nome_jogador = ? AND DATE(data_pedido) = ? AND hora_pedido = ?';
         await db.promise().query(queryUpdatePedido, [
             nomeJogador,
             itemsString,
@@ -145,6 +126,7 @@ async function handleUpdateItem(event) {
         };
     }
 }
+
 
 async function handleDeleteItem(event) {
     try {
