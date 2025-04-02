@@ -104,12 +104,10 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'PUT') {
         try {
-            const { id, dataJogo, horaJogo, totalJogadores, formasPagamento, totalArrecadado } = JSON.parse(event.body);
+            const { dataJogo, horaJogo, totalJogadores, formasPagamento, totalArrecadado } = JSON.parse(event.body);
 
             const query = `
                 UPDATE financeiro SET 
-                    data_jogo = ?, 
-                    hora_jogo = ?, 
                     total_jogadores = ?, 
                     credito = ?, 
                     debito = ?, 
@@ -117,12 +115,10 @@ exports.handler = async(event, context) => {
                     pix = ?, 
                     deposito = ?, 
                     total_arrecadado = ?
-                WHERE id = ?
+                WHERE data_jogo = ? AND hora_jogo = ?
             `;
 
             await connection.query(query, [
-                dataJogo,
-                horaJogo,
                 totalJogadores,
                 formasPagamento.credito,
                 formasPagamento.debito,
@@ -130,7 +126,8 @@ exports.handler = async(event, context) => {
                 formasPagamento.pix,
                 formasPagamento.deposito,
                 totalArrecadado,
-                id // ID do registro a ser atualizado
+                dataJogo,
+                horaJogo
             ]);
 
             return {

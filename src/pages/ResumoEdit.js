@@ -49,13 +49,28 @@ export default function ResumoEdit() {
             horaJogo: jogo.hora,
             totalJogadores: pagamentos.length,
             formasPagamento: {
-                credito: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'credito')?.valor || 0), 0),
-                debito: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'debito')?.valor || 0), 0),
-                dinheiro: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'dinheiro')?.valor || 0), 0),
-                pix: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'pix')?.valor || 0), 0),
-                deposito: formasPagamento.reduce((acc, jogador) => acc + (jogador.formaPagamento.find(p => p.metodo === 'deposito')?.valor || 0), 0),
+                credito: formasPagamento.reduce((acc, jogador) => {
+                    const pagamento = jogador.formaPagamento.find(p => p.metodo === 'credito');
+                    return acc + (parseFloat(pagamento?.valor) || 0);
+                }, 0),
+                debito: formasPagamento.reduce((acc, jogador) => {
+                    const pagamento = jogador.formaPagamento.find(p => p.metodo === 'debito');
+                    return acc + (parseFloat(pagamento?.valor) || 0);
+                }, 0),
+                dinheiro: formasPagamento.reduce((acc, jogador) => {
+                    const pagamento = jogador.formaPagamento.find(p => p.metodo === 'dinheiro');
+                    return acc + (parseFloat(pagamento?.valor) || 0);
+                }, 0),
+                pix: formasPagamento.reduce((acc, jogador) => {
+                    const pagamento = jogador.formaPagamento.find(p => p.metodo === 'pix');
+                    return acc + (parseFloat(pagamento?.valor) || 0);
+                }, 0),
+                deposito: formasPagamento.reduce((acc, jogador) => {
+                    const pagamento = jogador.formaPagamento.find(p => p.metodo === 'deposito');
+                    return acc + (parseFloat(pagamento?.valor) || 0);
+                }, 0),
             },
-            totalArrecadado
+            totalArrecadado: parseFloat(totalArrecadado)
         };
 
         try {
@@ -105,19 +120,36 @@ export default function ResumoEdit() {
                     <h1 className="text-2xl font-bold">Formas de pagamento</h1>
                     <div className="w-full px-3">
                         {formasPagamento && formasPagamento.length > 0 ? (
-                            formasPagamento.map((jogador, index) => (
-                                jogador.formaPagamento && jogador.formaPagamento.length > 0 ? (
-                                    jogador.formaPagamento.map((pagamento, pagamentoIndex) => (
-                                        <div key={`${index}-${pagamentoIndex}`} className="flex flex-row justify-around items-start">
-                                            <p className="text-xl font-semibold">{pagamento.metodo || 'Método Indefinido'}</p>
-                                            <p id={pagamento.metodo ? pagamento.metodo.toLowerCase() : 'metodo-indefinido'}>
-                                                {pagamento.valor !== undefined ? `R$ ${pagamento.valor.toFixed(2)}` : 'R$ 0.00'}
-                                            </p>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p>Nenhuma forma de pagamento disponível</p>
-                                )
+                            // Agrupa e soma os valores por método de pagamento
+                            formasPagamento.reduce((acc, jogador) => {
+                                if (jogador.formaPagamento && jogador.formaPagamento.length > 0) {
+                                    jogador.formaPagamento.forEach(pagamento => {
+                                        if (!acc[pagamento.metodo]) {
+                                            acc[pagamento.metodo] = 0;
+                                        }
+                                        acc[pagamento.metodo] += pagamento.valor;
+                                    });
+                                }
+                                return acc;
+                            }, {}),
+                            // Renderiza os métodos de pagamento agrupados
+                            Object.entries(formasPagamento.reduce((acc, jogador) => {
+                                if (jogador.formaPagamento && jogador.formaPagamento.length > 0) {
+                                    jogador.formaPagamento.forEach(pagamento => {
+                                        if (!acc[pagamento.metodo]) {
+                                            acc[pagamento.metodo] = 0;
+                                        }
+                                        acc[pagamento.metodo] += pagamento.valor;
+                                    });
+                                }
+                                return acc;
+                            }, {})).map(([metodo, valor]) => (
+                                <div key={metodo} className="flex flex-row justify-around items-start">
+                                    <p className="text-xl font-semibold">{metodo || 'Método Indefinido'}</p>
+                                    <p id={metodo ? metodo.toLowerCase() : 'metodo-indefinido'}>
+                                        R$ {valor.toFixed(2)}
+                                    </p>
+                                </div>
                             ))
                         ) : (
                             <p>Nenhuma forma de pagamento disponível</p>
