@@ -96,10 +96,8 @@ export default function PreAgendado() {
 
   const imprimirNomesJogadores = () => {
     if (jogadores.length > 0 && selectedEquipe) {
-      // Cria uma nova janela
       const printWindow = window.open('', '_blank');
       
-      // Adiciona conteúdo à nova janela
       printWindow.document.write(`
         <html>
           <head>

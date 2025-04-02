@@ -12,7 +12,7 @@ const db = mysql.createConnection({
 exports.handler = async (event, context) => {
   const connection = await db;
 
-  // POST /jogador
+
   if (event.httpMethod === 'POST') {
     try {
       const { username, email } = JSON.parse(event.body);
@@ -39,9 +39,9 @@ exports.handler = async (event, context) => {
     }
   }
 
-  // GET /jogador?team_id=1
+
   if (event.httpMethod === 'GET') {
-    const teamId = event.queryStringParameters.team_id; // Obtém o team_id da query string
+    const teamId = event.queryStringParameters.team_id; 
     if (!teamId) {
       return {
         statusCode: 400,
@@ -50,12 +50,12 @@ exports.handler = async (event, context) => {
     }
 
     try {
-      const query = 'SELECT * FROM jogadores WHERE team_id = ?'; // Consulta para buscar jogadores pelo team_id
+      const query = 'SELECT * FROM jogadores WHERE team_id = ?'; 
       const [results] = await connection.query(query, [teamId]);
 
       return {
         statusCode: 200,
-        body: JSON.stringify(results) // Retorna os jogadores que pertencem ao team_id
+        body: JSON.stringify(results) 
       };
     } catch (err) {
       console.error('Erro ao buscar jogadores:', err);

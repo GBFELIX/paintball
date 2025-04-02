@@ -12,7 +12,6 @@ const db = mysql.createConnection({
 exports.handler = async(event, context) => {
     const connection = await db;
 
-    // GET /estoque
     if (event.httpMethod === 'GET') {
         try {
             const [results] = await connection.query('SELECT * FROM estoque');
@@ -53,7 +52,6 @@ exports.handler = async(event, context) => {
             };
         }
     }
-    // POST /estoque
     if (event.httpMethod === 'POST') {
         try {
             const { item, valor, quantidade, custo, tipo } = JSON.parse(event.body);
@@ -73,7 +71,7 @@ exports.handler = async(event, context) => {
         }
     }
 
-    // DELETE /estoque/:nome
+
     if (event.httpMethod === 'DELETE') {
         try {
             const nome = event.path.split('/').pop();
@@ -93,13 +91,13 @@ exports.handler = async(event, context) => {
         }
     }
 
-    // PUT /estoque/:nome
+
     if (event.httpMethod === 'PUT') {
         try {
             const nome = event.path.split('/').pop();
             const { quantidade, valor, tipo, custo } = JSON.parse(event.body);
 
-            // Verifica se o item existe antes de atualizar
+
             const [itemExists] = await connection.query('SELECT * FROM estoque WHERE nome = ?', [nome]);
             if (itemExists.length === 0) {
                 return {
@@ -108,7 +106,6 @@ exports.handler = async(event, context) => {
                 };
             }
 
-            // Verifica se o tipo é "Aluguel" e a quantidade está sendo diminuída
             if (tipo === 'Aluguel') {
                 quantidade = itemExists[0].quantidade;
             }

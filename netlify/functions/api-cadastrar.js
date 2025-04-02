@@ -21,7 +21,6 @@ exports.handler = async (event, context) => {
     const connection = await db;
     const { nome_equipe, jogadores } = JSON.parse(event.body);
 
-    // Validação dos dados
     if (!nome_equipe || !jogadores || jogadores.length === 0) {
       return {
         statusCode: 400,
@@ -29,12 +28,11 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Inserir a equipe
+ 
     const equipeSql = 'INSERT INTO equipes (nome_equipe) VALUES (?)';
     const [equipeResult] = await connection.query(equipeSql, [nome_equipe]);
     const teamId = equipeResult.insertId;
 
-    // Inserir jogadores
     const jogadoresSql = 'INSERT INTO jogadores (username, email, telefone, team_id) VALUES (?, ?, ?, ?)';
     
     try {

@@ -39,7 +39,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     }, []);
 
     useEffect(() => {
-        // Recupera os itens do localStorage ao montar o componente
         const storedItems = JSON.parse(localStorage.getItem('itensVenda')) || {};
         setQuantidadeLocal(storedItems);
     }, []);
@@ -84,12 +83,11 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             const selectedItem = { ...updatedVendas[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
-            // Verifica se o item já existe na lista de itens do jogador
             const existingItem = updatedVendas[index].items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1;
             } else {
-                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                selectedItem.quantidade = 1; 
                 updatedVendas[index].items.push(selectedItem);
             }
             updatedVendas[index].selectedItem = '';
@@ -109,19 +107,18 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
         if (item) {
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-            // Verifica se o item já existe na lista de itens do jogador
+            
             const existingItem = updatedVendas[index].items.find(i => i.nome === selectedItem.nome)
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; 
             } else {
-                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                selectedItem.quantidade = 1; 
                 updatedVendas[index].items.push(selectedItem);
             }
             updatedVendas[index].selectedItem = '';
-            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
-            storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
             updateVendas(updatedVendas);
         } else {
@@ -143,9 +140,9 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
         localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
         if (updatedVendas[vendaIndex].items[itemIndex].quantidade > 1) {
-            updatedVendas[vendaIndex].items[itemIndex].quantidade -= 1; // Decrementa a quantidade
+            updatedVendas[vendaIndex].items[itemIndex].quantidade -= 1; 
         } else {
-            updatedVendas[vendaIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
+            updatedVendas[vendaIndex].items.splice(itemIndex, 1);
         }
         updateVendas(updatedVendas);
     };
@@ -170,7 +167,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                         ...prev,
                         [item.nome]: (prev[item.nome] || 0) + 1
                     };
-                    // Armazena as quantidades no localStorage
                     localStorage.setItem('itensVenda', JSON.stringify(newQuantities));
                     return newQuantities;
                 });
@@ -200,12 +196,10 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
 
         const venda = vendas[vendaIndexForPayment];
         
-        // Verifica se o nome do cliente está vazio e define como "venda avulsa"
         const nomeCliente = venda.nome.trim() === '' ? 'venda avulsa' : venda.nome;
 
         const itemsToUpdate = venda.items;
 
-        // Contabiliza a quantidade total de cada item
         const itemCountMap = itemsToUpdate.reduce((acc, item) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
             return acc;
@@ -215,15 +209,15 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             if (paymentMethods[method]) {
                 return {
                     metodo: method,
-                    valor: paymentValues[method] || 0 // Inclui o valor associado a cada forma de pagamento
+                    valor: paymentValues[method] || 0 
                 };
             }
-            return null; // Retorna null para métodos não selecionados
-        }).filter(Boolean); // Remove os métodos que não foram selecionados (null)
+            return null;
+        }).filter(Boolean); 
 
         const dadosParaEnviar = {
             items: venda.items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
-            formaPagamento: formaPagamento, // Agora inclui os valores das formas de pagamento
+            formaPagamento: formaPagamento, 
         };
         
         try {
@@ -239,7 +233,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 horaPedido: horaJogo,
             });
 
-            // Atualiza estado e localStorage
             const updatedVendas = [...vendas];
             updatedVendas[vendaIndexForPayment].isClosed = true;
             updateVendas(updatedVendas);
@@ -263,7 +256,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
         }
     };
 
-    // Função para centralizar mensagens toast
     const showToast = (message, type = 'info') => {
         const options = {
             position: "top-right",

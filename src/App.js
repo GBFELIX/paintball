@@ -34,7 +34,6 @@ function Login() {
     navigate('/'); 
   };
   const handleLogin = async () => {
-    // Validação dos campos
     if (!username || !email) {
       toast.error('Por favor, preencha todos os campos', {
         position: "top-right",
@@ -72,7 +71,6 @@ function Login() {
           theme: "light",
         });
         
-        // Pequeno delay antes de redirecionar para garantir que o usuário veja o toast
         setTimeout(() => {
           navigate("/cadequipe");
         }, 1000);

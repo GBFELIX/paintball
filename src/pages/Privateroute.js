@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
+import 'react-toastify/dist/ReactToastify.css'; 
 
 function PrivateRoute({ role, children }) {
   const userRole = localStorage.getItem('role');

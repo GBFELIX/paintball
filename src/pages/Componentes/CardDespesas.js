@@ -64,20 +64,19 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
       const selectedItem = { ...updatedDespesas[index].selectedItem };
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
-      // Verifica se o item já existe na lista de itens do jogador
       const existingItem = updatedDespesas[index].items.find(item => item.nome === selectedItem.nome);
       if (existingItem) {
-          existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+          existingItem.quantidade = (existingItem.quantidade || 1) + 1; 
       } else {
-          selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+          selectedItem.quantidade = 1; 
           updatedDespesas[index].items.push(selectedItem);
       }
       updatedDespesas[index].selectedItem = '';
 
-      // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
+    
       const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
       const itemName = selectedItem.nome;
-      storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+      storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
       localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
       setDespesas(updatedDespesas);
@@ -88,20 +87,19 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     const updatedDespesas = [...despesas];
     const itemName = updatedDespesas[despesaIndex].items[itemIndex].nome;
 
-    // Atualiza o localStorage ao remover um item
     const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
     if (storedItems[itemName]) {
-      storedItems[itemName] -= 1; // Decrementa a quantidade
+      storedItems[itemName] -= 1; 
       if (storedItems[itemName] <= 0) {
-        delete storedItems[itemName]; // Remove o item se a quantidade for zero
+        delete storedItems[itemName]; 
       }
     }
     localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
     if (updatedDespesas[despesaIndex].items[itemIndex].quantidade > 1) {
-            updatedDespesas[despesaIndex].items[itemIndex].quantidade -= 1; // Decrementa a quantidade
+            updatedDespesas[despesaIndex].items[itemIndex].quantidade -= 1; 
         } else {
-            updatedDespesas[despesaIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
+            updatedDespesas[despesaIndex].items.splice(itemIndex, 1); 
         }
     setDespesas(updatedDespesas);
   };
@@ -153,7 +151,6 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
             horaPedido: horaJogo,
         });
 
-        // Atualiza estado e localStorage
         const updatedDespesas = [...despesas];
         updatedDespesas[despesaIndexForPayment].isClosed = true;
         updatedDespesas[despesaIndexForPayment].valorTotal = valorFinal;
@@ -196,19 +193,18 @@ const handleAddItemNovo = (index, item) => {
   if (item) {
       const selectedItem = { ...item };
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-      // Verifica se o item já existe na lista de itens do jogador
+     
       const existingItem = updatedDespesas[index].items.find(i => i.nome === selectedItem.nome)
       if (existingItem) {
-          existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+          existingItem.quantidade = (existingItem.quantidade || 1) + 1;
       } else {
-          selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+          selectedItem.quantidade = 1; 
           updatedDespesas[index].items.push(selectedItem);
       }
       updatedDespesas[index].selectedItem = '';
-      // Armazenar a quantidade e o nome dos itens no localStorage da p��gina VendaAvul
       const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
       const itemName = selectedItem.nome;
-      storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+      storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
       localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
       updateDespesas(updatedDespesas);
   } else {
@@ -217,7 +213,7 @@ const handleAddItemNovo = (index, item) => {
 };
 const handleAddDespesaValor = (index, event) => {
     const updatedDespesas = [...despesas];
-    updatedDespesas[index].valor = parseFloat(event.target.value) || 0; // Corrigido para armazenar o valor
+    updatedDespesas[index].valor = parseFloat(event.target.value) || 0; 
     updateDespesas(updatedDespesas);
 };
 

@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useGameContext } from '../context/GameContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import ClipLoader from 'react-spinners/ClipLoader'; // Importar o ClipLoader
+import ClipLoader from 'react-spinners/ClipLoader'; 
 import { toast } from 'react-toastify';
 import VendaAvulsa from './Componentes/VendaAvul';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
-// Adicione o estilo do spinner
 const spinnerStyle = `
   @keyframes spin {
     0% { transform: rotate(0deg); }
@@ -27,7 +26,7 @@ const spinnerStyle = `
 const Game = () => {
 
     const location = useLocation();
-    const { dataJogo, horaJogo } = location.state || {}; // Recebe os dados passados
+    const { dataJogo, horaJogo } = location.state || {}; 
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -43,9 +42,9 @@ const Game = () => {
         items: [],
         selectedItem: '',
         isClosed: false
-    }]); // Estado para armazenar os jogadores
-    const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
-    const [estoque, setEstoque] = useState([]); // Adicionando estado para estoque
+    }]); 
+    const [loading, setLoading] = useState(true);
+    const [estoque, setEstoque] = useState([]); 
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [jogadorIndexForPayment, setJogadorIndexForPayment] = useState(null);
     const [paymentValues, setPaymentValues] = useState({ dinheiro: 0, credito: 0, debito: 0, pix: 0, deposito: 0 });
@@ -63,11 +62,10 @@ const Game = () => {
     }]);
     const [jogador, setJogador] = useState({
         id: null,
-        items: '[]', // Inicialize com um valor padrão
-        // outras propriedades...
+        items: '[]', 
     });
-    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
-    const [itemToDelete, setItemToDelete] = useState(null); // Estado para armazenar o item a ser deletado
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null); 
     const [updateCounter, setUpdateCounter] = useState(0);
 
     const handleAddVendaAvulsa = () => {
@@ -81,15 +79,14 @@ const Game = () => {
         }]);
     };
 
-    // Função para buscar os dados dos jogadores
     const fetchJogadores = async () => {
         try {
             const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
-            setJogadores(response.data || []); // Certifique-se de que é um array
+            setJogadores(response.data || []); 
         } catch (error) {
             console.error('Erro ao buscar jogadores:', error);
         } finally {
-            setLoading(false); // Define loading como false após a busca
+            setLoading(false); 
         }
     };
 
@@ -122,11 +119,6 @@ const Game = () => {
         };
         fetchDescontos();
     }, []);
-
-    //useEffect(() => {
-        // Função para buscar dados atualizados
-    //    fetchJogadores(); // Chame sua função de busca de dados aqui
-    //}, [jogadores]); // O efeito será executado sempre que 'jogadores' mudar
 
     if (loading) {
         return (
@@ -179,12 +171,10 @@ const Game = () => {
             const selectedItem = { ...updatedJogadores[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
-            // Garante que items seja um array
             const items = Array.isArray(updatedJogadores[index].items) 
                 ? updatedJogadores[index].items 
                 : (typeof updatedJogadores[index].items === 'string' ? JSON.parse(updatedJogadores[index].items) : []);
 
-            // Verifica se o item já existe na lista de itens do jogador
             const existingItem = items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
                 existingItem.qtd = (existingItem.qtd || 1) + 1; 
@@ -212,23 +202,21 @@ const Game = () => {
         if (item) {
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-            // Verifica se o item já existe na lista de itens do jogador
             const items = Array.isArray(updatedJogadores[index].items) 
                 ? updatedJogadores[index].items 
                 : JSON.parse(updatedJogadores[index].items || '[]');
             const existingItem = items.find(i => i.nome === selectedItem.nome)
             if (existingItem) {
-                existingItem.qtd = (existingItem.qtd || 1) + 1; // Incrementa a quantidade
+                existingItem.qtd = (existingItem.qtd || 1) + 1; 
             } else {
-                selectedItem.qtd = 1; // Define a quantidade como 1 se for um novo item
+                selectedItem.qtd = 1; 
                 items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
             updatedJogadores[index].items = items;
-            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
-            storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
             updateJogadores(updatedJogadores);
         } else {
@@ -237,8 +225,8 @@ const Game = () => {
     };
     
     const handleDeleteItem = (jogador, itemIndex) => {
-        setItemToDelete({ jogador, itemIndex }); // Armazena o jogador e o índice do item a ser deletado
-        setIsModalOpen(true); // Abre o modal de confirmação
+        setItemToDelete({ jogador, itemIndex }); 
+        setIsModalOpen(true); 
     };
 
     const confirmDeleteItem = async () => {
@@ -249,10 +237,8 @@ const Game = () => {
             const pedidoId = jogador.id;
             const itemsArray = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
 
-            // Remove o item do array
             const updatedItems = itemsArray.filter((_, index) => index !== itemIndex);
 
-            // Faz a chamada para a API para deletar o item
             const deleteResponse = await axios.delete(`/.netlify/functions/api-pedidos/${pedidoId}`, {
                 data: { pedidoId, itemIndex }
             });
@@ -265,15 +251,14 @@ const Game = () => {
                 });
                 toast.success('Item removido com sucesso!');
 
-                // Força uma atualização
                 setUpdateCounter(prev => prev + 1);
             }
         } catch (error) {
             console.error('Erro ao remover o item:', error);
             toast.error('Erro ao remover o item.');
         } finally {
-            setIsModalOpen(false); // Fecha o modal após a confirmação
-            setItemToDelete(null); // Limpa o item a ser deletado
+            setIsModalOpen(false); 
+            setItemToDelete(null); 
         }
         fetchJogadores();
     };
@@ -281,7 +266,6 @@ const Game = () => {
     const handleClosePedido = (index) => {
         const jogador = jogadores[index];
 
-        // Verifique se o nome do jogador está preenchido
         if (!jogador.nome_jogador || jogador.nome_jogador.trim() === '') {
             toast.error('O nome do jogador é obrigatório antes de fechar o pedido.', {
                 position: "top-right",
@@ -292,7 +276,7 @@ const Game = () => {
                 draggable: true,
                 theme: "light",
             });
-            return; // Não fecha o pedido se o nome não estiver preenchido
+            return; 
         }
 
         if (jogador.isClosed) {
@@ -305,30 +289,30 @@ const Game = () => {
             setShowPaymentModal(true);
         }
 
-        // Calcular o valor total após fechar o pedido
+
         const items = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
         const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
-        setValorTotalVendaAtual(valorTotal); // Atualiza o estado com o novo total
+        setValorTotalVendaAtual(valorTotal); 
     };
     const handleRemoveItem = (jogadorIndex, itemIndex) => {
         const updatedJogadores = [...jogadores];
         const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
 
-        // Atualiza o localStorage ao remover um item
+
         const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
         if (storedItems[itemName]) {
-            storedItems[itemName] -= 1; // Decrementa a quantidade
+            storedItems[itemName] -= 1; 
             if (storedItems[itemName] <= 0) {
-                delete storedItems[itemName]; // Remove o item se a quantidade for zero
+                delete storedItems[itemName]; 
             }
         }
         localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
-        // Reduz a quantidade do item ou remove o item se a quantidade for zero
+
         if (updatedJogadores[jogadorIndex].items[itemIndex].qtd > 1) {
-            updatedJogadores[jogadorIndex].items[itemIndex].qtd -= 1; // Decrementa a quantidade
+            updatedJogadores[jogadorIndex].items[itemIndex].qtd -= 1; 
         } else {
-            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
+            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); 
         }
         
         updateJogadores(updatedJogadores);
@@ -361,24 +345,10 @@ const Game = () => {
         setJogadores(updatedJogadores);
         setShowPaymentModal(false);
         toast.success('Pagamento confirmado com sucesso!');
-        // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
         try {
             await axios.put('/.netlify/functions/api-pedidos', {
-                nomeJogador: jogador.nome_jogador,
-                items: jogador.items,
-                formaPagamento: Object.entries(paymentMethods)
-                    .filter(([_, isSelected]) => isSelected)
-                    .map(([metodo]) => ({
-                        metodo,
-                        valor: parseFloat(paymentValues[metodo]) || 0
-                    })),
-                valorTotal: valorTotal,
-                dataPedido: dataJogo,
-                horaPedido: horaJogo,
-            });
-            console.log('Pedido atualizado com sucesso:', {
                 nomeJogador: jogador.nome_jogador,
                 items: jogador.items,
                 formaPagamento: Object.entries(paymentMethods)
@@ -396,7 +366,6 @@ const Game = () => {
             console.error('Erro ao cadastrar pedido:', error);
             toast.error('Erro ao finalizar pedido');
         }
-        // Adiciona um delay de 3 segundos antes de recarregar os jogadores
         setTimeout(() => {
             fetchJogadores();
         }, 3000);
@@ -404,19 +373,18 @@ const Game = () => {
 
     const calculateTotalValue = (items) => {
         return items.reduce((acc, item) => {
-            const quantidade = item.qtd || 0; // Pega a quantidade, se não existir, usa 0
-            const valor = parseFloat(item.valor) || 0; // Pega o valor, se não existir, usa 0
-            return acc + (quantidade * valor); // Soma a quantidade multiplicada pelo valor
+            const quantidade = item.qtd || 0; 
+            const valor = parseFloat(item.valor) || 0; 
+            return acc + (quantidade * valor); 
         }, 0);
     };
 
     const handleFecharPartida = () => {
-        // Coletar dados de pagamento de todos os jogadores
         const pagamentos = jogadores.map(jogador => {
             return {
                 nomeJogador: jogador.nome_jogador,
                 formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
-                valorTotal: calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : []), // Supondo que você tenha uma função para calcular o valor total
+                valorTotal: calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : []), 
             };
         });
 
@@ -693,7 +661,6 @@ const Game = () => {
                     </div>
                 </div>
             )}
-            {/* Modal de Confirmação */}
             {isModalOpen && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white p-6 rounded-lg w-96">

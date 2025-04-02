@@ -1,22 +1,20 @@
 import logo from '../../images/logo_la.png';
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-//import NavBar from '../Componentes/Navbar';
+
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
-// inputmask
+import 'react-toastify/dist/ReactToastify.css'; 
 import { InputMask } from '@react-input/mask';
 
 function CadJog() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  //const [cpf, setCpf] = useState('');
+
   const [telefone, setTelefone] = useState('');
   const [senha, setSenha] = useState('');
   const navigate = useNavigate();
 
   const handleCadastro = async () => {
-    // Validar campos obrigatórios antes de enviar
     if (!username || !email || !telefone || !senha) {
       toast.error('Por favor, preencha os campos obrigatórios (nome, email, telefone e senha).', {
         position: "top-right",

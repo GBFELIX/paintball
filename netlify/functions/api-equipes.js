@@ -12,7 +12,6 @@ const db = mysql.createConnection({
 exports.handler = async (event, context) => {
   const connection = await db;
 
-  // DELETE /equipes/:team_id
   if (event.httpMethod === 'DELETE' && event.path.includes('/equipes/')) {
     try {
       const team_id = event.path.split('/')[2];
@@ -40,7 +39,6 @@ exports.handler = async (event, context) => {
     }
   }
 
-  // GET /equipes/:team_id/jogadores
   if (event.httpMethod === 'GET' && event.path.includes('/jogadores')) {
     try {
       const team_id = event.path.split('/')[2];
@@ -61,7 +59,6 @@ exports.handler = async (event, context) => {
     }
   }
 
-  // GET /equipes
   if (event.httpMethod === 'GET') {
     try {
       const sql = `

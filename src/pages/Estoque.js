@@ -421,11 +421,6 @@ export default function Estoque() {
               </div>
             </div>
 
-            {
-              /*
-                Desconto Programado
-              */
-            }
               <div className="w-full h-auto bg-red-600 rounded-sm flex flex-col p-5 items-center justify-center mb-5">
               <h2 className="font-bold mb-5 text-white">Desconto Programado</h2>
               <div className="flex flex-col md:flex-row items-center justify-center">
@@ -436,7 +431,6 @@ export default function Estoque() {
                     placeholder="Nome do Desconto" 
                     onChange={(e) => {
                         const value = e.target.value;
-                        // Regex para verificar se contém apenas letras e números
                         const regex = /^[a-zA-Z0-9]*$/;
 
                         if (!regex.test(value)) {
@@ -449,7 +443,6 @@ export default function Estoque() {
                                 draggable: true,
                                 theme: "light",
                             });
-                            // Remove o último caractere se não for permitido
                             e.target.value = value.slice(0, -1);
                         }
                     }}

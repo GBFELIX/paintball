@@ -151,7 +151,6 @@ export default function StatusGame() {
 
         setLoading(true);
         try {
-            // Lógica para diminuir os valores no banco de dados
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const promises = Object.keys(storedItems).map(async (itemName) => {
                 const quantidadeParaSubtrair = storedItems[itemName];
@@ -169,24 +168,19 @@ export default function StatusGame() {
 
                 const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
 
-                // Atualiza o estoque no banco de dados
                 await axios.put(`/.netlify/functions/api-estoque/${itemName}`, { nome: itemName, quantidade: novaQuantidade });
 
-                // Atualiza o localStorage após a subtração
-                storedItems[itemName] -= quantidadeParaSubtrair; // Decrementa a quantidade
+                storedItems[itemName] -= quantidadeParaSubtrair; 
                 if (storedItems[itemName] <= 0) {
-                    delete storedItems[itemName]; // Remove o item se a quantidade for zero
+                    delete storedItems[itemName]; 
                 }
             });
 
-            // Aguarda todas as promessas serem resolvidas
             await Promise.all(promises); 
 
-            // Atualiza o localStorage com o novo estado
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems)); 
 
-            // Limpa o localStorage da chave 'itensVendaAvul' após o processamento
-            localStorage.removeItem('itensVendaAvul'); // Remove o item do localStorage
+            localStorage.removeItem('itensVendaAvul'); 
 
             setShowConfirmationModal(false);
             toast.success('Partida finalizada com sucesso!', {
@@ -237,9 +231,8 @@ export default function StatusGame() {
                 return subtotal + (Number(item && item.valor) || 0);
             }, 0);
         }, 0);
-        
-        // Armazena o total de despesas no localStorage
-        localStorage.setItem('totdespesas', totalDespesas.toFixed(2)); // Armazena com duas casas decimais
+ 
+        localStorage.setItem('totdespesas', totalDespesas.toFixed(2)); 
 
         return totalDespesas;
     };
@@ -368,7 +361,6 @@ export default function StatusGame() {
                         </button>
                     </div>
 
-                    {/* Modal de confirmação */}
                     {showConfirmationModal && (
                         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
                             <div className="bg-white p-6 rounded-lg w-96">

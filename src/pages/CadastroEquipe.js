@@ -7,14 +7,14 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
 export default function CadEquipe() {
-  const [nomeEquipe, setNomeEquipe] = useState(''); // Nome da equipe
+  const [nomeEquipe, setNomeEquipe] = useState(''); 
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
   const [jogadores, setJogadores] = useState([]); 
   const [editIndex, setEditIndex] = useState(null); 
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false); // Estado para controlar o botão
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
   const handleAdd = () => {
     if (nome && email && telefone) {
@@ -88,7 +88,7 @@ export default function CadEquipe() {
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true); // Desabilita o botão ao iniciar o cadastro
+    setIsSubmitting(true); 
 
     if (!nomeEquipe) {
       toast.error('Preencha o nome da equipe antes de finalizar o cadastro.', {
@@ -100,7 +100,7 @@ export default function CadEquipe() {
         draggable: true,
         theme: "light",
       });
-      setIsSubmitting(false); // Reabilita o botão após o erro
+      setIsSubmitting(false); 
       return;
     }
 
@@ -114,7 +114,7 @@ export default function CadEquipe() {
         draggable: true,
         theme: "light",
       });
-      setIsSubmitting(false); // Reabilita o botão após o erro
+      setIsSubmitting(false); 
       return;
     }
 
@@ -170,7 +170,7 @@ export default function CadEquipe() {
         theme: "light",
       });
     } finally {
-      setIsSubmitting(false); // Reabilita o botão após a operação
+      setIsSubmitting(false); 
     }
   };
 
@@ -195,7 +195,6 @@ export default function CadEquipe() {
         <h2 className="text-red-600">Depois de cadastrar todos os jogadores, clique em finalizar cadastro.</h2>
       </div>
 
-      {/* Campo para o nome da equipe */}
       <input 
         type="text" 
         placeholder="Nome da Equipe" 

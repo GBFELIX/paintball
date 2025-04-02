@@ -56,16 +56,12 @@ export default function Financeiro() {
       .then((response) => {
         const data = response.data;
         setFinanceiroData(data);
-        console.log(data);
 
-        // Cálculo dos totais
         const totalArrecadado = data.reduce((acc, item) => acc + (parseFloat(item.total_arrecadado) || 0), 0);
         const totalDespesas = data.reduce((acc, item) => acc + (parseFloat(item.despesas) || 0), 0);
         
-        // Atualiza os estados dos totais
         setTotalArrecadado(totalArrecadado);
         setTotalDespesas(totalDespesas);
-        console.log("total", totalArrecadado);
         
         toast.success('Dados financeiros carregados com sucesso!', {
           position: "top-right",
@@ -161,12 +157,11 @@ export default function Financeiro() {
   };
 
   useEffect(() => {
-    // Filtra os dados com base nas datas
     const filteredData = financeiroData.filter(item => {
-      const itemDate = new Date(item.data_jogo); // Supondo que você tenha uma propriedade data_jogo
+      const itemDate = new Date(item.data_jogo); 
       return itemDate >= new Date(value.startDate) && itemDate <= new Date(value.endDate);
     });
-  }, [financeiroData, value.startDate, value.endDate]); // Dependências para recalcular quando as datas mudarem
+  }, [financeiroData, value.startDate, value.endDate]); 
 
   return (
     <section className="bg-black p-4 w-full h-screen flex flex-col items-center overflow-auto"> 
@@ -320,8 +315,6 @@ export default function Financeiro() {
           </div>
         </div>
       )}
-
-      {/* Renderizar o componente StatusGamer se showStatusGamer for true */}
       {showStatusGamer && dadosPedido && (
         <Game dadosPedido={dadosPedido} onClose={() => setShowStatusGamer(false)} />
       )}

@@ -11,12 +11,8 @@ function AddJogo() {
   const navigate = useNavigate(); 
   useEffect(() => {
     const now = new Date();
-    now.setDate(now.getDate() - 1); // Subtrai um dia da data atual
-
-    // Formatando a data no formato YYYY-MM-DD
+    now.setDate(now.getDate()); 
     const dataAtual = now.toISOString().split('T')[0];
-
-    // Formatando a hora no formato HH:MM
     const horaAtual = now.toTimeString().split(':').slice(0, 2).join(':');
 
     setData(dataAtual);
@@ -25,7 +21,6 @@ function AddJogo() {
 
   const handleAdicionar = async () => {
     try {
-      // Validar data e hora antes de prosseguir
       if (!data || !hora) {
         toast.error('Data e hora são obrigatórios.', {
           position: "top-right",
@@ -39,7 +34,6 @@ function AddJogo() {
         return;
       }
 
-      // Array de chaves para limpar localStorage
       const keysToRemove = [
        'pagamentos', 'totalAvulso', 'dataJogo', 'horaJogo',
         'jogadores', 'vendasAvulsas', 'despesas', 'descontos',
@@ -48,7 +42,6 @@ function AddJogo() {
         'totalDespesas', 'totalJogadores', 'totalArrecadado', 'formasPagamento'
       ];
       
-      // Limpar localStorage de forma mais segura
       keysToRemove.forEach(key => {
         try {
           localStorage.removeItem(key);
@@ -56,8 +49,6 @@ function AddJogo() {
           console.error(`Erro ao remover ${key}:`, e);
         }
       });
-
-      // Agora sim, adicionar os novos dados
       localStorage.setItem('dataJogo', data);
       localStorage.setItem('horaJogo', hora);
 
@@ -82,7 +73,7 @@ function AddJogo() {
           progress: undefined,
           theme: "light",
         });
-        navigate('/statusgame'); // Redireciona para StatusGame
+        navigate('/statusgame'); 
       } else {
         toast.error('Erro ao adicionar jogo.', {
           position: "top-right",

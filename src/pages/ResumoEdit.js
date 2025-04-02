@@ -93,7 +93,7 @@ export default function ResumoEdit() {
 
             setTimeout(() => {
                 navigate('/estoque');
-            }, 2000); // Aguarda 2 segundos antes de redirecionar
+            }, 2000); 
         } catch (error) {
             console.error('Erro ao atualizar dados financeiros:', error);
             toast.error('Erro ao atualizar dados financeiros');
@@ -119,8 +119,7 @@ export default function ResumoEdit() {
                 <div className="bg-primary rounded-md w-full h-auto p-5 mt-3 gap-4 flex flex-col justify-center items-center">
                     <h1 className="text-2xl font-bold">Formas de pagamento</h1>
                     <div className="w-full px-3">
-                        {formasPagamento && formasPagamento.length > 0 ? (
-                            // Agrupa e soma os valores por método de pagamento
+                        {formasPagamento && formasPagamento.length > 0 ? (                            
                             formasPagamento.reduce((acc, jogador) => {
                                 if (jogador.formaPagamento && jogador.formaPagamento.length > 0) {
                                     jogador.formaPagamento.forEach(pagamento => {
@@ -132,7 +131,6 @@ export default function ResumoEdit() {
                                 }
                                 return acc;
                             }, {}),
-                            // Renderiza os métodos de pagamento agrupados
                             Object.entries(formasPagamento.reduce((acc, jogador) => {
                                 if (jogador.formaPagamento && jogador.formaPagamento.length > 0) {
                                     jogador.formaPagamento.forEach(pagamento => {

@@ -10,7 +10,6 @@ const db = mysql.createConnection({
 });
 
 exports.handler = async (event, context) => {
-  // Verifica se o método é POST
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Estilos do toastify
+import 'react-toastify/dist/ReactToastify.css'; 
 
 export default function CardJogador({ jogadores, setJogadores, handleAddJogador }) {
     const [estoque, setEstoque] = useState([]);
@@ -77,20 +77,19 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             const selectedItem = { ...updatedJogadores[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
-            // Verifica se o item já existe na lista de itens do jogador
+            
             const existingItem = updatedJogadores[index].items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; 
             } else {
-                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                selectedItem.quantidade = 1; 
                 updatedJogadores[index].items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
 
-            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
-            storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
             updateJogadores(updatedJogadores);
@@ -104,16 +103,16 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         if (item) {
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-            // Verifica se o item já existe na lista de itens do jogador
+            
             const existingItem = updatedJogadores[index].items.find(i => i.nome === selectedItem.nome)
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1; // Incrementa a quantidade
+                existingItem.quantidade = (existingItem.quantidade || 1) + 1; 
             } else {
-                selectedItem.quantidade = 1; // Define a quantidade como 1 se for um novo item
+                selectedItem.quantidade = 1; 
                 updatedJogadores[index].items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
-            // Armazenar a quantidade e o nome dos itens no localStorage da página VendaAvul
+            
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
             storedItems[itemName] = (storedItems[itemName] || 0) + 1; // Incrementa a quantidade
@@ -128,21 +127,19 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         const updatedJogadores = [...jogadores];
         const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
 
-        // Atualiza o localStorage ao remover um item
         const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
         if (storedItems[itemName]) {
-            storedItems[itemName] -= 1; // Decrementa a quantidade
+            storedItems[itemName] -= 1; 
             if (storedItems[itemName] <= 0) {
-                delete storedItems[itemName]; // Remove o item se a quantidade for zero
+                delete storedItems[itemName]; 
             }
         }
         localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
-        // Reduz a quantidade do item ou remove o item se a quantidade for zero
         if (updatedJogadores[jogadorIndex].items[itemIndex].quantidade > 1) {
-            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; // Decrementa a quantidade
+            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; 
         } else {
-            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); // Remove o item se a quantidade for zero
+            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); 
         }
         
         updateJogadores(updatedJogadores);
@@ -151,7 +148,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     const handleClosePedido = (index) => {
         const jogador = jogadores[index];
 
-        // Verifique se o nome do jogador está preenchido
         if (!jogador.nome || jogador.nome.trim() === '') {
             toast.error('O nome do jogador é obrigatório antes de fechar o pedido.', {
                 position: "top-right",
@@ -162,7 +158,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 draggable: true,
                 theme: "light",
             });
-            return; // Não fecha o pedido se o nome não estiver preenchido
+            return; 
         }
 
         if (jogador.isClosed) {
@@ -175,15 +171,13 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             setShowPaymentModal(true);
         }
 
-        // Calcular o valor total após fechar o pedido
         const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);;
-        setValorTotalVendaAtual(valorTotal); // Atualiza o estado com o novo total
+        setValorTotalVendaAtual(valorTotal); 
     };
 
     const handleConfirmPayment = async () => {
         const jogador = jogadores[jogadorIndexForPayment];
         const valorFinal = valorComDesconto || valorTotalVendaAtual;
-        // Verifique se items estão definidos
         if (!jogador.items || jogador.items.length === 0) {
             toast.error('Nenhum item encontrado para o jogador', {
                 position: "top-right",
@@ -197,7 +191,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             return;
         }
 
-        // Verifique se pelo menos uma forma de pagamento foi selecionada
         if (!Object.values(paymentMethods).some(method => method === true)) {
             toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
                 position: "top-right",
@@ -211,7 +204,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             return;
         }
 
-        // Verifique se os valores foram inseridos
         const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
         const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);;
         setValorTotalVendaAtual(valorTotal);
@@ -228,7 +220,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             return;
         }
 
-        // Mapeie os itens do jogador para calcular as quantidades
         const itemCountMap = jogador.items.reduce((acc, item) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
             return acc;
@@ -254,18 +245,17 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             if (paymentMethods[method]) {
                 return {
                     metodo: method,
-                    valor: paymentValues[method] || 0 // Inclui o valor associado a cada forma de pagamento
+                    valor: paymentValues[method] || 0 
                 };
             }
-            return null; // Retorna null para métodos não selecionados
-        }).filter(Boolean); // Remove os métodos que não foram selecionados (null)
+            return null; 
+        }).filter(Boolean); 
 
         const dadosParaEnviar = {
             items: jogador.items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
-            formaPagamento: formaPagamento, // Agora inclui os valores das formas de pagamento
+            formaPagamento: formaPagamento, 
         };
 
-        // Enviar o pedido para a API
         const dataJogo = localStorage.getItem('dataJogo');
         const horaJogo = localStorage.getItem('horaJogo');
         try {
@@ -316,11 +306,11 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         setValorDesconto(valorDesconto);
         return Math.max(0, valorTotal - valorDesconto);
     };
-    // Atualize o valor total sempre que os jogadores mudarem
+    
     useEffect(() => {
         const total = calcularTotal();
         setValorTotalVendaAtual(total);
-    }, [jogadores]); // Dependência para re-calcular quando jogadores mudarem
+    }, [jogadores]); 
 
     return (
         <div className="flex flex-wrap gap-4">
