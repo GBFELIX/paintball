@@ -171,24 +171,33 @@ const Game = () => {
             const selectedItem = { ...updatedJogadores[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
+            // Check if it's a ball item
+            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
+            const isBallItem = ballItems.includes(selectedItem.nome);
+
             const items = Array.isArray(updatedJogadores[index].items) 
                 ? updatedJogadores[index].items 
                 : (typeof updatedJogadores[index].items === 'string' ? JSON.parse(updatedJogadores[index].items) : []);
 
             const existingItem = items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
-                existingItem.qtd = (existingItem.qtd || 1) + 1; 
+                if (isBallItem) {
+                    // For ball items, we want to keep them as separate entries
+                    selectedItem.qtd = 1;
+                    items.push(selectedItem);
+                } else {
+                    existingItem.qtd = (existingItem.qtd || 1) + 1;
+                }
             } else {
-                selectedItem.qtd = 1; 
+                selectedItem.qtd = 1;
                 items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
             updatedJogadores[index].items = items;
 
-            
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
-            storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1;
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
             updateJogadores(updatedJogadores);
@@ -202,21 +211,34 @@ const Game = () => {
         if (item) {
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
+            
+            // Check if it's a ball item
+            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
+            const isBallItem = ballItems.includes(selectedItem.nome);
+            
             const items = Array.isArray(updatedJogadores[index].items) 
                 ? updatedJogadores[index].items 
                 : JSON.parse(updatedJogadores[index].items || '[]');
-            const existingItem = items.find(i => i.nome === selectedItem.nome)
+            
+            const existingItem = items.find(i => i.nome === selectedItem.nome);
             if (existingItem) {
-                existingItem.qtd = (existingItem.qtd || 1) + 1; 
+                if (isBallItem) {
+                    // For ball items, we want to keep them as separate entries
+                    selectedItem.qtd = 1;
+                    items.push(selectedItem);
+                } else {
+                    existingItem.qtd = (existingItem.qtd || 1) + 1;
+                }
             } else {
-                selectedItem.qtd = 1; 
+                selectedItem.qtd = 1;
                 items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
             updatedJogadores[index].items = items;
+            
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
-            storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1;
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
             updateJogadores(updatedJogadores);
         } else {
@@ -340,6 +362,34 @@ const Game = () => {
             toast.error('O valor total do pagamento deve ser igual ao valor total dos itens');
             return;
         }
+
+        // Reduzir quantidade de bolinhas
+        const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
+        for (const item of jogador.items) {
+            if (ballItems.includes(item.nome)) {
+                try {
+                    // Call the API for each quantity of the ball item
+                    for (let i = 0; i < (item.qtd || 1); i++) {
+                        await axios.patch('/.netlify/functions/api-bolinhas', {
+                            itemNome: item.nome
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro ao reduzir quantidade de bolinhas:', error);
+                    toast.error('Erro ao reduzir quantidade de bolinhas', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                    return; // Stop the process if there's an error
+                }
+            }
+        }
+
         const updatedJogadores = [...jogadores];
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
         setJogadores(updatedJogadores);
