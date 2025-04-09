@@ -32,6 +32,7 @@ export default function Estoque() {
   const [descontos, setDescontos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [bolinhas, setBolinhas] = useState([]);
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('auth');
@@ -101,9 +102,28 @@ export default function Estoque() {
       });
   };
   
+  const fetchBolinhas = () => {
+    axios.get('/.netlify/functions/api-bolinhas')
+      .then(response => {
+        setBolinhas(response.data);
+      })
+      .catch(error => {
+        toast.error('Erro ao carregar bolinhas. Tente novamente.', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      });
+  };
+
   useEffect(() => {
     fetchEstoque();
     fetchDescontos();
+    fetchBolinhas();
   }, []);
 
   const addDesconto = () => {
@@ -374,6 +394,69 @@ export default function Estoque() {
     printWindow.print();
   };
 
+  const addBolinhas = () => {
+    const quantidade = document.getElementById('QuantidadeBolinhas').value;
+    
+    if (!quantidade) {
+      toast.error('Preencha a quantidade de bolinhas', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+      return;
+    }
+
+    axios.post('/.netlify/functions/api-bolinhas', { quantidade: parseInt(quantidade) })
+      .then(response => {
+        toast.success('Bolinhas adicionadas com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+        fetchBolinhas();
+        document.getElementById('QuantidadeBolinhas').value = '';
+      })
+      .catch(error => {
+        toast.error('Erro ao adicionar bolinhas', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      });
+  };
+
+  const updateBolinhas = (id, novaQuantidade) => {
+    axios.put(`/.netlify/functions/api-bolinhas/${id}`, { quantidade: novaQuantidade })
+      .then(() => {
+        fetchBolinhas();
+        setInputs(prev => ({ ...prev, [id]: { ...prev[id], quantidade: '' } }));
+      })
+      .catch(error => {
+        console.error('Erro ao atualizar quantidade de bolinhas:', error);
+        toast.error('Erro ao atualizar quantidade', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      });
+  };
+
   return (
     <div className="bg-black min-h-screen flex flex-col items-center justify-center">
       <style>{spinnerStyle}</style>
@@ -503,6 +586,65 @@ export default function Estoque() {
               )}
             </div>
 
+            <div className="w-full h-auto bg-blue-600 rounded-sm flex flex-col p-5 items-center justify-center mb-5">
+              <h2 className="font-bold mb-5 text-white">Gerenciamento de Bolinhas</h2>
+              <div className="flex flex-col md:flex-row items-center justify-center">
+                <input 
+                    id="QuantidadeBolinhas" 
+                    type="number" 
+                    className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" 
+                    placeholder="Quantidade de bolinhas" 
+                    min="0"
+                />
+                <button className="bg-primary hover:bg-green-500 duration-200 w-auto p-3 h-10 rounded-md flex items-center justify-center" onClick={addBolinhas}>
+                  <FaPlus /> Adicionar
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-primary w-full max-w-4xl rounded-md shadow-lg flex flex-col p-6 items-center justify-center mb-5">
+              <h2 className="text-black font-bold text-lg mb-5">Estoque de Bolinhas</h2>
+              
+              <div className="w-full flex justify-between items-center px-4 py-2 border-b border-gray-300 font-semibold text-black">
+                <p className="w-1/2 text-center">Quantidade</p>
+                <p className="w-1/2 text-center">Ações</p>
+              </div>
+              
+              {bolinhas.length > 0 ? (
+                bolinhas.map((bolinha) => (
+                  <div
+                    key={bolinha.id}
+                    className="w-full flex justify-between items-center px-4 py-2 border-t border-gray-200"
+                  >
+                    {editMode[bolinha.id] ? (
+                      <input
+                        type="number"
+                        className="text-black font-semibold w-1/2 text-center p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
+                        value={inputs[bolinha.id]?.quantidade || bolinha.quantidade}
+                        onChange={(e) => handleInputChange(bolinha.id, 'quantidade', e.target.value)}
+                        onBlur={() => {
+                          if (inputs[bolinha.id]?.quantidade) {
+                            updateBolinhas(bolinha.id, inputs[bolinha.id].quantidade);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <p className="w-1/2 text-black font-semibold text-center">{bolinha.quantidade}</p>
+                    )}
+                    <div className="w-1/2 text-center">
+                      <button
+                        className="text-blue-500 hover:text-blue-700 mx-2"
+                        onClick={() => toggleEditMode(bolinha.id)}
+                      >
+                        {editMode[bolinha.id] ? 'Salvar' : <FaRegEdit />}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-black font-semibold">Nenhuma bolinha registrada</p>
+              )}
+            </div>
 
             <div className="bg-primary w-full max-w-4xl rounded-sm flex flex-col p-5 items-center justify-center">
               <h2 className="text-black font-bold mb-5">Estoque Atual - Venda</h2>
