@@ -84,7 +84,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
             // Check if it's a ball item
-            const ballItems = ['saco com 500 bolinhas', 'saco com 50', 'saco com 2000'];
+            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
             const isBallItem = ballItems.includes(selectedItem.nome);
             
             const existingItem = updatedVendas[index].items.find(item => item.nome === selectedItem.nome);
@@ -119,7 +119,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
             
             // Check if it's a ball item
-            const ballItems = ['saco com 500 bolinhas', 'saco com 50', 'saco com 2000'];
+            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
             const isBallItem = ballItems.includes(selectedItem.nome);
             
             const existingItem = updatedVendas[index].items.find(i => i.nome === selectedItem.nome);
@@ -224,7 +224,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
             return acc;
         }, {});
-        const ballItems = ['saco com 500 bolinhas', 'saco com 50', 'saco com 2000'];
+        const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
         for (const item of venda.items) {
             if (ballItems.includes(item.nome)) {
                 try {
