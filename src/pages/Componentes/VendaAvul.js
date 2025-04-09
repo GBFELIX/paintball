@@ -83,42 +83,62 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             const selectedItem = { ...updatedVendas[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
+            // Check if it's a ball item
+            const ballItems = ['saco com 500 bolinhas', 'saco com 50', 'saco com 2000'];
+            const isBallItem = ballItems.includes(selectedItem.nome);
+            
             const existingItem = updatedVendas[index].items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1;
+                if (isBallItem) {
+                    // For ball items, we want to keep them as separate entries
+                    selectedItem.quantidade = 1;
+                    updatedVendas[index].items.push(selectedItem);
+                } else {
+                    existingItem.quantidade = (existingItem.quantidade || 1) + 1;
+                }
             } else {
-                selectedItem.quantidade = 1; 
+                selectedItem.quantidade = 1;
                 updatedVendas[index].items.push(selectedItem);
             }
             updatedVendas[index].selectedItem = '';
 
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
-
             storedItems[itemName] = (storedItems[itemName] || 0) + 1;
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
             setVendas(updatedVendas);
-        }  else {
+        } else {
             toast.error('Por favor, selecione um item antes de adicionar.');
         }
     };
+
     const handleAddItemNovo = (index, item) => {
         const updatedVendas = [...vendas];
         if (item) {
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
             
-            const existingItem = updatedVendas[index].items.find(i => i.nome === selectedItem.nome)
+            // Check if it's a ball item
+            const ballItems = ['saco com 500 bolinhas', 'saco com 50', 'saco com 2000'];
+            const isBallItem = ballItems.includes(selectedItem.nome);
+            
+            const existingItem = updatedVendas[index].items.find(i => i.nome === selectedItem.nome);
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1; 
+                if (isBallItem) {
+                    // For ball items, we want to keep them as separate entries
+                    selectedItem.quantidade = 1;
+                    updatedVendas[index].items.push(selectedItem);
+                } else {
+                    existingItem.quantidade = (existingItem.quantidade || 1) + 1;
+                }
             } else {
-                selectedItem.quantidade = 1; 
+                selectedItem.quantidade = 1;
                 updatedVendas[index].items.push(selectedItem);
             }
             updatedVendas[index].selectedItem = '';
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
-            storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1;
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
             updateVendas(updatedVendas);
         } else {
@@ -204,6 +224,30 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
             return acc;
         }, {});
+        const ballItems = ['saco com 500 bolinhas', 'saco com 50', 'saco com 2000'];
+        for (const item of venda.items) {
+            if (ballItems.includes(item.nome)) {
+                try {
+                    for (let i = 0; i < (item.quantidade || 1); i++) {
+                        await axios.patch('/.netlify/functions/api-bolinhas', {
+                            itemNome: item.nome
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro ao reduzir quantidade de bolinhas:', error);
+                    toast.error('Erro ao reduzir quantidade de bolinhas', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                    return;
+                }
+            }
+        }
 
         const formaPagamento = Object.keys(paymentMethods).map(method => {
             if (paymentMethods[method]) {

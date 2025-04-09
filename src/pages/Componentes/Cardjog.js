@@ -77,19 +77,28 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             const selectedItem = { ...updatedJogadores[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
+            // Check if it's a ball item
+            const ballItems = ['saco com 500 bolinhas', 'saco com 50', 'saco com 2000'];
+            const isBallItem = ballItems.includes(selectedItem.nome);
             
             const existingItem = updatedJogadores[index].items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
-                existingItem.quantidade = (existingItem.quantidade || 1) + 1; 
+                if (isBallItem) {
+                    // For ball items, we want to keep them as separate entries
+                    selectedItem.quantidade = 1;
+                    updatedJogadores[index].items.push(selectedItem);
+                } else {
+                    existingItem.quantidade = (existingItem.quantidade || 1) + 1;
+                }
             } else {
-                selectedItem.quantidade = 1; 
+                selectedItem.quantidade = 1;
                 updatedJogadores[index].items.push(selectedItem);
             }
             updatedJogadores[index].selectedItem = '';
 
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const itemName = selectedItem.nome;
-            storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
+            storedItems[itemName] = (storedItems[itemName] || 0) + 1;
             localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
             updateJogadores(updatedJogadores);
@@ -225,6 +234,32 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             return acc;
         }, {});
 
+        // Check for ball items and reduce stock
+        const ballItems = ['saco com 500 bolinhas', 'saco com 50', 'saco com 2000'];
+        for (const item of jogador.items) {
+            if (ballItems.includes(item.nome)) {
+                try {
+                    // Call the API for each quantity of the ball item
+                    for (let i = 0; i < (item.quantidade || 1); i++) {
+                        await axios.patch('/.netlify/functions/api-bolinhas', {
+                            itemNome: item.nome
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro ao reduzir quantidade de bolinhas:', error);
+                    toast.error('Erro ao reduzir quantidade de bolinhas', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                    return; // Stop the process if there's an error
+                }
+            }
+        }
      
         const updatedJogadores = [...jogadores];
         updatedJogadores[jogadorIndexForPayment].isClosed = true;
@@ -296,7 +331,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
     const calcularTotal = () => {
         return jogadores.reduce((total, jogador) => {
-            const valorJogador = jogador.items.reduce((soma, item) => soma + (parseFloat(item.valor) || 0), 0);
+            const valorJogador = jogador.items.reduce((soma, item) => soma + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
             return total + valorJogador;
         }, 0);
     };
