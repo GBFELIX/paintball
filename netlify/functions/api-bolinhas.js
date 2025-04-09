@@ -14,7 +14,7 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'GET') {
         try {
-            const [results] = await connection.query('SELECT * FROM estoque WHERE nome = "Bolinha"');
+            const [results] = await connection.query('SELECT * FROM estoque WHERE nome = "Bolinha" LIMIT 1');
             return {
                 statusCode: 200,
                 body: JSON.stringify(results)
@@ -31,12 +31,23 @@ exports.handler = async(event, context) => {
     if (event.httpMethod === 'POST') {
         try {
             const { quantidade } = JSON.parse(event.body);
-            const query = 'INSERT INTO estoque (nome, valor, quantidade, custo, tipo) VALUES (?, ?, ?, ?, ?)';
-            const [results] = await connection.query(query, ['Bolinha', 0, quantidade, 0, 'Bolinha']);
+            
+            // First check if bolinhas entry exists
+            const [existing] = await connection.query('SELECT * FROM estoque WHERE nome = "Bolinha" LIMIT 1');
+            
+            if (existing.length > 0) {
+                // Update existing entry
+                const query = 'UPDATE estoque SET quantidade = ? WHERE nome = "Bolinha"';
+                await connection.query(query, [quantidade]);
+            } else {
+                // Create new entry
+                const query = 'INSERT INTO estoque (nome, valor, quantidade, custo, tipo) VALUES (?, ?, ?, ?, ?)';
+                await connection.query(query, ['Bolinha', 0, quantidade, 0, 'Bolinha']);
+            }
 
             return {
                 statusCode: 200,
-                body: JSON.stringify({ id: results.insertId, quantidade })
+                body: JSON.stringify({ success: true, message: 'Quantidade de bolinhas atualizada com sucesso' })
             };
         } catch (err) {
             console.error('Erro ao adicionar bolinhas:', err);

@@ -611,36 +611,34 @@ export default function Estoque() {
               </div>
               
               {bolinhas.length > 0 ? (
-                bolinhas.map((bolinha) => (
-                  <div
-                    key={bolinha.id}
-                    className="w-full flex justify-between items-center px-4 py-2 border-t border-gray-200"
-                  >
-                    {editMode[bolinha.id] ? (
-                      <input
-                        type="number"
-                        className="text-black font-semibold w-1/2 text-center p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
-                        value={inputs[bolinha.id]?.quantidade || bolinha.quantidade}
-                        onChange={(e) => handleInputChange(bolinha.id, 'quantidade', e.target.value)}
-                        onBlur={() => {
-                          if (inputs[bolinha.id]?.quantidade) {
-                            updateBolinhas(bolinha.id, inputs[bolinha.id].quantidade);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <p className="w-1/2 text-black font-semibold text-center">{bolinha.quantidade}</p>
-                    )}
-                    <div className="w-1/2 text-center">
-                      <button
-                        className="text-blue-500 hover:text-blue-700 mx-2"
-                        onClick={() => toggleEditMode(bolinha.id)}
-                      >
-                        {editMode[bolinha.id] ? 'Salvar' : <FaRegEdit />}
-                      </button>
-                    </div>
+                <div
+                  key={bolinhas[0].id}
+                  className="w-full flex justify-between items-center px-4 py-2 border-t border-gray-200"
+                >
+                  {editMode[bolinhas[0].id] ? (
+                    <input
+                      type="number"
+                      className="text-black font-semibold w-1/2 text-center p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400"
+                      value={inputs[bolinhas[0].id]?.quantidade || bolinhas[0].quantidade}
+                      onChange={(e) => handleInputChange(bolinhas[0].id, 'quantidade', e.target.value)}
+                      onBlur={() => {
+                        if (inputs[bolinhas[0].id]?.quantidade) {
+                          updateBolinhas(bolinhas[0].id, inputs[bolinhas[0].id].quantidade);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <p className="w-1/2 text-black font-semibold text-center">{bolinhas[0].quantidade}</p>
+                  )}
+                  <div className="w-1/2 text-center">
+                    <button
+                      className="text-blue-500 hover:text-blue-700 mx-2"
+                      onClick={() => toggleEditMode(bolinhas[0].id)}
+                    >
+                      {editMode[bolinhas[0].id] ? 'Salvar' : <FaRegEdit />}
+                    </button>
                   </div>
-                ))
+                </div>
               ) : (
                 <p className="text-black font-semibold">Nenhuma bolinha registrada</p>
               )}
