@@ -14,7 +14,7 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'GET') {
         try {
-            const [results] = await connection.query('SELECT * FROM estoque WHERE nome = "bolinha"');
+            const [results] = await connection.query('SELECT * FROM estoque WHERE nome = "Bolinha"');
             return {
                 statusCode: 200,
                 body: JSON.stringify(results)
