@@ -83,7 +83,7 @@ exports.handler = async(event, context) => {
             let quantidadeAReduzir = 0;
 
             // Determine how many balls to reduce based on the item name
-            if (itemNome === 'saco 500 bolas') {
+            if (itemNome === 'SACO 500 BOLAS') {
                 quantidadeAReduzir = 500;
             } else if (itemNome === 'saco com 50') {
                 quantidadeAReduzir = 50;
