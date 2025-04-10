@@ -26,7 +26,7 @@ export default function Financeiro() {
 
   useEffect(() => {
     const today = new Date();
-    today.setDate(today.getDate() - 1);
+    today.setDate(today.getDate());
     const formattedDate = today.toISOString().split("T")[0];
     setValue({ startDate: formattedDate, endDate: formattedDate });
     
