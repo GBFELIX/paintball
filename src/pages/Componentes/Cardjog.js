@@ -235,7 +235,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }, {});
 
         // Check for ball items and reduce stock
-        const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
+        const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
         for (const item of jogador.items) {
             if (ballItems.includes(item.nome)) {
                 try {

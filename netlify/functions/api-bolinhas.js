@@ -1,3 +1,4 @@
+
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -89,6 +90,10 @@ exports.handler = async(event, context) => {
                 quantidadeAReduzir = 50;
             } else if (itemNome === 'SACO 2000 BOLAS') {
                 quantidadeAReduzir = 2000;
+            } else if (itemNome === 'CAMPO 35 50 BOLAS GRATIS') {
+                quantidadeAReduzir = 50;
+            } else if (itemNome === 'CAMPO 45 50 BOLAS GRATIS') {
+                quantidadeAReduzir = 50;
             }
 
             if (quantidadeAReduzir > 0) {

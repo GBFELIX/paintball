@@ -84,7 +84,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
             // Check if it's a ball item
-            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
+            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
             const isBallItem = ballItems.includes(selectedItem.nome);
             
             const existingItem = updatedVendas[index].items.find(item => item.nome === selectedItem.nome);

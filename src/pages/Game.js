@@ -172,7 +172,7 @@ const Game = () => {
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
             // Check if it's a ball item
-            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
+            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
             const isBallItem = ballItems.includes(selectedItem.nome);
 
             const items = Array.isArray(updatedJogadores[index].items) 
@@ -213,7 +213,7 @@ const Game = () => {
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
             
             // Check if it's a ball item
-            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
+            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
             const isBallItem = ballItems.includes(selectedItem.nome);
             
             const items = Array.isArray(updatedJogadores[index].items) 
@@ -364,7 +364,7 @@ const Game = () => {
         }
 
         // Reduzir quantidade de bolinhas
-        const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
+        const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
         for (const item of jogador.items) {
             if (ballItems.includes(item.nome)) {
                 try {

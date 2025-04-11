@@ -64,19 +64,28 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
       const selectedItem = { ...updatedDespesas[index].selectedItem };
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
+      // Check if it's a ball item
+      const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
+      const isBallItem = ballItems.includes(selectedItem.nome);
+
       const existingItem = updatedDespesas[index].items.find(item => item.nome === selectedItem.nome);
       if (existingItem) {
-          existingItem.quantidade = (existingItem.quantidade || 1) + 1; 
-      } else {
-          selectedItem.quantidade = 1; 
+        if (isBallItem) {
+          // For ball items, we want to keep them as separate entries
+          selectedItem.quantidade = 1;
           updatedDespesas[index].items.push(selectedItem);
+        } else {
+          existingItem.quantidade = (existingItem.quantidade || 1) + 1;
+        }
+      } else {
+        selectedItem.quantidade = 1;
+        updatedDespesas[index].items.push(selectedItem);
       }
       updatedDespesas[index].selectedItem = '';
 
-    
       const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
       const itemName = selectedItem.nome;
-      storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
+      storedItems[itemName] = (storedItems[itemName] || 0) + 1;
       localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
       setDespesas(updatedDespesas);
@@ -139,10 +148,36 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     const valorFinal = valorTotalDespesa;
     const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
+    // Reduzir quantidade de bolinhas
+    const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
+    for (const item of despesa.items) {
+        if (ballItems.includes(item.nome)) {
+            try {
+                // Call the API for each quantity of the ball item
+                for (let i = 0; i < (item.quantidade || 1); i++) {
+                    await axios.patch('/.netlify/functions/api-bolinhas', {
+                        itemNome: item.nome
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao reduzir quantidade de bolinhas:', error);
+                toast.error('Erro ao reduzir quantidade de bolinhas', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return; // Stop the process if there's an error
+            }
+        }
+    }
 
     try {
-      const dataJogo = localStorage.getItem('dataJogo');
-      const horaJogo = localStorage.getItem('horaJogo');
+        const dataJogo = localStorage.getItem('dataJogo');
+        const horaJogo = localStorage.getItem('horaJogo');
         await axios.post('/.netlify/functions/api-pedidos', {
             nomeJogador: despesa.nome,
             items: despesa.items.map(item => ({ nome: item.nome, valor: item.valor })),
@@ -158,10 +193,9 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         setShowPaymentModal(false);
 
         const despesasAnteriores = JSON.parse(localStorage.getItem('despesas')) || [];
- 
-                despesasAnteriores.push({
-                    valorTotal: valorFinal,
-                });
+        despesasAnteriores.push({
+            valorTotal: valorFinal,
+        });
 
         localStorage.setItem('despesas', JSON.stringify(despesasAnteriores));
         toast.success('Pedido finalizado com sucesso!', {
@@ -193,18 +227,28 @@ const handleAddItemNovo = (index, item) => {
   if (item) {
       const selectedItem = { ...item };
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
-     
-      const existingItem = updatedDespesas[index].items.find(i => i.nome === selectedItem.nome)
+      
+      // Check if it's a ball item
+      const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
+      const isBallItem = ballItems.includes(selectedItem.nome);
+      
+      const existingItem = updatedDespesas[index].items.find(i => i.nome === selectedItem.nome);
       if (existingItem) {
-          existingItem.quantidade = (existingItem.quantidade || 1) + 1;
+          if (isBallItem) {
+              // For ball items, we want to keep them as separate entries
+              selectedItem.quantidade = 1;
+              updatedDespesas[index].items.push(selectedItem);
+          } else {
+              existingItem.quantidade = (existingItem.quantidade || 1) + 1;
+          }
       } else {
-          selectedItem.quantidade = 1; 
+          selectedItem.quantidade = 1;
           updatedDespesas[index].items.push(selectedItem);
       }
       updatedDespesas[index].selectedItem = '';
       const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
       const itemName = selectedItem.nome;
-      storedItems[itemName] = (storedItems[itemName] || 0) + 1; 
+      storedItems[itemName] = (storedItems[itemName] || 0) + 1;
       localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
       updateDespesas(updatedDespesas);
   } else {
