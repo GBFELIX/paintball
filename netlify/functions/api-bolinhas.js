@@ -1,4 +1,3 @@
-
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -15,6 +14,16 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'GET') {
         try {
+            // Se houver query parameter 'config', retorna a configuração dos itens
+            if (event.queryStringParameters && event.queryStringParameters.config === 'true') {
+                const [results] = await connection.query('SELECT * FROM bolinhas_config');
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(results)
+                };
+            }
+            
+            // Caso contrário, retorna a quantidade de bolinhas
             const [results] = await connection.query('SELECT * FROM estoque WHERE nome = "Bolinha" LIMIT 1');
             return {
                 statusCode: 200,
@@ -31,17 +40,28 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'POST') {
         try {
-            const { quantidade } = JSON.parse(event.body);
+            const body = JSON.parse(event.body);
             
-            // First check if bolinhas entry exists
+            // Se houver o campo 'config', estamos adicionando um novo item de configuração
+            if (body.config) {
+                const { nome, quantidade } = body;
+                const query = 'INSERT INTO bolinhas_config (nome, quantidade) VALUES (?, ?)';
+                await connection.query(query, [nome, quantidade]);
+                
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ success: true, message: 'Item de configuração adicionado com sucesso' })
+                };
+            }
+            
+            // Caso contrário, estamos atualizando a quantidade de bolinhas
+            const { quantidade } = body;
             const [existing] = await connection.query('SELECT * FROM estoque WHERE nome = "Bolinha" LIMIT 1');
             
             if (existing.length > 0) {
-                // Update existing entry
                 const query = 'UPDATE estoque SET quantidade = ? WHERE nome = "Bolinha"';
                 await connection.query(query, [quantidade]);
             } else {
-                // Create new entry
                 const query = 'INSERT INTO estoque (nome, valor, quantidade, custo, tipo) VALUES (?, ?, ?, ?, ?)';
                 await connection.query(query, ['Bolinha', 0, quantidade, 0, 'Bolinha']);
             }
@@ -59,21 +79,21 @@ exports.handler = async(event, context) => {
         }
     }
 
-    if (event.httpMethod === 'PUT') {
+    if (event.httpMethod === 'DELETE') {
         try {
-            const { quantidade } = JSON.parse(event.body);
-            const query = 'UPDATE estoque SET quantidade = ? WHERE nome = "Bolinha"';
-            await connection.query(query, [quantidade]);
-
+            const { id } = JSON.parse(event.body);
+            const query = 'DELETE FROM bolinhas_config WHERE id = ?';
+            await connection.query(query, [id]);
+            
             return {
                 statusCode: 200,
-                body: JSON.stringify({ success: true, message: 'Quantidade de bolinhas atualizada com sucesso' })
+                body: JSON.stringify({ success: true, message: 'Item de configuração removido com sucesso' })
             };
         } catch (err) {
-            console.error('Erro ao atualizar quantidade de bolinhas:', err);
+            console.error('Erro ao remover item de configuração:', err);
             return {
                 statusCode: 500,
-                body: JSON.stringify('Erro ao atualizar quantidade de bolinhas')
+                body: JSON.stringify(err)
             };
         }
     }
@@ -81,49 +101,45 @@ exports.handler = async(event, context) => {
     if (event.httpMethod === 'PATCH') {
         try {
             const { itemNome } = JSON.parse(event.body);
-            let quantidadeAReduzir = 0;
-
-            // Determine how many balls to reduce based on the item name
-            if (itemNome === 'SACO 500 BOLAS') {
-                quantidadeAReduzir = 500;
-            } else if (itemNome === 'SACO 50 BOLAS') {
-                quantidadeAReduzir = 50;
-            } else if (itemNome === 'SACO 2000 BOLAS') {
-                quantidadeAReduzir = 2000;
-            } else if (itemNome === 'CAMPO 35 50 BOLAS GRATIS') {
-                quantidadeAReduzir = 50;
-            } else if (itemNome === 'CAMPO 45 50 BOLAS GRATIS') {
-                quantidadeAReduzir = 50;
+            
+            // Busca a configuração do item
+            const [config] = await connection.query('SELECT quantidade FROM bolinhas_config WHERE nome = ?', [itemNome]);
+            
+            if (config.length === 0) {
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({ error: 'Item não configurado para reduzir bolinhas' })
+                };
             }
-
-            if (quantidadeAReduzir > 0) {
-                // Get current quantity
-                const [current] = await connection.query('SELECT quantidade FROM estoque WHERE nome = "Bolinha" LIMIT 1');
+            
+            const quantidadeAReduzir = config[0].quantidade;
+            
+            // Get current quantity
+            const [current] = await connection.query('SELECT quantidade FROM estoque WHERE nome = "Bolinha" LIMIT 1');
+            
+            if (current.length > 0) {
+                const novaQuantidade = current[0].quantidade - quantidadeAReduzir;
                 
-                if (current.length > 0) {
-                    const novaQuantidade = current[0].quantidade - quantidadeAReduzir;
+                if (novaQuantidade >= 0) {
+                    // Update the quantity
+                    await connection.query('UPDATE estoque SET quantidade = ? WHERE nome = "Bolinha"', [novaQuantidade]);
                     
-                    if (novaQuantidade >= 0) {
-                        // Update the quantity
-                        await connection.query('UPDATE estoque SET quantidade = ? WHERE nome = "Bolinha"', [novaQuantidade]);
-                        
-                        return {
-                            statusCode: 200,
-                            body: JSON.stringify({ 
-                                success: true, 
-                                message: 'Quantidade de bolinhas reduzida com sucesso',
-                                novaQuantidade 
-                            })
-                        };
-                    } else {
-                        return {
-                            statusCode: 400,
-                            body: JSON.stringify({ error: 'Quantidade insuficiente de bolinhas no estoque' })
-                        };
-                    }
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify({ 
+                            success: true, 
+                            message: 'Quantidade de bolinhas reduzida com sucesso',
+                            novaQuantidade 
+                        })
+                    };
+                } else {
+                    return {
+                        statusCode: 400,
+                        body: JSON.stringify({ error: 'Quantidade insuficiente de bolinhas no estoque' })
+                    };
                 }
             }
-
+            
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: 'Item inválido ou quantidade não especificada' })

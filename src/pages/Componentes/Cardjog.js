@@ -14,6 +14,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     const [valorDesconto, setValorDesconto] = useState(0);
     const [valorComDesconto, setValorComDesconto] = useState(0);
     const [valorTotalVendaAtual, setValorTotalVendaAtual] = useState(0);
+    const [ballItemsConfig, setBallItemsConfig] = useState([]);
 
     useEffect(() => {
         const fetchEstoque = async () => {
@@ -37,6 +38,17 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             }
         };
         fetchDescontos();
+    }, []);
+
+    useEffect(() => {
+        // Carregar configuração dos itens que reduzem bolinhas
+        axios.get('/.netlify/functions/api-bolinhas?config=true')
+            .then(response => {
+                setBallItemsConfig(response.data);
+            })
+            .catch(error => {
+                console.error('Erro ao carregar configuração de bolinhas:', error);
+            });
     }, []);
 
     const updateJogadores = (updatedJogadores) => {
@@ -185,115 +197,116 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     };
 
     const handleConfirmPayment = async () => {
-        const jogador = jogadores[jogadorIndexForPayment];
-        const valorFinal = valorComDesconto || valorTotalVendaAtual;
-        if (!jogador.items || jogador.items.length === 0) {
-            toast.error('Nenhum item encontrado para o jogador', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            return;
-        }
+        try {
+            const jogador = jogadores[jogadorIndexForPayment];
+            const valorFinal = valorComDesconto || valorTotalVendaAtual;
+            if (!jogador.items || jogador.items.length === 0) {
+                toast.error('Nenhum item encontrado para o jogador', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return;
+            }
 
-        if (!Object.values(paymentMethods).some(method => method === true)) {
-            toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            return;
-        }
+            if (!Object.values(paymentMethods).some(method => method === true)) {
+                toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return;
+            }
 
-        const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-        const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);;
-        setValorTotalVendaAtual(valorTotal);
-        if (totalPagamento !== valorTotal) {
-            toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-            return;
-        }
+            const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+            const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);;
+            setValorTotalVendaAtual(valorTotal);
+            if (totalPagamento !== valorTotal) {
+                toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return;
+            }
 
-        const itemCountMap = jogador.items.reduce((acc, item) => {
-            acc[item.nome] = (acc[item.nome] || 0) + 1;
-            return acc;
-        }, {});
+            const itemCountMap = jogador.items.reduce((acc, item) => {
+                acc[item.nome] = (acc[item.nome] || 0) + 1;
+                return acc;
+            }, {});
 
-        // Check for ball items and reduce stock
-        const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
-        for (const item of jogador.items) {
-            if (ballItems.includes(item.nome)) {
-                try {
-                    // Call the API for each quantity of the ball item
-                    for (let i = 0; i < (item.quantidade || 1); i++) {
-                        await axios.patch('/.netlify/functions/api-bolinhas', {
-                            itemNome: item.nome
+            // Check for ball items and reduce stock
+            for (const item of jogador.items) {
+                // Verifica se o item está na configuração de itens que reduzem bolinhas
+                const ballItemConfig = ballItemsConfig.find(config => config.nome === item.nome);
+                if (ballItemConfig) {
+                    try {
+                        // Call the API for each quantity of the ball item
+                        for (let i = 0; i < (item.quantidade || 1); i++) {
+                            await axios.patch('/.netlify/functions/api-bolinhas', {
+                                itemNome: item.nome
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Erro ao reduzir quantidade de bolinhas:', error);
+                        toast.error('Erro ao reduzir quantidade de bolinhas', {
+                            position: "top-right",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            theme: "light",
                         });
+                        return; // Stop the process if there's an error
                     }
-                } catch (error) {
-                    console.error('Erro ao reduzir quantidade de bolinhas:', error);
-                    toast.error('Erro ao reduzir quantidade de bolinhas', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                    return; // Stop the process if there's an error
                 }
             }
-        }
      
-        const updatedJogadores = [...jogadores];
-        updatedJogadores[jogadorIndexForPayment].isClosed = true;
-        updateJogadores(updatedJogadores);
-        setShowPaymentModal(false);
-        toast.dismiss();
-        toast.success('Pagamento confirmado com sucesso!', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
+            const updatedJogadores = [...jogadores];
+            updatedJogadores[jogadorIndexForPayment].isClosed = true;
+            updateJogadores(updatedJogadores);
+            setShowPaymentModal(false);
+            toast.dismiss();
+            toast.success('Pagamento confirmado com sucesso!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
 
-        const formaPagamento = Object.keys(paymentMethods).map(method => {
-            if (paymentMethods[method]) {
-                return {
-                    metodo: method,
-                    valor: paymentValues[method] || 0 
-                };
-            }
-            return null; 
-        }).filter(Boolean); 
+            const formaPagamento = Object.keys(paymentMethods).map(method => {
+                if (paymentMethods[method]) {
+                    return {
+                        metodo: method,
+                        valor: paymentValues[method] || 0 
+                    };
+                }
+                return null; 
+            }).filter(Boolean); 
 
-        const dadosParaEnviar = {
-            items: jogador.items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
-            formaPagamento: formaPagamento, 
-        };
+            const dadosParaEnviar = {
+                items: jogador.items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
+                formaPagamento: formaPagamento, 
+            };
 
-        const dataJogo = localStorage.getItem('dataJogo');
-        const horaJogo = localStorage.getItem('horaJogo');
-        try {
+            const dataJogo = localStorage.getItem('dataJogo');
+            const horaJogo = localStorage.getItem('horaJogo');
             await axios.post('/.netlify/functions/api-pedidos', {
                 nomeJogador: jogador.nome,
                 items: dadosParaEnviar.items,
@@ -304,19 +317,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             });
             
             
-        } catch (error) {
-            console.error('Erro ao cadastrar pedido:', error);
-            toast.error('Erro ao finalizar pedido', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-        }
-        const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
+            const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
             const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
 
             formasSelecionadas.forEach(forma => {
@@ -327,6 +328,18 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 });
             });
             localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
+        } catch (error) {
+            console.error('Erro ao processar pagamento:', error);
+            toast.error('Erro ao processar pagamento', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+        }
     };
 
     const calcularTotal = () => {

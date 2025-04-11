@@ -13,6 +13,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     const [descontoSelecionado, setDescontoSelecionado] = useState('');
     const [valorComDesconto, setValorComDesconto] = useState(0);
     const [valorTotalVendaAtual, setValorTotalVendaAtual] = useState(0);
+    const [ballItemsConfig, setBallItemsConfig] = useState([]);
 
     useEffect(() => {
         const fetchEstoque = async () => {
@@ -41,6 +42,17 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     useEffect(() => {
         const storedItems = JSON.parse(localStorage.getItem('itensVenda')) || {};
         setQuantidadeLocal(storedItems);
+    }, []);
+
+    useEffect(() => {
+        // Carregar configuração dos itens que reduzem bolinhas
+        axios.get('/.netlify/functions/api-bolinhas?config=true')
+            .then(response => {
+                setBallItemsConfig(response.data);
+            })
+            .catch(error => {
+                console.error('Erro ao carregar configuração de bolinhas:', error);
+            });
     }, []);
 
     const updateVendas = (updatedVendas) => {
@@ -83,9 +95,9 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             const selectedItem = { ...updatedVendas[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
-            // Check if it's a ball item
-            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
-            const isBallItem = ballItems.includes(selectedItem.nome);
+            // Check if it's a ball item using the configuration
+            const ballItemConfig = ballItemsConfig.find(config => config.nome === selectedItem.nome);
+            const isBallItem = !!ballItemConfig;
             
             const existingItem = updatedVendas[index].items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
@@ -118,9 +130,9 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
             
-            // Check if it's a ball item
-            const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
-            const isBallItem = ballItems.includes(selectedItem.nome);
+            // Check if it's a ball item using the configuration
+            const ballItemConfig = ballItemsConfig.find(config => config.nome === selectedItem.nome);
+            const isBallItem = !!ballItemConfig;
             
             const existingItem = updatedVendas[index].items.find(i => i.nome === selectedItem.nome);
             if (existingItem) {
@@ -224,10 +236,13 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
             return acc;
         }, {});
-        const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS'];
+
         for (const item of venda.items) {
-            if (ballItems.includes(item.nome)) {
+            // Verifica se o item está na configuração de itens que reduzem bolinhas
+            const ballItemConfig = ballItemsConfig.find(config => config.nome === item.nome);
+            if (ballItemConfig) {
                 try {
+                    // Call the API for each quantity of the ball item
                     for (let i = 0; i < (item.quantidade || 1); i++) {
                         await axios.patch('/.netlify/functions/api-bolinhas', {
                             itemNome: item.nome
@@ -244,7 +259,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                         draggable: true,
                         theme: "light",
                     });
-                    return;
+                    return; // Stop the process if there's an error
                 }
             }
         }
@@ -295,8 +310,16 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             showToast('Pedido finalizado com sucesso!', 'success');
 
         } catch (error) {
-            console.error(error.message);
-            showToast(error.message || 'Erro ao processar pedido', 'error');
+            console.error('Erro ao processar pagamento:', error);
+            toast.error('Erro ao processar pagamento', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
         }
     };
 

@@ -33,6 +33,9 @@ export default function Estoque() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [bolinhas, setBolinhas] = useState([]);
+  const [bolinhasConfig, setBolinhasConfig] = useState([]);
+  const [novoItemNome, setNovoItemNome] = useState('');
+  const [novoItemQuantidade, setNovoItemQuantidade] = useState('');
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('auth');
@@ -120,10 +123,30 @@ export default function Estoque() {
       });
   };
 
+  const fetchBolinhasConfig = () => {
+    axios.get('/.netlify/functions/api-bolinhas?config=true')
+      .then(response => {
+        setBolinhasConfig(response.data);
+      })
+      .catch(error => {
+        console.error('Erro ao carregar configuração de bolinhas:', error);
+        toast.error('Erro ao carregar configuração de bolinhas', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      });
+  };
+
   useEffect(() => {
     fetchEstoque();
     fetchDescontos();
     fetchBolinhas();
+    fetchBolinhasConfig();
   }, []);
 
   const addDesconto = () => {
@@ -457,6 +480,81 @@ export default function Estoque() {
       });
   };
 
+  const addBolinhasConfig = () => {
+    if (!novoItemNome || !novoItemQuantidade) {
+      toast.error('Preencha todos os campos!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+      return;
+    }
+
+    axios.post('/.netlify/functions/api-bolinhas', {
+      config: true,
+      nome: novoItemNome,
+      quantidade: parseInt(novoItemQuantidade)
+    })
+      .then(() => {
+        toast.success('Item adicionado com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+        fetchBolinhasConfig();
+        setNovoItemNome('');
+        setNovoItemQuantidade('');
+      })
+      .catch(error => {
+        console.error('Erro ao adicionar item:', error);
+        toast.error('Erro ao adicionar item', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      });
+  };
+
+  const removeBolinhasConfig = (id) => {
+    axios.delete('/.netlify/functions/api-bolinhas', { data: { id } })
+      .then(() => {
+        toast.success('Item removido com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+        fetchBolinhasConfig();
+      })
+      .catch(error => {
+        console.error('Erro ao remover item:', error);
+        toast.error('Erro ao remover item', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      });
+  };
+
   return (
     <div className="bg-black min-h-screen flex flex-col items-center justify-center">
       <style>{spinnerStyle}</style>
@@ -583,6 +681,65 @@ export default function Estoque() {
                 ))
               ) : (
                 <p className="text-black font-semibold">Nenhum desconto cadastrado</p>
+              )}
+            </div>
+
+            <div className="w-full h-auto bg-purple-600 rounded-sm flex flex-col p-5 items-center justify-center mb-5">
+              <h2 className="font-bold mb-5 text-white">Configuração de Itens que Reduzem Bolinhas</h2>
+              <div className="flex flex-col md:flex-row items-center justify-center gap-2 w-full">
+                <input 
+                  type="text" 
+                  className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" 
+                  placeholder="Nome do Item" 
+                  value={novoItemNome}
+                  onChange={(e) => setNovoItemNome(e.target.value)}
+                />
+                <input 
+                  type="number" 
+                  className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" 
+                  placeholder="Quantidade de Bolinhas" 
+                  min="0"
+                  value={novoItemQuantidade}
+                  onChange={(e) => setNovoItemQuantidade(e.target.value)}
+                />
+                <button 
+                  className="bg-primary hover:bg-green-500 duration-200 w-auto p-3 h-10 rounded-md flex items-center justify-center" 
+                  onClick={addBolinhasConfig}
+                >
+                  <FaPlus /> Adicionar Item
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-primary w-full max-w-4xl rounded-md shadow-lg flex flex-col p-6 items-center justify-center mb-5">
+              <h2 className="text-black font-bold text-lg mb-5">Itens Configurados</h2>
+              
+              <div className="w-full flex justify-between items-center px-4 py-2 border-b border-gray-300 font-semibold text-black">
+                <p className="w-1/3 text-center">Nome do Item</p>
+                <p className="w-1/3 text-center">Quantidade de Bolinhas</p>
+                <p className="w-1/3 text-center">Ações</p>
+              </div>
+              
+              {bolinhasConfig.length > 0 ? (
+                bolinhasConfig.map((item) => (
+                  <div
+                    key={item.id}
+                    className="w-full flex justify-between items-center px-4 py-2 border-t border-gray-200"
+                  >
+                    <p className="w-1/3 text-black font-semibold text-center">{item.nome}</p>
+                    <p className="w-1/3 text-black font-semibold text-center">{item.quantidade}</p>
+                    <div className="w-1/3 text-center">
+                      <button
+                        className="text-red-500 hover:text-red-700 mx-2"
+                        onClick={() => removeBolinhasConfig(item.id)}
+                      >
+                        <FaTrashAlt /> Remover
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-black font-semibold">Nenhum item configurado</p>
               )}
             </div>
 
