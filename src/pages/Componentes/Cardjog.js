@@ -146,7 +146,11 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
 
     const handleRemoveItem = (jogadorIndex, itemIndex) => {
         const updatedJogadores = [...jogadores];
-        const itemName = updatedJogadores[jogadorIndex].items[itemIndex].nome;
+        const items = Array.isArray(updatedJogadores[jogadorIndex].items) 
+            ? updatedJogadores[jogadorIndex].items 
+            : JSON.parse(updatedJogadores[jogadorIndex].items || '[]');
+        
+        const itemName = items[itemIndex].nome;
 
         const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
         if (storedItems[itemName]) {
@@ -157,12 +161,13 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         }
         localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
-        if (updatedJogadores[jogadorIndex].items[itemIndex].quantidade > 1) {
-            updatedJogadores[jogadorIndex].items[itemIndex].quantidade -= 1; 
+        if (items[itemIndex].quantidade > 1) {
+            items[itemIndex].quantidade -= 1; 
         } else {
-            updatedJogadores[jogadorIndex].items.splice(itemIndex, 1); 
+            items.splice(itemIndex, 1); 
         }
         
+        updatedJogadores[jogadorIndex].items = items;
         updateJogadores(updatedJogadores);
     };
 
@@ -199,8 +204,10 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     const handleConfirmPayment = async () => {
         try {
             const jogador = jogadores[jogadorIndexForPayment];
+            const items = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
             const valorFinal = valorComDesconto || valorTotalVendaAtual;
-            if (!jogador.items || jogador.items.length === 0) {
+            
+            if (!items || items.length === 0) {
                 toast.error('Nenhum item encontrado para o jogador', {
                     position: "top-right",
                     autoClose: 3000,
@@ -227,9 +234,10 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             }
 
             const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-            const valorTotal = jogador.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);;
+            const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
             setValorTotalVendaAtual(valorTotal);
-            if (totalPagamento !== valorTotal) {
+            
+            if (totalPagamento !== valorFinal) {
                 toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
                     position: "top-right",
                     autoClose: 3000,
@@ -242,13 +250,8 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 return;
             }
 
-            const itemCountMap = jogador.items.reduce((acc, item) => {
-                acc[item.nome] = (acc[item.nome] || 0) + 1;
-                return acc;
-            }, {});
-
             // Check for ball items and reduce stock
-            for (const item of jogador.items) {
+            for (const item of items) {
                 // Verifica se o item está na configuração de itens que reduzem bolinhas
                 const ballItemConfig = ballItemsConfig.find(config => config.nome === item.nome);
                 if (ballItemConfig) {
@@ -301,7 +304,7 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
             }).filter(Boolean); 
 
             const dadosParaEnviar = {
-                items: jogador.items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
+                items: items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
                 formaPagamento: formaPagamento, 
             };
 
