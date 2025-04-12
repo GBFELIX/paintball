@@ -97,7 +97,24 @@ exports.handler = async(event, context) => {
             };
         }
     }
+    if (event.httpMethod === 'PUT') {
+        try {
+            const { quantidade } = JSON.parse(event.body);
+            const query = 'UPDATE estoque SET quantidade = ? WHERE nome = "Bolinha"';
+            await connection.query(query, [quantidade]);
 
+            return {
+                statusCode: 200,
+                body: JSON.stringify({ success: true, message: 'Quantidade de bolinhas atualizada com sucesso' })
+            };
+        } catch (err) {
+            console.error('Erro ao atualizar quantidade de bolinhas:', err);
+            return {
+                statusCode: 500,
+                body: JSON.stringify('Erro ao atualizar quantidade de bolinhas')
+            };
+        }
+    }
     if (event.httpMethod === 'PATCH') {
         try {
             const { itemNome } = JSON.parse(event.body);
