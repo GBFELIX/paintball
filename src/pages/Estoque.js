@@ -584,7 +584,24 @@ export default function Estoque() {
             
             <div className="w-full h-auto bg-gray-400 rounded-sm flex flex-col p-5 items-center justify-center mb-5">
               <h2 className="text-black font-bold mb-5">Adicionar/Remover Itens</h2>
-              <input id="NomeProduto" type="text" className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" placeholder="Nome do produto" />
+              <input id="NomeProduto" type="text" className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" placeholder="Nome do produto" onChange={(e) => {
+                        const value = e.target.value;
+                        const regex = /^[a-zA-Z0-9]*$/;
+
+                        if (!regex.test(value)) {
+                            toast.error('Apenas letras e números são permitidos!', {
+                                position: "top-right",
+                                autoClose: 3000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                theme: "light",
+                            });
+                            e.target.value = value.slice(0, -1);
+                        }
+                    }}
+                />
               <input id="custoProduto" type="text" className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" placeholder="Valor de custo" />
               <input id="valorProduto" type="text" className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" placeholder="Valor de venda" />
               <input id="QtdProduto" type="number" className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" placeholder="Quantidade" />
@@ -706,7 +723,7 @@ export default function Estoque() {
                   className="bg-primary hover:bg-green-500 duration-200 w-auto p-3 h-10 rounded-md flex items-center justify-center" 
                   onClick={addBolinhasConfig}
                 >
-                  <FaPlus /> Adicionar Item
+                  <FaPlus /> Adicionar
                 </button>
               </div>
             </div>
