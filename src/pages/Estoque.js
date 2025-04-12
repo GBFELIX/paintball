@@ -586,7 +586,7 @@ export default function Estoque() {
               <h2 className="text-black font-bold mb-5">Adicionar/Remover Itens</h2>
               <input id="NomeProduto" type="text" className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" placeholder="Nome do produto" onChange={(e) => {
                         const value = e.target.value;
-                        const regex = /^[a-zA-Z0-9]*$/;
+                        const regex = /^[a-zA-Z0-9\s]*$/;
 
                         if (!regex.test(value)) {
                             toast.error('Apenas letras e números são permitidos!', {
@@ -629,7 +629,7 @@ export default function Estoque() {
                     placeholder="Nome do Desconto" 
                     onChange={(e) => {
                         const value = e.target.value;
-                        const regex = /^[a-zA-Z0-9]*$/;
+                        const regex = /^[a-zA-Z0-9\s]*$/;
 
                         if (!regex.test(value)) {
                             toast.error('Apenas letras e números são permitidos!', {
