@@ -316,6 +316,11 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 horaPedido: horaJogo,
             });
             
+            // Reset discount and payment values
+            setDescontoSelecionado('');
+            setValorComDesconto(0);
+            setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0, deposito: 0 });
+            setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false, deposito: false });
             
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
             const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
@@ -351,7 +356,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
     const calcularDesconto = (valorTotal) => {
         if (!descontoSelecionado) return valorTotal;
         const valorDesconto = descontos[descontoSelecionado] || 0;
-        setValorDesconto(valorDesconto);
         return Math.max(0, valorTotal - valorDesconto);
     };
     
@@ -359,6 +363,10 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
         const total = calcularTotal();
         setValorTotalVendaAtual(total);
     }, [jogadores]); 
+
+    useEffect(() => {
+        setValorComDesconto(calcularDesconto(valorTotalVendaAtual));
+    }, [descontoSelecionado, valorTotalVendaAtual]);
 
     return (
         <div className="flex flex-wrap gap-4">
@@ -512,7 +520,6 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                                 value={descontoSelecionado}
                                 onChange={(e) => {
                                     setDescontoSelecionado(e.target.value);
-                                    setValorComDesconto(calcularDesconto(valorTotalVendaAtual));
                                 }}
                                 className="w-full p-2 border border-gray-300 rounded-md"
                             >

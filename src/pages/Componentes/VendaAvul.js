@@ -55,6 +55,10 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             });
     }, []);
 
+    useEffect(() => {
+        setValorComDesconto(calcularDesconto(valorTotalVendaAtual));
+    }, [descontoSelecionado, valorTotalVendaAtual]);
+
     const updateVendas = (updatedVendas) => {
         setVendas(updatedVendas);
     };
@@ -160,50 +164,49 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
 
     const handleRemoveItem = (vendaIndex, itemIndex) => {
         const updatedVendas = [...vendas];
-        const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
-        const itemName = updatedVendas[vendaIndex].items[itemIndex].nome;
+        const items = Array.isArray(updatedVendas[vendaIndex].items) 
+            ? updatedVendas[vendaIndex].items 
+            : JSON.parse(updatedVendas[vendaIndex].items || '[]');
+        
+        const itemName = items[itemIndex].nome;
 
+        const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
         if (storedItems[itemName]) {
-            storedItems[itemName] -= 1;
+            storedItems[itemName] -= 1; 
             if (storedItems[itemName] <= 0) {
-                delete storedItems[itemName];
+                delete storedItems[itemName]; 
             }
         }
         localStorage.setItem('itensVendaAvul', JSON.stringify(storedItems));
 
-        if (updatedVendas[vendaIndex].items[itemIndex].quantidade > 1) {
-            updatedVendas[vendaIndex].items[itemIndex].quantidade -= 1; 
+        if (items[itemIndex].quantidade > 1) {
+            items[itemIndex].quantidade -= 1; 
         } else {
-            updatedVendas[vendaIndex].items.splice(itemIndex, 1);
+            items.splice(itemIndex, 1); 
         }
+        
+        updatedVendas[vendaIndex].items = items;
         updateVendas(updatedVendas);
     };
 
     const handleClosePedido = (index) => {
-        const updatedVendas = [...vendas];
-        const venda = updatedVendas[index];
+        const venda = vendas[index];
+
+        
 
         if (venda.isClosed) {
-            venda.isClosed = false;
-            venda.items = [];
+            const updatedVendas = [...vendas];
+            updatedVendas[index].isClosed = false;
+            updatedVendas[index].items = [];
             updateVendas(updatedVendas);
         } else {
-            const valorTotal = venda.items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
-            setValorTotalVendaAtual(valorTotal);
             setVendaIndexForPayment(index);
             setShowPaymentModal(true);
-
-            venda.items.forEach(item => {
-                setQuantidadeLocal(prev => {
-                    const newQuantities = {
-                        ...prev,
-                        [item.nome]: (prev[item.nome] || 0) + 1
-                    };
-                    localStorage.setItem('itensVenda', JSON.stringify(newQuantities));
-                    return newQuantities;
-                });
-            });
         }
+
+        const items = Array.isArray(venda.items) ? venda.items : JSON.parse(venda.items || '[]');
+        const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
+        setValorTotalVendaAtual(valorTotal); 
     };
 
     const calcularDesconto = (valorTotal) => {
@@ -213,102 +216,140 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     };
 
     const handleConfirmPayment = async () => {
-        const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-        const valorFinal = valorComDesconto || valorTotalVendaAtual;
+        try {
+            const venda = vendas[vendaIndexForPayment];
+            const items = Array.isArray(venda.items) ? venda.items : JSON.parse(venda.items || '[]');
+            const valorFinal = valorComDesconto || valorTotalVendaAtual;
+            
+            if (!items || items.length === 0) {
+                toast.error('Nenhum item encontrado para a venda', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return;
+            }
 
-        if (totalPagamento !== valorFinal) {
-            showToast('O valor total do pagamento deve ser igual ao valor final', 'error');
-            return;
-        }
+            if (!Object.values(paymentMethods).some(method => method === true)) {
+                toast.error('Por favor, selecione pelo menos uma forma de pagamento', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return;
+            }
 
-        if (!Object.values(paymentMethods).some(method => method === true)) {
-            showToast('Por favor, selecione pelo menos uma forma de pagamento', 'error');
-            return;
-        }
+            const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+            const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.quantidade || 1) || 0), 0);
+            setValorTotalVendaAtual(valorTotal);
+            
+            if (totalPagamento !== valorFinal) {
+                toast.error('O valor total do pagamento deve ser igual ao valor total dos itens', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+                return;
+            }
 
-        const venda = vendas[vendaIndexForPayment];
-        
-        const nomeCliente = venda.nome.trim() === '' ? 'venda avulsa' : venda.nome;
-
-        const itemsToUpdate = venda.items;
-
-        const itemCountMap = itemsToUpdate.reduce((acc, item) => {
-            acc[item.nome] = (acc[item.nome] || 0) + 1;
-            return acc;
-        }, {});
-
-        for (const item of venda.items) {
-            // Verifica se o item está na configuração de itens que reduzem bolinhas
-            const ballItemConfig = ballItemsConfig.find(config => config.nome === item.nome);
-            if (ballItemConfig) {
-                try {
-                    // Call the API for each quantity of the ball item
-                    for (let i = 0; i < (item.quantidade || 1); i++) {
-                        await axios.patch('/.netlify/functions/api-bolinhas', {
-                            itemNome: item.nome
+            // Check for ball items and reduce stock
+            for (const item of items) {
+                // Verifica se o item está na configuração de itens que reduzem bolinhas
+                const ballItemConfig = ballItemsConfig.find(config => config.nome === item.nome);
+                if (ballItemConfig) {
+                    try {
+                        // Call the API for each quantity of the ball item
+                        for (let i = 0; i < (item.quantidade || 1); i++) {
+                            await axios.patch('/.netlify/functions/api-bolinhas', {
+                                itemNome: item.nome
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Erro ao reduzir quantidade de bolinhas:', error);
+                        toast.error('Erro ao reduzir quantidade de bolinhas', {
+                            position: "top-right",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            theme: "light",
                         });
+                        return; // Stop the process if there's an error
                     }
-                } catch (error) {
-                    console.error('Erro ao reduzir quantidade de bolinhas:', error);
-                    toast.error('Erro ao reduzir quantidade de bolinhas', {
-                        position: "top-right",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                    });
-                    return; // Stop the process if there's an error
                 }
             }
-        }
+     
+            const updatedVendas = [...vendas];
+            updatedVendas[vendaIndexForPayment].isClosed = true;
+            updateVendas(updatedVendas);
+            setShowPaymentModal(false);
+            toast.dismiss();
+            toast.success('Pagamento confirmado com sucesso!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
 
-        const formaPagamento = Object.keys(paymentMethods).map(method => {
-            if (paymentMethods[method]) {
-                return {
-                    metodo: method,
-                    valor: paymentValues[method] || 0 
-                };
-            }
-            return null;
-        }).filter(Boolean); 
+            const formaPagamento = Object.keys(paymentMethods).map(method => {
+                if (paymentMethods[method]) {
+                    return {
+                        metodo: method,
+                        valor: paymentValues[method] || 0 
+                    };
+                }
+                return null; 
+            }).filter(Boolean); 
 
-        const dadosParaEnviar = {
-            items: venda.items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
-            formaPagamento: formaPagamento, 
-        };
-        
-        try {
-            // Finaliza pedido
+            const dadosParaEnviar = {
+                items: items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
+                formaPagamento: formaPagamento, 
+            };
+
             const dataJogo = localStorage.getItem('dataJogo');
             const horaJogo = localStorage.getItem('horaJogo');
             await axios.post('/.netlify/functions/api-pedidos', {
-                nomeJogador: nomeCliente,
+                nomeJogador: venda.nome,
                 items: dadosParaEnviar.items,
                 formaPagamento: dadosParaEnviar.formaPagamento,
                 valorTotal: valorFinal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
             });
-
-            const updatedVendas = [...vendas];
-            updatedVendas[vendaIndexForPayment].isClosed = true;
-            updateVendas(updatedVendas);
-            setShowPaymentModal(false);
-
+            
+            // Reset discount and payment values
+            setDescontoSelecionado('');
+            setValorComDesconto(0);
+            setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0, deposito: 0 });
+            setPaymentMethods({ dinheiro: false, credito: false, debito: false, pix: false, deposito: false });
+            
             const pagamentosAnteriores = JSON.parse(localStorage.getItem('pagamentos')) || [];
-            dadosParaEnviar.formaPagamento.forEach(forma => {
-                const valorForma = forma.valor; 
+            const formasSelecionadas = Object.keys(paymentMethods).filter(method => paymentMethods[method]);
+
+            formasSelecionadas.forEach(forma => {
+                const valorForma = paymentValues[forma]; 
                 pagamentosAnteriores.push({
                     valorTotal: valorForma, 
-                    formaPagamento: forma.metodo,
+                    formaPagamento: forma,
                 });
             });
-
             localStorage.setItem('pagamentos', JSON.stringify(pagamentosAnteriores));
-            showToast('Pedido finalizado com sucesso!', 'success');
-
         } catch (error) {
             console.error('Erro ao processar pagamento:', error);
             toast.error('Erro ao processar pagamento', {
@@ -495,7 +536,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                                 value={descontoSelecionado}
                                 onChange={(e) => {
                                     setDescontoSelecionado(e.target.value);
-                                    setValorComDesconto(calcularDesconto(valorTotalVendaAtual));
                                 }}
                                 className="w-full p-2 border border-gray-300 rounded-md"
                             >
