@@ -652,7 +652,7 @@ export default function Estoque() {
               </div>
             </div>
 
-            <div className="bg-primary w-full max-w-4xl rounded-md shadow-lg flex flex-col p-6 items-center justify-center">
+            <div className="bg-primary w-full max-w-4xl rounded-md shadow-lg flex flex-col p-6 items-center justify-center mb-5">
               <h2 className="text-black font-bold text-lg mb-5">Descontos Programados</h2>
               
               <div className="w-full flex justify-between items-center px-4 py-2 border-b border-gray-300 font-semibold text-black">
