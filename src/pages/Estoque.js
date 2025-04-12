@@ -709,7 +709,25 @@ export default function Estoque() {
                   className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" 
                   placeholder="Nome do Item" 
                   value={novoItemNome}
-                  onChange={(e) => setNovoItemNome(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const regex = /^[a-zA-Z0-9\s]*$/;
+                    
+                    if (!regex.test(value)) {
+                      toast.error('Apenas letras, números e espaços são permitidos!', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                      });
+                      e.target.value = value.slice(0, -1);
+                    } else {
+                      setNovoItemNome(value);
+                    }
+                  }}
                 />
                 <input 
                   type="number" 
