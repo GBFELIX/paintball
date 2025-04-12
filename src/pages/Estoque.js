@@ -645,7 +645,7 @@ export default function Estoque() {
                         }
                     }}
                 />
-                <input id="ValorDesconto" type="text" className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" placeholder="Percentagem do desconto" />
+                <input id="ValorDesconto" type="text" className="w-full md:w-1/2 p-2 m-2 rounded-md text-center" placeholder="valor do desconto" />
                 <button className="bg-primary hover:bg-green-500 duration-200 w-auto p-3 h-10 rounded-md flex items-center justify-center" onClick={addDesconto}>
                   <FaPlus /> Adicionar
                 </button>
@@ -680,7 +680,7 @@ export default function Estoque() {
                         }}
                       />
                     ) : (
-                      <p className="w-1/3 mr-20 text-black font-semibold ">{desconto.valor}%</p>
+                      <p className="w-1/3 mr-20 text-black font-semibold ">{desconto.valor}R$</p>
                     )}
                     <button
                       className="text-blue-500 hover:text-blue-700 mx-2"
