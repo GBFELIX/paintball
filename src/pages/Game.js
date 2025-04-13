@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader'; 
 import { toast } from 'react-toastify';
 import VendaAvulsa from './Componentes/VendaAvul';
+import CardDespesas from './Componentes/CardDespesas';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
@@ -60,6 +61,13 @@ const Game = () => {
         selectedItem: '',
         isClosed: false
     }]);
+    const [despesas, setDespesas] = useState([{
+        nome: '',
+        numero: '1',
+        items: [],
+        selectedItem: '',
+        isClosed: false
+    }]);
     const [jogador, setJogador] = useState({
         id: null,
         items: '[]', 
@@ -100,7 +108,16 @@ const Game = () => {
             isClosed: false
         }]);
     };
-
+    const handleAddDespesa = () => {
+        const newNumero = (despesas.length + 1).toString();
+        setDespesas([...despesas, {
+            nome: '',
+            numero: newNumero,
+            items: [],
+            selectedItem: '',
+            isClosed: false
+        }]);
+    };
     const fetchJogadores = async () => {
         try {
             const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
@@ -555,7 +572,9 @@ const Game = () => {
                 <h1 className="text-3xl font-semibold mb-4">Detalhes do Jogo</h1>
                 <div className="flex flex-col items-start">
                     <p className="text-white">Data do Jogo: </p>
-                    <p className="font-semibold text-3xl">{new Date(dataJogo).toLocaleDateString('pt-BR')}</p> 
+                    <p className="font-semibold text-3xl">
+                        {dataJogo ? new Date(dataJogo + 'T00:00:00').toLocaleDateString('pt-BR') : ''}
+                    </p> 
                     
                 </div>
                 <div className="flex flex-col items-start">
@@ -695,14 +714,28 @@ const Game = () => {
                         handleClosePedido={handleClosePedido}
                     />
                 </div>
+                <div className="flex flex-col justify-center items-center w-[300px]">
+                    <CardDespesas 
+                        despesas={despesas}
+                        setDespesas={setDespesas}
+                        handleAddDespesa={handleAddDespesa}
+                        handleClosePedido={handleClosePedido}
+                    />
+                </div>
             </div>
             <div className="flex justify-end mt-auto">
                 <button
                     onClick={handleAddVendaAvulsa}
-                    className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                    className="bg-primary hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                 >
                     <FaPlus size={30} />
                 </button>
+                <button 
+                            onClick={handleAddDespesa}
+                            className="bg-primary hover:bg-red duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                        >
+                            <FaPlus size={30} />
+                        </button>
                 <div className="p-2 flex flex-col justify-center items-center">
                     <button 
                         onClick={handleFecharPartida}

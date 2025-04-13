@@ -325,20 +325,20 @@ export default function StatusGame() {
                     <div className="flex justify-end mt-auto">
                         <button
                             onClick={handleAddJogador}
-                            className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                            className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                             title="Adicionar Jogador"
                         >
                             <FaPlus size={30} />
                         </button>
                         <button
                             onClick={handleAddVendaAvulsa}
-                            className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                            className="bg-primary hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                         >
                             <FaPlus size={30} />
                         </button>
                         <button 
                             onClick={handleAddDespesa}
-                            className="bg-primary hover:bg-white duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                            className="bg-primary hover:bg-red duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                         >
                             <FaPlus size={30} />
                         </button>
