@@ -573,7 +573,11 @@ const Game = () => {
                 <div className="flex flex-col items-start">
                     <p className="text-white">Data do Jogo: </p>
                     <p className="font-semibold text-3xl">
-                        {dataJogo ? new Date(dataJogo + 'T00:00:00').toLocaleDateString('pt-BR') : ''}
+                        {(() => {
+                            const data = dataJogo ? new Date(dataJogo.split('T')[0]) : null;
+                            const dataValida = data instanceof Date && !isNaN(data);
+                            return dataValida ? data.toLocaleDateString('pt-BR') : '';
+                        })()}
                     </p> 
                     
                 </div>

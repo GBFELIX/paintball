@@ -259,44 +259,47 @@ export default function Financeiro() {
             <tbody>
               {financeiroData
                 .sort((a, b) => new Date(b.data_jogo) - new Date(a.data_jogo))
-                .map((item, index) => (
-                  <tr key={index} className="p-1 text-white flex justify-around hover:bg-green-700 duration-300 border border-gray-500">
-                    <td className="w-full">
-                      {item && item.data_jogo 
-                        ? new Date(item.data_jogo + 'T00:00:00').toLocaleDateString('pt-BR') 
-                        : ''}
-                    </td>
-                    <td className="w-full">{item && item.hora_jogo}</td>
-                    <td className="w-full">{item && item.total_jogadores}</td>
-                    <td className="w-full">R${item && item.credito}</td>
-                    <td className="w-full">R${item && item.debito}</td>
-                    <td className="w-full">R${item && item.dinheiro}</td>
-                    <td className="w-full">R${item && item.pix}</td>
-                    <td className="w-full">R${item && item.deposito}</td>
-                    <td className="w-full">R${item && item.despesas}</td>
-                    <td className="w-full">R${item && item.total_arrecadado}</td>
-                    <td className="w-full">R${item && item.valortot}</td>
-                    <td className="w-full flex gap-2">
-                      <button
-                        className="rounded-md bg-primary p-2 text-black hover:bg-black duration-300 hover:text-white flex items-center justify-center min-w-[120px]"
-                        onClick={() => handleMostrarJogo(item.data_jogo, item.hora_jogo)}
-                        disabled={loadingEquipe}
-                      >
-                        {loadingEquipe ? (
-                          <ClipLoader
-                            color="#000000"
-                            loading={loadingEquipe}
-                            size={20}
-                            aria-label="Loading Spinner"
-                            data-testid="loader"
-                          />
-                        ) : (
-                          'Mostrar Jogo'
-                        )}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                .map((item, index) => {
+                  const data = item?.data_jogo ? new Date(item.data_jogo.split('T')[0]) : null;
+                  const dataValida = data instanceof Date && !isNaN(data);
+                  
+                  return (
+                    <tr key={index} className="p-1 text-white flex justify-around hover:bg-green-700 duration-300 border border-gray-500">
+                      <td className="w-full">
+                        {dataValida ? data.toLocaleDateString('pt-BR') : ''}
+                      </td>
+                      <td className="w-full">{item && item.hora_jogo}</td>
+                      <td className="w-full">{item && item.total_jogadores}</td>
+                      <td className="w-full">R${item && item.credito}</td>
+                      <td className="w-full">R${item && item.debito}</td>
+                      <td className="w-full">R${item && item.dinheiro}</td>
+                      <td className="w-full">R${item && item.pix}</td>
+                      <td className="w-full">R${item && item.deposito}</td>
+                      <td className="w-full">R${item && item.despesas}</td>
+                      <td className="w-full">R${item && item.total_arrecadado}</td>
+                      <td className="w-full">R${item && item.valortot}</td>
+                      <td className="w-full flex gap-2">
+                        <button
+                          className="rounded-md bg-primary p-2 text-black hover:bg-black duration-300 hover:text-white flex items-center justify-center min-w-[120px]"
+                          onClick={() => handleMostrarJogo(item.data_jogo, item.hora_jogo)}
+                          disabled={loadingEquipe}
+                        >
+                          {loadingEquipe ? (
+                            <ClipLoader
+                              color="#000000"
+                              loading={loadingEquipe}
+                              size={20}
+                              aria-label="Loading Spinner"
+                              data-testid="loader"
+                            />
+                          ) : (
+                            'Mostrar Jogo'
+                          )}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
           <div className="w-full flex justify-between px-3 py-5 mt-5 border-t border-gray-300 fixed bottom-0 left-0 bg-black shadow-lg">
