@@ -261,6 +261,9 @@ export default function Financeiro() {
                 .sort((a, b) => new Date(b.data_jogo) - new Date(a.data_jogo))
                 .map((item, index) => {
                   const data = item?.data_jogo ? new Date(item.data_jogo.split('T')[0]) : null;
+                  if (data instanceof Date && !isNaN(data)) {
+                    data.setDate(data.getDate() + 1);
+                  }
                   const dataValida = data instanceof Date && !isNaN(data);
                   
                   return (

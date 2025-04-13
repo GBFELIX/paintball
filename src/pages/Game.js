@@ -575,8 +575,11 @@ const Game = () => {
                     <p className="font-semibold text-3xl">
                         {(() => {
                             const data = dataJogo ? new Date(dataJogo.split('T')[0]) : null;
-                            const dataValida = data instanceof Date && !isNaN(data);
-                            return dataValida ? data.toLocaleDateString('pt-BR') : '';
+                            if (data instanceof Date && !isNaN(data)) {
+                                data.setDate(data.getDate() + 1);
+                                return data.toLocaleDateString('pt-BR');
+                            }
+                            return '';
                         })()}
                     </p> 
                     
