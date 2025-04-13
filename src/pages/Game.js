@@ -733,20 +733,20 @@ const Game = () => {
             <div className="flex justify-end mt-auto">
                 <button
                     onClick={handleAddVendaAvulsa}
-                    className="bg-blue hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                    className="bg-blue-600 hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                 >
                     <FaPlus size={30} />
                 </button>
                 <button 
                             onClick={handleAddDespesa}
-                            className="bg-blue-600 hover:bg-red duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                            className="bg-secondary hover:bg-red duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                         >
                             <FaPlus size={30} />
                         </button>
                 <div className="p-2 flex flex-col justify-center items-center">
                     <button 
                         onClick={handleFecharPartida}
-                        className="bg-secondary hover:bg-red-600 duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                        className="bg-white hover:bg-red-600 duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                         disabled={loading}
                     >
                         {loading ? (
