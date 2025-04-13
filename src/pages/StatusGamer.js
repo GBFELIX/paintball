@@ -332,13 +332,13 @@ export default function StatusGame() {
                         </button>
                         <button
                             onClick={handleAddVendaAvulsa}
-                            className="bg-primary hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                            className="bg-blue-600 hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                         >
                             <FaPlus size={30} />
                         </button>
                         <button 
                             onClick={handleAddDespesa}
-                            className="bg-primary hover:bg-red duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                            className="bg-secondary hover:bg-red duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                         >
                             <FaPlus size={30} />
                         </button>
