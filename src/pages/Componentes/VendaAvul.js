@@ -325,7 +325,8 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             const dataJogo = localStorage.getItem('dataJogo');
             const horaJogo = localStorage.getItem('horaJogo');
             await axios.post('/.netlify/functions/api-pedidos', {
-                nomeJogador: venda.nome,
+                nomeJogador: "Venda Avulsa",
+                //nomeJogador: "venda.nome",
                 items: dadosParaEnviar.items,
                 formaPagamento: dadosParaEnviar.formaPagamento,
                 valorTotal: valorFinal,
