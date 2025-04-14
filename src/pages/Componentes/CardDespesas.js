@@ -181,7 +181,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         await axios.post('/.netlify/functions/api-pedidos', {
           nomeJogador: "Despesa",
           //nomeJogador: "despesa.nome",
-            items: despesa.items.map(item => ({ nome: item.nome, valor: item.valor })),
+            items: despesa.items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
             valorTotal: valorFinal,
             dataPedido: dataJogo,
             horaPedido: horaJogo,
