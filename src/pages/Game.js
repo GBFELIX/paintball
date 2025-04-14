@@ -592,7 +592,13 @@ const Game = () => {
             <div className="flex flex-wrap gap-4 text-black">
                 {jogadores.map((jogador, index) => (      
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <header className="bg-primary w-full p-3 rounded-t-lg text-black font-normal flex justify-between items-center">
+                        <header className={`w-full p-3 rounded-t-lg text-black font-normal flex justify-between items-center ${
+                            jogador.nome_jogador === 'Despesa' 
+                                ? 'bg-secondary' 
+                                : jogador.nome_jogador === 'Venda Avulsa' 
+                                    ? 'bg-blue-600' 
+                                    : 'bg-primary'
+                        }`}>
                             <div className="flex items-center gap-2">
                                 <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Despesa'}</h3>
                                 <button
