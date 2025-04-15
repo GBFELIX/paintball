@@ -14,6 +14,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     pix: 0
   });
   const [estoque, setEstoque] = useState([]);
+  const [ballItemsConfig, setBallItemsConfig] = useState([]);
 
   useEffect(() => {
     const fetchEstoque = async () => {
@@ -25,6 +26,17 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
       }
     };
     fetchEstoque();
+  }, []);
+
+  useEffect(() => {
+    // Carregar configuração dos itens que reduzem bolinhas
+    axios.get('/.netlify/functions/api-bolinhas?config=true')
+      .then(response => {
+        setBallItemsConfig(response.data);
+      })
+      .catch(error => {
+        console.error('Erro ao carregar configuração de bolinhas:', error);
+      });
   }, []);
 
   useEffect(() => {
@@ -65,8 +77,8 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
       // Check if it's a ball item
-      const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
-      const isBallItem = ballItems.includes(selectedItem.nome);
+      const ballItemConfig = ballItemsConfig.find(config => config.nome === selectedItem.nome);
+      const isBallItem = ballItemConfig !== undefined;
 
       const existingItem = updatedDespesas[index].items.find(item => item.nome === selectedItem.nome);
       if (existingItem) {
@@ -149,9 +161,9 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
     // Reduzir quantidade de bolinhas
-    const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
     for (const item of despesa.items) {
-        if (ballItems.includes(item.nome)) {
+        const ballItemConfig = ballItemsConfig.find(config => config.nome === item.nome);
+        if (ballItemConfig) {
             try {
                 // Call the API for each quantity of the ball item
                 for (let i = 0; i < (item.quantidade || 1); i++) {
@@ -230,8 +242,8 @@ const handleAddItemNovo = (index, item) => {
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
       
       // Check if it's a ball item
-      const ballItems = ['SACO 500 BOLAS', 'SACO 50 BOLAS', 'SACO 2000 BOLAS', 'CAMPO 35 50 BOLAS GRATIS', 'CAMPO 45 50 BOLAS GRATIS'];
-      const isBallItem = ballItems.includes(selectedItem.nome);
+      const ballItemConfig = ballItemsConfig.find(config => config.nome === selectedItem.nome);
+      const isBallItem = ballItemConfig !== undefined;
       
       const existingItem = updatedDespesas[index].items.find(i => i.nome === selectedItem.nome);
       if (existingItem) {
