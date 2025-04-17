@@ -29,7 +29,7 @@ exports.handler = async(event, context) => {
     }
     if (event.httpMethod === 'GET' && event.path.includes('/estoque/')) {
         try {
-            const nome = event.path.split('/').pop();
+            const nome = decodeURIComponent(event.path.split('/estoque/')[1]);
             const query = 'SELECT quantidade FROM estoque WHERE nome = ?';
             const [results] = await connection.query(query, [nome]);
 
@@ -94,7 +94,7 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'PUT') {
         try {
-            const nome = event.path.split('/').pop();
+            const nome = decodeURIComponent(event.path.split('/estoque/')[1]);
             const { quantidade, valor, tipo, custo } = JSON.parse(event.body);
 
 
