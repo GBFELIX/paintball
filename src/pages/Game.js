@@ -590,7 +590,27 @@ const Game = () => {
                 </div>
             </div>
             <div className="flex flex-wrap gap-4 text-black">
-                {jogadores.map((jogador, index) => (      
+                {jogadores
+                    .sort((a, b) => {
+                        // Primeiro, ordena por tipo
+                        const getTypeOrder = (nome) => {
+                            if (nome === 'Despesa') return 3;
+                            if (nome === 'Venda Avulsa') return 2;
+                            return 1; // Jogadores com nome
+                        };
+                        
+                        const typeA = getTypeOrder(a.nome_jogador);
+                        const typeB = getTypeOrder(b.nome_jogador);
+                        
+                        // Se os tipos forem diferentes, ordena pelo tipo
+                        if (typeA !== typeB) {
+                            return typeA - typeB;
+                        }
+                        
+                        // Se forem do mesmo tipo, ordena alfabeticamente
+                        return a.nome_jogador.localeCompare(b.nome_jogador);
+                    })
+                    .map((jogador, index) => (      
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                         <header className={`w-full p-3 rounded-t-lg text-black font-normal flex justify-between items-center ${
                             jogador.nome_jogador === 'Despesa' 
