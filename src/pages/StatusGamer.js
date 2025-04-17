@@ -154,8 +154,7 @@ export default function StatusGame() {
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const promises = Object.keys(storedItems).map(async (itemName) => {
                 const quantidadeParaSubtrair = storedItems[itemName];
-                const safeItemName = itemName.replace(/\//g, '_').replace(/,/g, '_');
-                const response = await axios.get(`/.netlify/functions/api-estoque/${safeItemName}`);
+                const response = await axios.get(`/.netlify/functions/api-estoque/${itemName}`);
                 const selectedItems = response.data;
                 if (selectedItems.length === 0) {
                     throw new Error(`Item ${itemName} não encontrado no estoque`);
@@ -169,10 +168,7 @@ export default function StatusGame() {
 
                 const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
 
-                await axios.put(`/.netlify/functions/api-estoque/${safeItemName}`, { 
-                    nome: itemName, 
-                    quantidade: novaQuantidade 
-                });
+                await axios.put(`/.netlify/functions/api-estoque/${itemName}`, { nome: itemName, quantidade: novaQuantidade });
 
                 storedItems[itemName] -= quantidadeParaSubtrair; 
                 if (storedItems[itemName] <= 0) {
@@ -235,7 +231,7 @@ export default function StatusGame() {
                 return subtotal + (Number(item && item.valor) || 0);
             }, 0);
         }, 0);
- 
+
         localStorage.setItem('totdespesas', totalDespesas.toFixed(2)); 
 
         return totalDespesas;
@@ -304,7 +300,7 @@ export default function StatusGame() {
                             </div>
                         </div>
 
-   
+
                         <div className="flex flex-wrap gap-4 text-black">
                             <CardJog 
                                 jogadores={jogadores} 

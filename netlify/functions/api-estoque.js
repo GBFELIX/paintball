@@ -29,19 +29,7 @@ exports.handler = async(event, context) => {
     }
     if (event.httpMethod === 'GET' && event.path.includes('/estoque/')) {
         try {
-            const nome = decodeURIComponent(event.path.split('/estoque/')[1])
-                .replace(/_/g, ',')
-                .replace(/%20/g, ' ')
-                .replace(/%2F/g, '/')
-                .replace(/%C3%81/g, 'Á')
-                .replace(/%C3%89/g, 'É')
-                .replace(/%C3%8D/g, 'Í')
-                .replace(/%C3%93/g, 'Ó')
-                .replace(/%C3%9A/g, 'Ú')
-                .replace(/%C3%81/g, 'Á')
-                .replace(/%C3%87/g, 'Ç')
-                .replace(/%C3%83/g, 'Ã')
-                .replace(/%C3%95/g, 'Õ');
+            const nome = event.path.split('/').pop();
             const query = 'SELECT quantidade FROM estoque WHERE nome = ?';
             const [results] = await connection.query(query, [nome]);
 
@@ -106,19 +94,7 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'PUT') {
         try {
-            const nome = decodeURIComponent(event.path.split('/estoque/')[1])
-                .replace(/_/g, ',')
-                .replace(/%20/g, ' ')
-                .replace(/%2F/g, '/')
-                .replace(/%C3%81/g, 'Á')
-                .replace(/%C3%89/g, 'É')
-                .replace(/%C3%8D/g, 'Í')
-                .replace(/%C3%93/g, 'Ó')
-                .replace(/%C3%9A/g, 'Ú')
-                .replace(/%C3%81/g, 'Á')
-                .replace(/%C3%87/g, 'Ç')
-                .replace(/%C3%83/g, 'Ã')
-                .replace(/%C3%95/g, 'Õ');
+            const nome = event.path.split('/').pop();
             const { quantidade, valor, tipo, custo } = JSON.parse(event.body);
 
 
