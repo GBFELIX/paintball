@@ -154,8 +154,7 @@ export default function StatusGame() {
             const storedItems = JSON.parse(localStorage.getItem('itensVendaAvul')) || {};
             const promises = Object.keys(storedItems).map(async (itemName) => {
                 const quantidadeParaSubtrair = storedItems[itemName];
-                const encodedItemName = encodeURIComponent(itemName);
-                const response = await axios.get(`/.netlify/functions/api-estoque/${encodedItemName}`);
+                const response = await axios.get(`/.netlify/functions/api-estoque/${itemName}`);
                 const selectedItems = response.data;
                 if (selectedItems.length === 0) {
                     throw new Error(`Item ${itemName} não encontrado no estoque`);
@@ -169,7 +168,7 @@ export default function StatusGame() {
 
                 const novaQuantidade = selectedItem.quantidade - quantidadeParaSubtrair;
 
-                await axios.put(`/.netlify/functions/api-estoque/${encodedItemName}`, { nome: itemName, quantidade: novaQuantidade });
+                await axios.put(`/.netlify/functions/api-estoque/${itemName}`, { nome: itemName, quantidade: novaQuantidade });
 
                 storedItems[itemName] -= quantidadeParaSubtrair; 
                 if (storedItems[itemName] <= 0) {
