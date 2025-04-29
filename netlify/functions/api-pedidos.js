@@ -101,7 +101,7 @@ async function handleUpdateItem(event) {
         const formaPagamentoString = JSON.stringify(formaPagamento);
 
         // Atualiza o pedido com todas as informações
-        const queryUpdatePedido = 'UPDATE pedidos SET nome_jogador = ?, items = ?, forma_pagamento = ?, valor_total = ?, data_pedido = ?, hora_pedido = ? WHERE id = ? AND DATE(data_pedido) = ? AND hora_pedido = ?';
+        const queryUpdatePedido = 'UPDATE pedidos SET nome_jogador = ?, items = ?, forma_pagamento = ?, valor_total = ?, data_pedido = ?, hora_pedido = ? WHERE nome_jogador = ? AND DATE(data_pedido) = ? AND hora_pedido = ?';
         await db.promise().query(queryUpdatePedido, [
             nomeJogador,
             itemsString,
@@ -109,7 +109,7 @@ async function handleUpdateItem(event) {
             valorTotal,
             dataPedido,
             horaPedido,
-            pedidoId,
+            nomeJogador,
             dataPedido,
             horaPedido
         ]);
