@@ -332,6 +332,20 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 valorTotal: valorFinal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
+            }).catch(error => {
+                if (error.response && error.response.status === 409) {
+                    toast.error('Esta venda já foi registrada anteriormente', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                } else {
+                    throw error;
+                }
             });
             
             // Reset discount and payment values

@@ -51,6 +51,16 @@ async function handlePost(event) {
     try {
         const { nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido } = JSON.parse(event.body);
 
+        // Verifica se já existe um pedido com as mesmas informações
+        const checkQuery = 'SELECT * FROM pedidos WHERE nome_jogador = ? AND DATE(data_pedido) = ? AND hora_pedido = ?';
+        const [existingOrders] = await db.promise().query(checkQuery, [nomeJogador, dataPedido, horaPedido]);
+
+        if (existingOrders.length > 0) {
+            return {
+                statusCode: 409,
+                body: JSON.stringify({ error: 'Já existe um pedido com essas informações' })
+            };
+        }
 
         // Tenta converter os itens para JSON
         let itemsString;

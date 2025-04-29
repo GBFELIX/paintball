@@ -192,11 +192,24 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
         const horaJogo = localStorage.getItem('horaJogo');
         await axios.post('/.netlify/functions/api-pedidos', {
           nomeJogador: "Despesa",
-          //nomeJogador: "despesa.nome",
-            items: despesa.items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
-            valorTotal: valorFinal,
-            dataPedido: dataJogo,
-            horaPedido: horaJogo,
+          items: despesa.items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
+          valorTotal: valorFinal,
+          dataPedido: dataJogo,
+          horaPedido: horaJogo,
+        }).catch(error => {
+            if (error.response && error.response.status === 409) {
+                toast.error('Esta despesa já foi registrada anteriormente', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                });
+            } else {
+                throw error;
+            }
         });
 
         const updatedDespesas = [...despesas];

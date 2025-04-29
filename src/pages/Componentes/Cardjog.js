@@ -317,6 +317,20 @@ export default function CardJogador({ jogadores, setJogadores, handleAddJogador 
                 valorTotal: valorFinal,
                 dataPedido: dataJogo,
                 horaPedido: horaJogo,
+            }).catch(error => {
+                if (error.response && error.response.status === 409) {
+                    toast.error('Este pedido já foi registrado anteriormente', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                    });
+                } else {
+                    throw error;
+                }
             });
             
             // Reset discount and payment values
