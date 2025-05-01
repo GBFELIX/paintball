@@ -45,7 +45,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
     }, []);
 
     useEffect(() => {
-        // Carregar configuração dos itens que reduzem bolinhas
         axios.get('/.netlify/functions/api-bolinhas?config=true')
             .then(response => {
                 setBallItemsConfig(response.data);
@@ -99,14 +98,12 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             const selectedItem = { ...updatedVendas[index].selectedItem };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
-            // Check if it's a ball item using the configuration
             const ballItemConfig = ballItemsConfig.find(config => config.nome === selectedItem.nome);
             const isBallItem = !!ballItemConfig;
             
             const existingItem = updatedVendas[index].items.find(item => item.nome === selectedItem.nome);
             if (existingItem) {
                 if (isBallItem) {
-                    // For ball items, we want to keep them as separate entries
                     selectedItem.quantidade = 1;
                     updatedVendas[index].items.push(selectedItem);
                 } else {
@@ -134,14 +131,12 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
             const selectedItem = { ...item };
             selectedItem.valor = parseFloat(selectedItem.valor) || 0;
             
-            // Check if it's a ball item using the configuration
             const ballItemConfig = ballItemsConfig.find(config => config.nome === selectedItem.nome);
             const isBallItem = !!ballItemConfig;
             
             const existingItem = updatedVendas[index].items.find(i => i.nome === selectedItem.nome);
             if (existingItem) {
                 if (isBallItem) {
-                    // For ball items, we want to keep them as separate entries
                     selectedItem.quantidade = 1;
                     updatedVendas[index].items.push(selectedItem);
                 } else {
@@ -264,13 +259,10 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 return;
             }
 
-            // Check for ball items and reduce stock
             for (const item of items) {
-                // Verifica se o item está na configuração de itens que reduzem bolinhas
                 const ballItemConfig = ballItemsConfig.find(config => config.nome === item.nome);
                 if (ballItemConfig) {
-                    try {
-                        // Call the API for each quantity of the ball item
+                    try {                        
                         for (let i = 0; i < (item.quantidade || 1); i++) {
                             await axios.patch('/.netlify/functions/api-bolinhas', {
                                 itemNome: item.nome
@@ -287,7 +279,7 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                             draggable: true,
                             theme: "light",
                         });
-                        return; // Stop the process if there's an error
+                        return; 
                     }
                 }
             }
@@ -348,7 +340,6 @@ const VendaAvul = ({ vendas, setVendas, handleAddVendaAvulsa }) => {
                 }
             });
             
-            // Reset discount and payment values
             setDescontoSelecionado('');
             setValorComDesconto(0);
             setPaymentValues({ dinheiro: 0, credito: 0, debito: 0, pix: 0, deposito: 0 });

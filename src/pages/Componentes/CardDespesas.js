@@ -29,7 +29,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
   }, []);
 
   useEffect(() => {
-    // Carregar configuração dos itens que reduzem bolinhas
+
     axios.get('/.netlify/functions/api-bolinhas?config=true')
       .then(response => {
         setBallItemsConfig(response.data);
@@ -76,14 +76,13 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
       const selectedItem = { ...updatedDespesas[index].selectedItem };
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
 
-      // Check if it's a ball item
+
       const ballItemConfig = ballItemsConfig.find(config => config.nome === selectedItem.nome);
       const isBallItem = ballItemConfig !== undefined;
 
       const existingItem = updatedDespesas[index].items.find(item => item.nome === selectedItem.nome);
       if (existingItem) {
         if (isBallItem) {
-          // For ball items, we want to keep them as separate entries
           selectedItem.quantidade = 1;
           updatedDespesas[index].items.push(selectedItem);
         } else {
@@ -160,12 +159,11 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
     const valorFinal = valorTotalDespesa;
     const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
 
-    // Reduzir quantidade de bolinhas
     for (const item of despesa.items) {
         const ballItemConfig = ballItemsConfig.find(config => config.nome === item.nome);
         if (ballItemConfig) {
             try {
-                // Call the API for each quantity of the ball item
+
                 for (let i = 0; i < (item.quantidade || 1); i++) {
                     await axios.patch('/.netlify/functions/api-bolinhas', {
                         itemNome: item.nome
@@ -182,7 +180,7 @@ export default function CardDespesas({ despesas, setDespesas, handleAddDespesa})
                     draggable: true,
                     theme: "light",
                 });
-                return; // Stop the process if there's an error
+                return; 
             }
         }
     }
@@ -254,14 +252,12 @@ const handleAddItemNovo = (index, item) => {
       const selectedItem = { ...item };
       selectedItem.valor = parseFloat(selectedItem.valor) || 0;
       
-      // Check if it's a ball item
       const ballItemConfig = ballItemsConfig.find(config => config.nome === selectedItem.nome);
       const isBallItem = ballItemConfig !== undefined;
       
       const existingItem = updatedDespesas[index].items.find(i => i.nome === selectedItem.nome);
       if (existingItem) {
           if (isBallItem) {
-              // For ball items, we want to keep them as separate entries
               selectedItem.quantidade = 1;
               updatedDespesas[index].items.push(selectedItem);
           } else {

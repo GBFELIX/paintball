@@ -14,7 +14,6 @@ exports.handler = async(event, context) => {
 
     if (event.httpMethod === 'GET') {
         try {
-            // Se houver query parameter 'config', retorna a configuração dos itens
             if (event.queryStringParameters && event.queryStringParameters.config === 'true') {
                 const [results] = await connection.query('SELECT * FROM bolinhas_config');
                 return {
@@ -23,7 +22,6 @@ exports.handler = async(event, context) => {
                 };
             }
             
-            // Caso contrário, retorna a quantidade de bolinhas
             const [results] = await connection.query('SELECT * FROM estoque WHERE nome = "Bolinha" LIMIT 1');
             return {
                 statusCode: 200,
@@ -42,7 +40,7 @@ exports.handler = async(event, context) => {
         try {
             const body = JSON.parse(event.body);
             
-            // Se houver o campo 'config', estamos adicionando um novo item de configuração
+           
             if (body.config) {
                 const { nome, quantidade } = body;
                 const query = 'INSERT INTO bolinhas_config (nome, quantidade) VALUES (?, ?)';
@@ -54,7 +52,7 @@ exports.handler = async(event, context) => {
                 };
             }
             
-            // Caso contrário, estamos atualizando a quantidade de bolinhas
+           
             const { quantidade } = body;
             const [existing] = await connection.query('SELECT * FROM estoque WHERE nome = "Bolinha" LIMIT 1');
             
@@ -119,7 +117,6 @@ exports.handler = async(event, context) => {
         try {
             const { itemNome } = JSON.parse(event.body);
             
-            // Busca a configuração do item
             const [config] = await connection.query('SELECT quantidade FROM bolinhas_config WHERE nome = ?', [itemNome]);
             
             if (config.length === 0) {
@@ -131,14 +128,13 @@ exports.handler = async(event, context) => {
             
             const quantidadeAReduzir = config[0].quantidade;
             
-            // Get current quantity
+            
             const [current] = await connection.query('SELECT quantidade FROM estoque WHERE nome = "Bolinha" LIMIT 1');
             
             if (current.length > 0) {
                 const novaQuantidade = current[0].quantidade - quantidadeAReduzir;
                 
                 if (novaQuantidade >= 0) {
-                    // Update the quantity
                     await connection.query('UPDATE estoque SET quantidade = ? WHERE nome = "Bolinha"', [novaQuantidade]);
                     
                     return {

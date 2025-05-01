@@ -51,7 +51,6 @@ async function handlePost(event) {
     try {
         const { nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido } = JSON.parse(event.body);
 
-        // Verifica se já existe um pedido com as mesmas informações
         const checkQuery = 'SELECT * FROM pedidos WHERE nome_jogador = ? AND DATE(data_pedido) = ? AND hora_pedido = ?';
         const [existingOrders] = await db.promise().query(checkQuery, [nomeJogador, dataPedido, horaPedido]);
 
@@ -62,12 +61,11 @@ async function handlePost(event) {
             };
         }
 
-        // Tenta converter os itens para JSON
         let itemsString;
         let formaPagamentoString;
         try {
             itemsString = JSON.stringify(items);
-            formaPagamentoString = JSON.stringify(formaPagamento); // Converte o array de formas de pagamento para JSON
+            formaPagamentoString = JSON.stringify(formaPagamento); 
         } catch (error) {
             console.error('Erro ao converter items ou forma de pagamento para JSON:', error);
             return {
@@ -76,13 +74,13 @@ async function handlePost(event) {
             };
         }
 
-        // Inserir pedido no banco de dados
+
         const queryPedido = 'INSERT INTO pedidos (nome_jogador, items, forma_pagamento, valor_total, data_pedido, hora_pedido) VALUES (?, ?, ?, ?, ?, ?)';
         const [resultPedido] = await db.promise().query(queryPedido, [nomeJogador, itemsString, formaPagamentoString, valorTotal, dataPedido, horaPedido]);
 
         const pedidoId = resultPedido.insertId;
 
-        // Mapear quantidade de itens
+
         const itemCountMap = items.reduce((acc, item) => {
             acc[item.nome] = (acc[item.nome] || 0) + 1;
             return acc;
@@ -93,7 +91,7 @@ async function handlePost(event) {
             body: JSON.stringify({ message: 'Pedido cadastrado com sucesso' })
         };
     } catch (error) {
-        console.error('Erro ao cadastrar pedido:', error); // Log do erro
+        console.error('Erro ao cadastrar pedido:', error); 
         return {
             statusCode: 500,
             body: JSON.stringify({ error: 'Erro ao cadastrar pedido' })
@@ -106,11 +104,10 @@ async function handleUpdateItem(event) {
         const { pedidoId, nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido } = JSON.parse(event.body);
         console.log('Atualizando pedido:', { pedidoId, nomeJogador, items, formaPagamento, valorTotal, dataPedido, horaPedido });
 
-        // Converte os arrays para JSON
+
         const itemsString = JSON.stringify(items);
         const formaPagamentoString = JSON.stringify(formaPagamento);
 
-        // Atualiza o pedido com todas as informações
         const queryUpdatePedido = 'UPDATE pedidos SET nome_jogador = ?, items = ?, forma_pagamento = ?, valor_total = ?, data_pedido = ?, hora_pedido = ? WHERE nome_jogador = ? AND DATE(data_pedido) = ? AND hora_pedido = ?';
         await db.promise().query(queryUpdatePedido, [
             nomeJogador,
@@ -140,10 +137,10 @@ async function handleUpdateItem(event) {
 
 async function handleDeleteItem(event) {
     try {
-        const { pedidoId, itemIndex } = JSON.parse(event.body); // Recebe o ID do pedido e o índice do item a ser removido
+        const { pedidoId, itemIndex } = JSON.parse(event.body); 
         console.log('Removendo item do pedido:', { pedidoId, itemIndex });
 
-        // Primeiro, busque o pedido para obter os itens
+
         const queryGetItems = 'SELECT * FROM pedidos WHERE id = ?';
         const [pedido] = await db.promise().query(queryGetItems, [pedidoId]);
 

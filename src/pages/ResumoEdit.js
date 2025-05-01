@@ -85,7 +85,6 @@ export default function ResumoEdit() {
                 theme: "light",
             });
 
-            // Limpar o localStorage
             localStorage.removeItem('pagamentos');
             localStorage.removeItem('dataJogo');
             localStorage.removeItem('horaJogo');

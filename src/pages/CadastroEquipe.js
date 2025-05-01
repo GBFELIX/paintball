@@ -174,7 +174,6 @@ export default function CadEquipe() {
     }
   };
 
- // logout 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleLogout = () => {
     localStorage.removeItem('auth'); 

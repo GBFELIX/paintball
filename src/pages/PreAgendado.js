@@ -179,11 +179,11 @@ export default function PreAgendado() {
                   <button 
                     className="rounded-md bg-green-600 p-2 hover:bg-black duration-300"
                     onClick={() => {
-                      const numeroWhatsApp = `55${equipe.contato}`; // Adiciona o código do país 55 ao número de contato da equipe
-                      const mensagem = "Olá, gostaria de mais informações sobre a equipe."; // Mensagem pré-definida
+                      const numeroWhatsApp = `55${equipe.contato}`; 
+                      const mensagem = "Olá, gostaria de mais informações sobre a equipe."; 
                       const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
                       
-                      window.open(urlWhatsApp, "_blank"); // Abre o WhatsApp em uma nova aba
+                      window.open(urlWhatsApp, "_blank"); 
                     }}
                   >
                     Entrar em contato
