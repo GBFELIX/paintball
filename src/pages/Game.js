@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader'; 
 import { toast } from 'react-toastify';
 import VendaAvulsa from './Componentes/VendaAvul';
+import CardJog from './Componentes/Cardjog';
 import CardDespesas from './Componentes/CardDespesas';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
