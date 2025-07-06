@@ -6,6 +6,7 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import { toast } from 'react-toastify';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardDespesas from './Componentes/CardDespesas';
+import CardJog from './Componentes/Cardjog';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
@@ -96,7 +97,15 @@ const Game = () => {
                 console.error('Erro ao carregar configuração de bolinhas:', error);
             });
     }, []);
-
+    const handleAddJogador = () => {
+        const newNumero = (jogadores.length + 1).toString();
+        setJogadores([...jogadores, {
+            nome: '',
+            numero: newNumero,
+            items: [],
+            selectedItem: '',
+            isClosed: false
+        }]);
     const handleAddVendaAvulsa = () => {
         const newNumero = (vendasAvulsas.length + 1).toString();
         setVendasAvulsas([...vendasAvulsas, {
@@ -728,6 +737,14 @@ const Game = () => {
                     </section>
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
+                    <CardJog 
+                    jogadores={jogadores} 
+                    setJogadores={setJogadores} 
+                    handleAddJogador={handleAddJogador} 
+                    handleClosePedido={handleClosePedido}   
+                />
+                </div>
+                <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
                         vendas={vendasAvulsas} 
                         setVendas={setVendasAvulsas} 
@@ -876,7 +893,7 @@ const Game = () => {
                 </div>
             )}
         </div>
-    );
+    )};
 };
 
 export default Game;
