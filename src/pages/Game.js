@@ -6,7 +6,6 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import { toast } from 'react-toastify';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardDespesas from './Componentes/CardDespesas';
-import CardJog from './Componentes/Cardjog';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
@@ -118,25 +117,6 @@ const Game = () => {
             isClosed: false
         }]);
     };
-    const handleAddJogador = () => {
-            const newNumero = (jogadores.length + 1).toString();
-            setJogadores([...jogadores, {
-                nome: '',
-                numero: newNumero,
-                items: [],
-                selectedItem: '',
-                isClosed: false
-            }]);
-            toast.success('Novo jogador adicionado!', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-        };
     const fetchJogadores = async () => {
         try {
             const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
@@ -195,6 +175,17 @@ const Game = () => {
     const updateJogadores = (updatedJogadores) => {
         setJogadores(updatedJogadores);
     };
+
+    const handleAddJogador = () => {
+        setJogadores([...jogadores, {
+            nome: '',
+            numero: newNumero,
+            items: [],
+            selectedItem: '',
+            isClosed: false
+        }]);
+    };
+
     const handleRemoveJogador = (index) => {
         const updatedJogadores = jogadores.filter((_, i) => i !== index);
         setJogadores(updatedJogadores);
@@ -543,14 +534,7 @@ const Game = () => {
             return acc + (quantidade * valor); 
         }, 0);
     };
-    const calcularTotalJogadores = () => {
-        return jogadores.reduce((total, jogador) => {
-            if (!jogador || !jogador.items) return total;
-            return total + jogador.items.reduce((subtotal, item) => {
-                return subtotal + (Number(item && item.valor) || 0);
-            }, 0);
-        }, 0);
-    };
+
     const handleFecharPartida = () => {
         const pagamentos = jogadores.map(jogador => {
             return {
@@ -744,14 +728,6 @@ const Game = () => {
                     </section>
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
-                    <CardJog 
-                                                    jogadores={jogadores} 
-                                                    setJogadores={setJogadores} 
-                                                    handleAddJogador={handleAddJogador} 
-                                                    handleClosePedido={handleClosePedido}   
-                                                />
-                </div>
-                <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
                         vendas={vendasAvulsas} 
                         setVendas={setVendasAvulsas} 
@@ -769,13 +745,6 @@ const Game = () => {
                 </div>
             </div>
             <div className="flex justify-end mt-auto">
-                <button
-                onClick={handleAddJogador}
-                className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
-                title="Adicionar Jogador"
-             >
-                    <FaPlus size={30} />
-                </button>
                 <button
                     onClick={handleAddVendaAvulsa}
                     className="bg-blue-600 hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
