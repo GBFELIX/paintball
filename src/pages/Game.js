@@ -69,7 +69,11 @@ const Game = () => {
         selectedItem: '',
         isClosed: false
     }]);
- 
+   const [jogador, setJogador] = useState({
+        id: null,
+        items: '[]', 
+    });
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null); 
     const [updateCounter, setUpdateCounter] = useState(0);
