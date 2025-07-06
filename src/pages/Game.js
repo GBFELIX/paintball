@@ -6,7 +6,6 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import { toast } from 'react-toastify';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardDespesas from './Componentes/CardDespesas';
-import CardJog from './Componentes/Cardjog';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
@@ -97,15 +96,7 @@ const Game = () => {
                 console.error('Erro ao carregar configuração de bolinhas:', error);
             });
     }, []);
-    const handleAddJogador = () => {
-        const newNumero = (jogadores.length + 1).toString();
-        setJogadores([...jogadores, {
-            nome: '',
-            numero: newNumero,
-            items: [],
-            selectedItem: '',
-            isClosed: false
-        }]);
+
     const handleAddVendaAvulsa = () => {
         const newNumero = (vendasAvulsas.length + 1).toString();
         setVendasAvulsas([...vendasAvulsas, {
@@ -763,6 +754,13 @@ const Game = () => {
             </div>
             <div className="flex justify-end mt-auto">
                 <button
+                    onClick={handleAddJogador}
+                    className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                    title="Adicionar Jogador"
+                >
+                    <FaPlus size={30} />
+                </button>
+                <button
                     onClick={handleAddVendaAvulsa}
                     className="bg-blue-600 hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                 >
@@ -893,7 +891,7 @@ const Game = () => {
                 </div>
             )}
         </div>
-    )};
+    );
 };
 
 export default Game;
