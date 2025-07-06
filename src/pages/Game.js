@@ -6,7 +6,6 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import { toast } from 'react-toastify';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardDespesas from './Componentes/CardDespesas';
-import CardJog from './Componentes/Cardjog';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
@@ -97,7 +96,7 @@ const Game = () => {
                 console.error('Erro ao carregar configuração de bolinhas:', error);
             });
     }, []);
-    
+
     const handleAddVendaAvulsa = () => {
         const newNumero = (vendasAvulsas.length + 1).toString();
         setVendasAvulsas([...vendasAvulsas, {
@@ -412,9 +411,8 @@ const Game = () => {
                 return;
             }
 
-            const totalPagamento = Object.values(paymentValues || {}).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-            const safeItems = Array.isArray(items) ? items : [];
-            const valorTotal = safeItems.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
+            const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+            const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
             setValorTotalVendaAtual(valorTotal);
             
             if (totalPagamento !== valorFinal) {
@@ -530,13 +528,12 @@ const Game = () => {
     };
 
     const calculateTotalValue = (items) => {
-    const safeItems = Array.isArray(items) ? items : [];
-    return safeItems.reduce((acc, item) => {
-        const quantidade = item.qtd || 0; 
-        const valor = parseFloat(item.valor) || 0; 
-        return acc + (quantidade * valor); 
-  }, 0);
-};
+        return items.reduce((acc, item) => {
+            const quantidade = item.qtd || 0; 
+            const valor = parseFloat(item.valor) || 0; 
+            return acc + (quantidade * valor); 
+        }, 0);
+    };
 
     const handleFecharPartida = () => {
         const pagamentos = jogadores.map(jogador => {
@@ -555,18 +552,11 @@ const Game = () => {
 
         navigate('/resumoedit', { state: dataToSend });
     };
-    let safeItems = [];
-try {
-  safeItems = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
-} catch (e) {
-  safeItems = [];
-}
-
-const valorTotalVenda = safeItems.reduce((sum, item) => {
-  const quantidade = item.qtd || 1;
-  const valor = parseFloat(item.valor) || 0;
-  return sum + (quantidade * valor);
-}, 0);
+    const valorTotalVenda = jogador.items ? (Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]')).reduce((sum, item) => {
+        const quantidade = item.qtd || 1;
+        const valor = parseFloat(item.valor) || 0;
+        return sum + (quantidade * valor);
+    }, 0) : 0;
     return (
         <div className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
             <div className="flex justify-between w-full gap-4 mb-4">
@@ -738,14 +728,6 @@ const valorTotalVenda = safeItems.reduce((sum, item) => {
                     </section>
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
-                    <CardJog 
-                    jogadores={jogadores} 
-                    setJogadores={setJogadores} 
-                    handleAddJogador={handleAddJogador} 
-                    handleClosePedido={handleClosePedido}   
-                />
-                </div>
-                <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
                         vendas={vendasAvulsas} 
                         setVendas={setVendasAvulsas} 
@@ -763,13 +745,6 @@ const valorTotalVenda = safeItems.reduce((sum, item) => {
                 </div>
             </div>
             <div className="flex justify-end mt-auto">
-                <button
-                    onClick={handleAddJogador}
-                    className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
-                    title="Adicionar Jogador"
-                >
-                    <FaPlus size={30} />
-                </button>
                 <button
                     onClick={handleAddVendaAvulsa}
                     className="bg-blue-600 hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
