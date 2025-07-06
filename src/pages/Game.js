@@ -4,7 +4,6 @@ import { useGameContext } from '../context/GameContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader'; 
 import { toast } from 'react-toastify';
-import CardJog from './Componentes/Cardjog';    
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardDespesas from './Componentes/CardDespesas';
 import { FaPlus } from 'react-icons/fa';
@@ -69,11 +68,10 @@ const Game = () => {
         selectedItem: '',
         isClosed: false
     }]);
-   const [jogador, setJogador] = useState({
+    const [jogador, setJogador] = useState({
         id: null,
         items: '[]', 
     });
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null); 
     const [updateCounter, setUpdateCounter] = useState(0);
@@ -98,15 +96,6 @@ const Game = () => {
                 console.error('Erro ao carregar configuração de bolinhas:', error);
             });
     }, []);
-    const handleAddJogador = () => {
-        setJogadores([...jogadores, {
-            nome: '',
-            numero: newNumero,
-            items: [],
-            selectedItem: '',
-            isClosed: false
-        }]);
-    };
 
     const handleAddVendaAvulsa = () => {
         const newNumero = (vendasAvulsas.length + 1).toString();
@@ -128,6 +117,25 @@ const Game = () => {
             isClosed: false
         }]);
     };
+    const handleAddJogador = () => {
+            const newNumero = (jogadores.length + 1).toString();
+            setJogadores([...jogadores, {
+                nome: '',
+                numero: newNumero,
+                items: [],
+                selectedItem: '',
+                isClosed: false
+            }]);
+            toast.success('Novo jogador adicionado!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+            });
+        };
     const fetchJogadores = async () => {
         try {
             const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
@@ -186,7 +194,6 @@ const Game = () => {
     const updateJogadores = (updatedJogadores) => {
         setJogadores(updatedJogadores);
     };
-
     const handleRemoveJogador = (index) => {
         const updatedJogadores = jogadores.filter((_, i) => i !== index);
         setJogadores(updatedJogadores);
@@ -348,8 +355,7 @@ const Game = () => {
 
 
         const items = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
-        const safeItems = Array.isArray(items) ? items : [];
-        const valorTotal = safeItems.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
+        const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
         setValorTotalVendaAtual(valorTotal); 
     };
     const handleRemoveItem = (jogadorIndex, itemIndex) => {
@@ -414,8 +420,7 @@ const Game = () => {
             }
 
             const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-            const safeItems = Array.isArray(items) ? items : [];
-            const valorTotal = safeItems.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
+            const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
             setValorTotalVendaAtual(valorTotal);
             
             if (totalPagamento !== valorFinal) {
@@ -531,14 +536,20 @@ const Game = () => {
     };
 
     const calculateTotalValue = (items) => {
-  const safeItems = Array.isArray(items) ? items : [];
-  return safeItems.reduce((acc, item) => {
-    const quantidade = item.qtd || 0; 
-    const valor = parseFloat(item.valor) || 0; 
-    return acc + (quantidade * valor); 
-  }, 0);
-};
-
+        return items.reduce((acc, item) => {
+            const quantidade = item.qtd || 0; 
+            const valor = parseFloat(item.valor) || 0; 
+            return acc + (quantidade * valor); 
+        }, 0);
+    };
+    const calcularTotalJogadores = () => {
+        return jogadores.reduce((total, jogador) => {
+            if (!jogador || !jogador.items) return total;
+            return total + jogador.items.reduce((subtotal, item) => {
+                return subtotal + (Number(item && item.valor) || 0);
+            }, 0);
+        }, 0);
+    };
     const handleFecharPartida = () => {
         const pagamentos = jogadores.map(jogador => {
             return {
@@ -733,11 +744,11 @@ const Game = () => {
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
                     <CardJog 
-                    jogadores={jogadores} 
-                    setJogadores={setJogadores} 
-                    handleAddJogador={handleAddJogador} 
-                    handleClosePedido={handleClosePedido}   
-                />
+                                                    jogadores={jogadores} 
+                                                    setJogadores={setJogadores} 
+                                                    handleAddJogador={handleAddJogador} 
+                                                    handleClosePedido={handleClosePedido}   
+                                                />
                 </div>
                 <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
@@ -758,10 +769,10 @@ const Game = () => {
             </div>
             <div className="flex justify-end mt-auto">
                 <button
-                    onClick={handleAddJogador}
-                    className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
-                    title="Adicionar Jogador"
-                >
+                onClick={handleAddJogador}
+                className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                title="Adicionar Jogador"
+             >
                     <FaPlus size={30} />
                 </button>
                 <button
