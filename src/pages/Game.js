@@ -4,6 +4,7 @@ import { useGameContext } from '../context/GameContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader'; 
 import { toast } from 'react-toastify';
+import CardJog from './Componentes/Cardjog';    
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardDespesas from './Componentes/CardDespesas';
 import { FaPlus } from 'react-icons/fa';
@@ -96,6 +97,15 @@ const Game = () => {
                 console.error('Erro ao carregar configuração de bolinhas:', error);
             });
     }, []);
+    const handleAddJogador = () => {
+        setJogadores([...jogadores, {
+            nome: '',
+            numero: newNumero,
+            items: [],
+            selectedItem: '',
+            isClosed: false
+        }]);
+    };
 
     const handleAddVendaAvulsa = () => {
         const newNumero = (vendasAvulsas.length + 1).toString();
@@ -174,16 +184,6 @@ const Game = () => {
 
     const updateJogadores = (updatedJogadores) => {
         setJogadores(updatedJogadores);
-    };
-
-    const handleAddJogador = () => {
-        setJogadores([...jogadores, {
-            nome: '',
-            numero: newNumero,
-            items: [],
-            selectedItem: '',
-            isClosed: false
-        }]);
     };
 
     const handleRemoveJogador = (index) => {
@@ -728,6 +728,14 @@ const Game = () => {
                     </section>
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
+                    <CardJog 
+                    jogadores={jogadores} 
+                    setJogadores={setJogadores} 
+                    handleAddJogador={handleAddJogador} 
+                    handleClosePedido={handleClosePedido}   
+                />
+                </div>
+                <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
                         vendas={vendasAvulsas} 
                         setVendas={setVendasAvulsas} 
@@ -745,6 +753,13 @@ const Game = () => {
                 </div>
             </div>
             <div className="flex justify-end mt-auto">
+                <button
+                    onClick={handleAddJogador}
+                    className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                    title="Adicionar Jogador"
+                >
+                    <FaPlus size={30} />
+                </button>
                 <button
                     onClick={handleAddVendaAvulsa}
                     className="bg-blue-600 hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
