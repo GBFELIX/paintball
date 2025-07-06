@@ -412,8 +412,9 @@ const Game = () => {
                 return;
             }
 
-            const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-            const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
+            const totalPagamento = Object.values(paymentValues || {}).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+            const safeItems = Array.isArray(items) ? items : [];
+            const valorTotal = safeItems.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
             setValorTotalVendaAtual(valorTotal);
             
             if (totalPagamento !== valorFinal) {
@@ -529,12 +530,13 @@ const Game = () => {
     };
 
     const calculateTotalValue = (items) => {
-        return items.reduce((acc, item) => {
-            const quantidade = item.qtd || 0; 
-            const valor = parseFloat(item.valor) || 0; 
-            return acc + (quantidade * valor); 
-        }, 0);
-    };
+    const safeItems = Array.isArray(items) ? items : [];
+    return safeItems.reduce((acc, item) => {
+        const quantidade = item.qtd || 0; 
+        const valor = parseFloat(item.valor) || 0; 
+        return acc + (quantidade * valor); 
+  }, 0);
+};
 
     const handleFecharPartida = () => {
         const pagamentos = jogadores.map(jogador => {
@@ -553,11 +555,18 @@ const Game = () => {
 
         navigate('/resumoedit', { state: dataToSend });
     };
-    const valorTotalVenda = jogador.items ? (Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]')).reduce((sum, item) => {
-        const quantidade = item.qtd || 1;
-        const valor = parseFloat(item.valor) || 0;
-        return sum + (quantidade * valor);
-    }, 0) : 0;
+    let safeItems = [];
+try {
+  safeItems = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
+} catch (e) {
+  safeItems = [];
+}
+
+const valorTotalVenda = safeItems.reduce((sum, item) => {
+  const quantidade = item.qtd || 1;
+  const valor = parseFloat(item.valor) || 0;
+  return sum + (quantidade * valor);
+}, 0);
     return (
         <div className="bg-black text-white min-h-screen w-full h-auto rounded-md p-3 flex flex-col gap-4">
             <div className="flex justify-between w-full gap-4 mb-4">
