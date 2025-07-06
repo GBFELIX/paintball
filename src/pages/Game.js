@@ -69,11 +69,7 @@ const Game = () => {
         selectedItem: '',
         isClosed: false
     }]);
-   const [jogador, setJogador] = useState({
-        id: null,
-        items: '[]', 
-    });
-
+ 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null); 
     const [updateCounter, setUpdateCounter] = useState(0);
@@ -348,7 +344,8 @@ const Game = () => {
 
 
         const items = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
-        const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
+        const safeItems = Array.isArray(items) ? items : [];
+        const valorTotal = safeItems.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
         setValorTotalVendaAtual(valorTotal); 
     };
     const handleRemoveItem = (jogadorIndex, itemIndex) => {
@@ -413,7 +410,8 @@ const Game = () => {
             }
 
             const totalPagamento = Object.values(paymentValues).reduce((a, b) => a + (parseFloat(b) || 0), 0);
-            const valorTotal = items.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
+            const safeItems = Array.isArray(items) ? items : [];
+            const valorTotal = safeItems.reduce((sum, item) => sum + (parseFloat(item.valor) * (item.qtd || 1) || 0), 0);
             setValorTotalVendaAtual(valorTotal);
             
             if (totalPagamento !== valorFinal) {
@@ -529,12 +527,13 @@ const Game = () => {
     };
 
     const calculateTotalValue = (items) => {
-        return items.reduce((acc, item) => {
-            const quantidade = item.qtd || 0; 
-            const valor = parseFloat(item.valor) || 0; 
-            return acc + (quantidade * valor); 
-        }, 0);
-    };
+  const safeItems = Array.isArray(items) ? items : [];
+  return safeItems.reduce((acc, item) => {
+    const quantidade = item.qtd || 0; 
+    const valor = parseFloat(item.valor) || 0; 
+    return acc + (quantidade * valor); 
+  }, 0);
+};
 
     const handleFecharPartida = () => {
         const pagamentos = jogadores.map(jogador => {
