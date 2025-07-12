@@ -743,6 +743,8 @@ const Game = () => {
                         handleAddJogador={handleAddJogador} 
                         handleClosePedido={handleClosePedido}   
                     />
+                </div>
+                <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
                         vendas={vendasAvulsas} 
                         setVendas={setVendasAvulsas} 
