@@ -4,7 +4,7 @@ import { useGameContext } from '../context/GameContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader'; 
 import { toast } from 'react-toastify';
-import CardJogador from './Componentes/Cardjog';
+import CardJog from './Componentes/Cardjog';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardDespesas from './Componentes/CardDespesas';
 import { FaPlus } from 'react-icons/fa';
@@ -123,11 +123,16 @@ const Game = () => {
     const fetchJogadores = async () => {
         try {
             const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
-            setJogadores(response.data || []); 
+            setJogadores((response.data || []).map(jogador => ({
+                ...jogador,
+                items: Array.isArray(jogador.items)
+                    ? jogador.items
+                    : (typeof jogador.items === 'string' ? JSON.parse(jogador.items) : [])
+            })));
         } catch (error) {
             console.error('Erro ao buscar jogadores:', error);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
@@ -180,6 +185,7 @@ const Game = () => {
     };
 
     const handleAddJogador = () => {
+        const newNumero = (jogadores.length + 1).toString();
         setJogadores([...jogadores, {
             nome: '',
             numero: newNumero,
@@ -731,12 +737,12 @@ const Game = () => {
                     </section>
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
-                    <CardJogador 
-                                                    jogadores={jogadores} 
-                                                    setJogadores={setJogadores} 
-                                                    handleAddJogador={handleAddJogador} 
-                                                    handleClosePedido={handleClosePedido}   
-                                                />
+                    <CardJog 
+                        jogadores={jogadores} 
+                        setJogadores={setJogadores} 
+                        handleAddJogador={handleAddJogador} 
+                        handleClosePedido={handleClosePedido}   
+                    />
                     <VendaAvulsa 
                         vendas={vendasAvulsas} 
                         setVendas={setVendasAvulsas} 
