@@ -4,13 +4,11 @@ import { useGameContext } from '../context/GameContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader'; 
 import { toast } from 'react-toastify';
-import CardJog from './Componentes/Cardjog';
 import VendaAvulsa from './Componentes/VendaAvul';
 import CardDespesas from './Componentes/CardDespesas';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
-
-//ta alterado da versao do git
+import CardJog from './Componentes/Cardjog';
 
 const spinnerStyle = `
   @keyframes spin {
@@ -120,25 +118,6 @@ const Game = () => {
             isClosed: false
         }]);
     };
-    const handleAddJogador = () => {
-            const newNumero = (jogadores.length + 1).toString();
-            setJogadores([...jogadores, {
-                nome: '',
-                numero: newNumero,
-                items: [],
-                selectedItem: '',
-                isClosed: false
-            }]);
-            toast.success('Novo jogador adicionado!', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "light",
-            });
-        };
     const fetchJogadores = async () => {
         try {
             const response = await axios.get(`/.netlify/functions/api-pedidos?data=${dataJogo}&hora=${horaJogo}`);
@@ -197,6 +176,27 @@ const Game = () => {
     const updateJogadores = (updatedJogadores) => {
         setJogadores(updatedJogadores);
     };
+
+    const handleAddJogador = () => {
+        const newNumero = (jogadores.length + 1).toString();
+        setJogadores([...jogadores, {
+            nome: '',
+            numero: newNumero,
+            items: [],
+            selectedItem: '',
+            isClosed: false
+        }]);
+        toast.success('Novo jogador adicionado!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+        });
+    };
+
     const handleRemoveJogador = (index) => {
         const updatedJogadores = jogadores.filter((_, i) => i !== index);
         setJogadores(updatedJogadores);
@@ -313,7 +313,7 @@ const Game = () => {
             if (deleteResponse.status === 200) {
                 setJogadores(prevState => {
                     const updatedJogadores = [...prevState];
-                    updatedJogadores[jogadores.indexOf(jogador)].items = updatedItems;
+                    updatedJogadores[jogadores.indexOf(jogador)].items = JSON.stringify(updatedItems);
                     return updatedJogadores;
                 });
                 toast.success('Item removido com sucesso!');
@@ -545,14 +545,7 @@ const Game = () => {
             return acc + (quantidade * valor); 
         }, 0);
     };
-    const calcularTotalJogadores = () => {
-        return jogadores.reduce((total, jogador) => {
-            if (!jogador || !jogador.items) return total;
-            return total + jogador.items.reduce((subtotal, item) => {
-                return subtotal + (Number(item && item.valor) || 0);
-            }, 0);
-        }, 0);
-    };
+
     const handleFecharPartida = () => {
         const pagamentos = jogadores.map(jogador => {
             return {
@@ -679,7 +672,7 @@ const Game = () => {
                                         )) 
                                         : <p>Nenhuma forma de pagamento disponível</p>}
                                 </div>
-                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(getItemsArray(jogador.items))}</p>
+                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]'))}</p>
                         </div>
                         <div className="w-full h-auto p-1" id="itemsObrigatorio">
                             <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
@@ -746,14 +739,6 @@ const Game = () => {
                     </section>
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
-                    <CardJog 
-                                                    jogadores={jogadores} 
-                                                    setJogadores={setJogadores} 
-                                                    handleAddJogador={handleAddJogador} 
-                                                    handleClosePedido={handleClosePedido}   
-                                                />
-                </div>
-                <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
                         vendas={vendasAvulsas} 
                         setVendas={setVendasAvulsas} 
@@ -769,18 +754,18 @@ const Game = () => {
                         handleClosePedido={handleClosePedido}
                     />
                 </div>
+                <CardJog 
+                    jogadores={jogadores} 
+                    setJogadores={setJogadores} 
+                    handleAddJogador={handleAddJogador} 
+                    handleClosePedido={handleClosePedido}   
+                />
             </div>
             <div className="flex justify-end mt-auto">
                 <button
-                onClick={handleAddJogador}
-                className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
-                title="Adicionar Jogador"
-             >
-                    <FaPlus size={30} />
-                </button>
-                <button
-                    onClick={handleAddVendaAvulsa}
-                    className="bg-blue-600 hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                    onClick={handleAddJogador}
+                    className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
+                    title="Adicionar Jogador"
                 >
                     <FaPlus size={30} />
                 </button>
@@ -815,7 +800,7 @@ const Game = () => {
                     <div className="bg-white p-6 rounded-lg w-[500px] text-black">
                         <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
                         <div className="mb-4">
-                            <p className="font-bold">Valor Total: R$ {calculateTotalValue(getItemsArray(jogadores[jogadorIndexForPayment].items))}</p>
+                            <p className="font-bold">Valor Total: R$ {calculateTotalValue(Array.isArray(jogadores[jogadorIndexForPayment].items) ? jogadores[jogadorIndexForPayment].items : JSON.parse(jogadores[jogadorIndexForPayment].items || '[]')).toFixed(2)}</p>
                         </div>
                         <div className="mb-4">
                             <select
@@ -911,13 +896,5 @@ const Game = () => {
         </div>
     );
 };
-
-function getItemsArray(items) {
-  if (Array.isArray(items)) return items;
-  if (typeof items === 'string') {
-    try { return JSON.parse(items); } catch { return []; }
-  }
-  return [];
-}
 
 export default Game;
