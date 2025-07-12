@@ -679,7 +679,7 @@ const Game = () => {
                                         )) 
                                         : <p>Nenhuma forma de pagamento disponível</p>}
                                 </div>
-                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]'))}</p>
+                            <p className="p-2 flex flex-col justify-center items-center"><strong>Valor Total:</strong> R$ {calculateTotalValue(getItemsArray(jogador.items))}</p>
                         </div>
                         <div className="w-full h-auto p-1" id="itemsObrigatorio">
                             <div className="p-2 flex flex-col justify-center items-center gap-2 md:flex-row md:justify-between">
@@ -815,7 +815,7 @@ const Game = () => {
                     <div className="bg-white p-6 rounded-lg w-[500px] text-black">
                         <h2 className="text-2xl font-semibold mb-4">Formas de Pagamento</h2>
                         <div className="mb-4">
-                            <p className="font-bold">Valor Total: R$ {calculateTotalValue(Array.isArray(jogadores[jogadorIndexForPayment].items) ? jogadores[jogadorIndexForPayment].items : JSON.parse(jogadores[jogadorIndexForPayment].items || '[]')).toFixed(2)}</p>
+                            <p className="font-bold">Valor Total: R$ {calculateTotalValue(getItemsArray(jogadores[jogadorIndexForPayment].items))}</p>
                         </div>
                         <div className="mb-4">
                             <select
