@@ -912,4 +912,12 @@ const Game = () => {
     );
 };
 
+function getItemsArray(items) {
+  if (Array.isArray(items)) return items;
+  if (typeof items === 'string') {
+    try { return JSON.parse(items); } catch { return []; }
+  }
+  return [];
+}
+
 export default Game;
