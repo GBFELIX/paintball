@@ -313,7 +313,7 @@ const Game = () => {
             if (deleteResponse.status === 200) {
                 setJogadores(prevState => {
                     const updatedJogadores = [...prevState];
-                    updatedJogadores[jogadores.indexOf(jogador)].items = JSON.stringify(updatedItems);
+                    updatedJogadores[jogadores.indexOf(jogador)].items = updatedItems;
                     return updatedJogadores;
                 });
                 toast.success('Item removido com sucesso!');
