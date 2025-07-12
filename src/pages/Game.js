@@ -8,7 +8,6 @@ import VendaAvulsa from './Componentes/VendaAvul';
 import CardDespesas from './Componentes/CardDespesas';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
-import CardJog from './Componentes/Cardjog';
 
 const spinnerStyle = `
   @keyframes spin {
@@ -178,7 +177,6 @@ const Game = () => {
     };
 
     const handleAddJogador = () => {
-        const newNumero = (jogadores.length + 1).toString();
         setJogadores([...jogadores, {
             nome: '',
             numero: newNumero,
@@ -186,15 +184,6 @@ const Game = () => {
             selectedItem: '',
             isClosed: false
         }]);
-        toast.success('Novo jogador adicionado!', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "light",
-        });
     };
 
     const handleRemoveJogador = (index) => {
@@ -754,18 +743,11 @@ const Game = () => {
                         handleClosePedido={handleClosePedido}
                     />
                 </div>
-                <CardJog 
-                    jogadores={jogadores} 
-                    setJogadores={setJogadores} 
-                    handleAddJogador={handleAddJogador} 
-                    handleClosePedido={handleClosePedido}   
-                />
             </div>
             <div className="flex justify-end mt-auto">
                 <button
-                    onClick={handleAddJogador}
-                    className="bg-primary hover:bg-yellow duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
-                    title="Adicionar Jogador"
+                    onClick={handleAddVendaAvulsa}
+                    className="bg-blue-600 hover:bg-blue duration-300 m-2 w-16 h-16 rounded-full flex justify-center items-center"
                 >
                     <FaPlus size={30} />
                 </button>
