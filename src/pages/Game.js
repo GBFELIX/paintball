@@ -605,7 +605,7 @@ const Game = () => {
                             return typeA - typeB;
                         }
                         
-                        return a.nome_jogador.localeCompare(b.nome_jogador);
+                        return (a.nome_jogador || '').localeCompare(b.nome_jogador || '');
                     })
                     .map((jogador, index) => (      
                     <section key={index} className={`w-[300px] h-auto rounded-lg bg-white ${jogador.isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
