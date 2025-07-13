@@ -77,6 +77,7 @@ const Game = () => {
     const [itemToDelete, setItemToDelete] = useState(null); 
     const [updateCounter, setUpdateCounter] = useState(0);
     const [ballItemsConfig, setBallItemsConfig] = useState([]);
+    const [editingNames, setEditingNames] = useState({});
 
     useEffect(() => {
         setValorComDesconto(calcularDesconto(valorTotalVendaAtual));
@@ -219,18 +220,28 @@ const Game = () => {
     };
 
     const handleUpdateNomeJogador = async (index) => {
-        const jogador = jogadores[index];
-        if (!jogador.id) return; // Só atualiza se tiver ID (já salvo no banco)
+        const nomeEditado = editingNames[index];
+        if (nomeEditado === undefined) return;
+        const updatedJogadores = [...jogadores];
+        updatedJogadores[index].nome_jogador = nomeEditado;
+        setJogadores(updatedJogadores);
+
+        const jogador = updatedJogadores[index];
+        if (!jogador.id) return;
         try {
             await axios.put('/.netlify/functions/api-pedidos', {
                 id: jogador.id,
-                nomeJogador: jogador.nome_jogador,
-                // envie outros campos necessários se precisar
+                nomeJogador: nomeEditado,
             });
             toast.success('Nome atualizado com sucesso!');
         } catch (error) {
             toast.error('Erro ao atualizar nome do jogador');
         }
+        setEditingNames(prev => {
+            const newEditing = { ...prev };
+            delete newEditing[index];
+            return newEditing;
+        });
     };
 
     const handleAddItem = (index) => {
@@ -641,8 +652,8 @@ const Game = () => {
                                 {(jogador.nome_jogador !== 'Despesa' && jogador.nome_jogador !== 'Venda Avulsa') ? (
                                     <input
                                         className="text-lg font-semibold ml-2 bg-transparent border-b border-gray-400 focus:outline-none"
-                                        value={jogador.nome_jogador || ''}
-                                        onChange={e => handleNomeJogadorChange(index, e.target.value)}
+                                        value={editingNames[index] !== undefined ? editingNames[index] : (jogador.nome_jogador || '')}
+                                        onChange={e => setEditingNames({ ...editingNames, [index]: e.target.value })}
                                         onBlur={() => handleUpdateNomeJogador(index)}
                                         onKeyDown={e => {
                                             if (e.key === 'Enter') handleUpdateNomeJogador(index);
