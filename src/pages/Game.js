@@ -645,7 +645,11 @@ const Game = () => {
         const pagamentos = jogadores.map(jogador => {
             return {
                 nomeJogador: jogador.nome_jogador,
-                formaPagamento: jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [],
+                formaPagamento: Array.isArray(jogador.forma_pagamento)
+    ? jogador.forma_pagamento
+    : (typeof jogador.forma_pagamento === 'string'
+        ? JSON.parse(jogador.forma_pagamento)
+        : []), 
                 valorTotal: calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : []), 
             };
         });
