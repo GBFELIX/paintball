@@ -575,10 +575,12 @@ const Game = () => {
                 if (!jogador.id) {
                     // Novo jogador, faz POST
                     const response = await axios.post('/.netlify/functions/api-pedidos', {
-                        nomeJogador: nomeEditado,
-                        numero: jogador.numero,
-                        items: jogador.items,
-                        // outros campos necessários
+                        nomeJogador: jogador.nome_jogador,
+                        items: dadosParaEnviar.items,
+                        formaPagamento: dadosParaEnviar.formaPagamento,
+                        valorTotal: valorFinal,
+                        dataPedido: dataJogo,
+                        horaPedido: horaJogo,
                     });
                     // Atualiza o id no estado
                     updatedJogadores[index].id = response.data.id; // ajuste conforme retorno do backend
