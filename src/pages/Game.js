@@ -650,7 +650,13 @@ const Game = () => {
     : (typeof jogador.forma_pagamento === 'string'
         ? JSON.parse(jogador.forma_pagamento)
         : []), 
-                valorTotal: calculateTotalValue(jogador.items ? JSON.parse(jogador.items) : []), 
+                valorTotal: calculateTotalValue(
+  Array.isArray(jogador.items)
+    ? jogador.items
+    : (typeof jogador.items === 'string'
+        ? JSON.parse(jogador.items)
+        : [])
+), 
             };
         });
 
@@ -735,7 +741,11 @@ const Game = () => {
                                     onClick={() => {
                                         const items = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
                                         const total = calculateTotalValue(items);
-                                        const formasPagamento = jogador.forma_pagamento ? JSON.parse(jogador.forma_pagamento) : [];
+                                        const formasPagamento = Array.isArray(jogador.forma_pagamento)
+                                            ? jogador.forma_pagamento
+                                            : (typeof jogador.forma_pagamento === 'string'
+                                                ? JSON.parse(jogador.forma_pagamento)
+                                                : []);
                                         
                                         let mensagem = `*Detalhes do Pedido*\n\n`;
                                         mensagem += `*Jogador:* ${jogador.nome_jogador || 'Despesa'}\n\n`;
@@ -815,7 +825,7 @@ const Game = () => {
                         <div className="w-full h-auto p-1">
                             <div className="p-2 flex flex-col justify-center items-center">
                                 <h4>Itens:</h4>
-                                {jogador.items ? (Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items)).map((item, itemIndex) => (
+                                {jogador.items ? (Array.isArray(jogador.items) ? jogador.items : (typeof jogador.items === 'string' ? JSON.parse(jogador.items) : [])).map((item, itemIndex) => (
                                     <div key={itemIndex} className="p-2 flex justify-between items-center w-full">
                                         <div className="inline-flex">
                                         <button
