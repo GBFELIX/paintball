@@ -212,6 +212,27 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
+    const handleNomeJogadorChange = (index, value) => {
+        const updatedJogadores = [...jogadores];
+        updatedJogadores[index].nome_jogador = value;
+        setJogadores(updatedJogadores);
+    };
+
+    const handleUpdateNomeJogador = async (index) => {
+        const jogador = jogadores[index];
+        if (!jogador.id) return; // Só atualiza se tiver ID (já salvo no banco)
+        try {
+            await axios.put('/.netlify/functions/api-pedidos', {
+                id: jogador.id,
+                nomeJogador: jogador.nome_jogador,
+                // envie outros campos necessários se precisar
+            });
+            toast.success('Nome atualizado com sucesso!');
+        } catch (error) {
+            toast.error('Erro ao atualizar nome do jogador');
+        }
+    };
+
     const handleAddItem = (index) => {
         const updatedJogadores = [...jogadores];
         if (updatedJogadores[index].selectedItem) {
@@ -617,7 +638,19 @@ const Game = () => {
                                     : 'bg-primary'
                         }`}>
                             <div className="flex items-center gap-2">
-                                <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Despesa'}</h3>
+                                {(jogador.nome_jogador !== 'Despesa' && jogador.nome_jogador !== 'Venda Avulsa') ? (
+                                    <input
+                                        className="text-lg font-semibold ml-2 bg-transparent border-b border-gray-400 focus:outline-none"
+                                        value={jogador.nome_jogador || ''}
+                                        onChange={e => handleNomeJogadorChange(index, e.target.value)}
+                                        onBlur={() => handleUpdateNomeJogador(index)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') handleUpdateNomeJogador(index);
+                                        }}
+                                    />
+                                ) : (
+                                    <h3 className="text-lg font-semibold ml-2">{jogador.nome_jogador || 'Despesa'}</h3>
+                                )}
                                 <button
                                     onClick={() => {
                                         const items = Array.isArray(jogador.items) ? jogador.items : JSON.parse(jogador.items || '[]');
