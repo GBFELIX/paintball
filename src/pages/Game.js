@@ -185,15 +185,39 @@ const Game = () => {
         setJogadores(updatedJogadores);
     };
 
-    const handleAddJogador = () => {
+    const handleAddJogador = async () => {
         const newNumero = (jogadores.length + 1).toString();
-        setJogadores([...jogadores, {
-            nome: '',
+        const novoJogador = {
+            nome_jogador: '',
             numero: newNumero,
             items: [],
             selectedItem: '',
             isClosed: false
-        }]);
+        };
+        // Adiciona localmente para renderizar o card imediatamente
+        setJogadores(prev => [...prev, novoJogador]);
+
+        try {
+            // Cria no banco
+            const response = await axios.post('/.netlify/functions/api-pedidos', {
+                nomeJogador: '', // ou outro campo necessário
+                numero: newNumero,
+                items: [],
+                // outros campos necessários
+            });
+            // Atualiza o jogador recém-adicionado com o id do banco
+            setJogadores(prev => {
+                const updated = [...prev];
+                // Atualiza o último jogador adicionado
+                updated[updated.length - 1] = {
+                    ...updated[updated.length - 1],
+                    id: response.data.id, // ajuste conforme o retorno do seu backend
+                };
+                return updated;
+            });
+        } catch (error) {
+            toast.error('Erro ao criar jogador no banco');
+        }
     };
 
     const handleRemoveJogador = (index) => {
@@ -226,16 +250,37 @@ const Game = () => {
         updatedJogadores[index].nome_jogador = nomeEditado;
         setJogadores(updatedJogadores);
 
-        const jogador = updatedJogadores[index];
-        if (!jogador.id) return;
+        let jogador = updatedJogadores[index];
         try {
-            await axios.put('/.netlify/functions/api-pedidos', {
-                id: jogador.id,
-                nomeJogador: nomeEditado,
-            });
+            if (!jogador.id) {
+                // Novo jogador, faz POST
+                const dadosParaEnviar = {
+                    items: items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
+                    formaPagamento: formaPagamento, 
+                };
+                
+                const response = await axios.post('/.netlify/functions/api-pedidos', {
+                    nomeJogador: nomeEditado,
+                    items: dadosParaEnviar.items,
+                    formaPagamento: dadosParaEnviar.formaPagamento,
+                    valorTotal: valorFinal,
+                    dataPedido: dataJogo,
+                    horaPedido: horaJogo,
+                    // outros campos necessários
+                });
+                // Atualiza o id no estado
+                updatedJogadores[index].id = response.data.id; // ajuste conforme retorno do backend
+                setJogadores(updatedJogadores);
+            } else {
+                // Jogador já existe, faz PUT
+                await axios.put('/.netlify/functions/api-pedidos', {
+                    id: jogador.id,
+                    nomeJogador: nomeEditado,
+                });
+            }
             toast.success('Nome atualizado com sucesso!');
         } catch (error) {
-            toast.error('Erro ao atualizar nome do jogador');
+            toast.error('Erro ao atualizar/criar jogador');
         }
         setEditingNames(prev => {
             const newEditing = { ...prev };
