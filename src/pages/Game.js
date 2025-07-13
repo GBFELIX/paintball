@@ -737,12 +737,7 @@ const Game = () => {
                     </section>
                 ))}
                 <div className="flex flex-col justify-center items-center w-[300px]">
-                    <CardJog 
-                        jogadores={jogadores} 
-                        setJogadores={setJogadores} 
-                        handleAddJogador={handleAddJogador} 
-                        handleClosePedido={handleClosePedido}   
-                    />
+           
                 </div>
                 <div className="flex flex-col justify-center items-center w-[300px]">
                     <VendaAvulsa 
