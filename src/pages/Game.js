@@ -574,7 +574,7 @@ const Game = () => {
             try {
                 if (!jogador.id) {
                     // Novo jogador, faz POST
-                    const response = await axios.post('/.netlify/functions/api-pedidos', {
+                    await axios.post('/.netlify/functions/api-pedidos', {
                         nomeJogador: jogador.nome_jogador,
                         items: dadosParaEnviar.items,
                         formaPagamento: dadosParaEnviar.formaPagamento,
