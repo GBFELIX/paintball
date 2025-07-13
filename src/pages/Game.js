@@ -258,7 +258,7 @@ const Game = () => {
                     items: items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.quantidade })),
                     formaPagamento: formaPagamento, 
                 };
-                
+
                 const response = await axios.post('/.netlify/functions/api-pedidos', {
                     nomeJogador: nomeEditado,
                     items: dadosParaEnviar.items,
@@ -563,7 +563,7 @@ const Game = () => {
                 }
                 return null; 
             }).filter(Boolean); 
-
+            
             const dadosParaEnviar = {
                 items: items.map(item => ({ nome: item.nome, valor: item.valor, qtd: item.qtd })),
                 formaPagamento: formaPagamento, 
@@ -571,14 +571,32 @@ const Game = () => {
 
             const dataJogo = localStorage.getItem('dataJogo');
             const horaJogo = localStorage.getItem('horaJogo');
-            await axios.put('/.netlify/functions/api-pedidos', {
-                nomeJogador: jogador.nome_jogador,
-                items: dadosParaEnviar.items,
-                formaPagamento: dadosParaEnviar.formaPagamento,
-                valorTotal: valorFinal,
-                dataPedido: dataJogo,
-                horaPedido: horaJogo,
-            });
+            try {
+                if (!jogador.id) {
+                    // Novo jogador, faz POST
+                    const response = await axios.post('/.netlify/functions/api-pedidos', {
+                        nomeJogador: nomeEditado,
+                        numero: jogador.numero,
+                        items: jogador.items,
+                        // outros campos necessários
+                    });
+                    // Atualiza o id no estado
+                    updatedJogadores[index].id = response.data.id; // ajuste conforme retorno do backend
+                    setJogadores(updatedJogadores);
+                } else {
+                    await axios.put('/.netlify/functions/api-pedidos', {
+                        nomeJogador: jogador.nome_jogador,
+                        items: dadosParaEnviar.items,
+                        formaPagamento: dadosParaEnviar.formaPagamento,
+                        valorTotal: valorFinal,
+                        dataPedido: dataJogo,
+                        horaPedido: horaJogo,
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar/criar jogador:', error);
+                toast.error('Erro ao atualizar/criar jogador');
+            }
             
             setDescontoSelecionado('');
             setValorComDesconto(0);
